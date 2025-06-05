@@ -1,0 +1,171 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input AddCompanyNoteInput {
+  content: String!
+  type: String
+}
+
+type AuthenticationPayload {
+  token: String!
+  user: User!
+}
+
+type Channel {
+  description: String
+  id: ID!
+  name: String!
+  token: String!
+}
+
+type ChannelConnection {
+  items: [Channel!]!
+  totalCount: Int!
+}
+
+type Company {
+  address: JSON
+  channelToken: String
+  createdAt: DateTime!
+  deletedAt: DateTime
+  description: String
+  id: ID!
+  industry: String
+  linkedinUrl: String
+  name: String!
+  notes(
+    """Number of items to skip"""
+    skip: Int = 0
+
+    """Number of items to take"""
+    take: Int = 10
+  ): CompanyConnectionNotes!
+  updatedAt: DateTime!
+  website: String
+}
+
+type CompanyConnection {
+  items: [Company!]!
+  totalCount: Int!
+}
+
+type CompanyConnectionNotes {
+  items: [CompanyNote!]!
+  totalCount: Int!
+}
+
+type CompanyNote {
+  channelToken: ID!
+  companyId: ID!
+  content: String!
+  createdAt: DateTime!
+  id: ID!
+  type: String
+  updatedAt: DateTime!
+  userId: ID!
+}
+
+input CreateChannelInput {
+  description: String
+  name: String!
+}
+
+input CreateCompanyInput {
+  address: JSON
+  description: String
+  industry: String
+  linkedinUrl: String
+  name: String!
+  website: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
+type LogoutOutput {
+  success: Boolean!
+}
+
+type Mutation {
+  addNoteToCompany(addCompanyNoteInput: AddCompanyNoteInput!, companyId: ID!): CompanyNote!
+  createChannel(createChannelInput: CreateChannelInput!): Channel!
+  createCompany(createCompanyInput: CreateCompanyInput!): Company!
+  deleteCompany(id: ID!): Company!
+  deleteCompanyNote(noteId: ID!): CompanyNote!
+  loginUser(loginUserInput: LoginUserInput!): AuthenticationPayload!
+  logoutUser: LogoutOutput!
+  registerNewTenant(registerNewTenantInput: RegisterNewTenantInput!): AuthenticationPayload!
+  registerUser(channelToken: String!, registerUserInput: RegisterUserInput!): AuthenticationPayload!
+  updateCompany(id: ID!, updateCompanyInput: UpdateCompanyInput!): Company!
+  updateCompanyNote(noteId: ID!, updateCompanyNoteInput: UpdateCompanyNoteInput!): CompanyNote!
+}
+
+type Query {
+  channels(
+    """Number of items to skip"""
+    skip: Int = 0
+
+    """Number of items to take"""
+    take: Int = 10
+  ): ChannelConnection!
+  companies(
+    channelToken: ID
+
+    """Number of items to skip"""
+    skip: Int = 0
+
+    """Number of items to take"""
+    take: Int = 10
+  ): CompanyConnection!
+  company(id: ID!): Company
+  me: User
+}
+
+input RegisterNewTenantInput {
+  email: String!
+  password: String!
+  tenantDescription: String
+  tenantName: String!
+  userName: String!
+}
+
+input RegisterUserInput {
+  email: String!
+  name: String!
+  password: String!
+}
+
+input UpdateCompanyInput {
+  address: JSON
+  description: String
+  industry: String
+  linkedinUrl: String
+  name: String
+  website: String
+}
+
+input UpdateCompanyNoteInput {
+  content: String
+  type: String
+}
+
+type User {
+  createdAt: DateTime
+  email: String!
+  id: ID!
+  name: String
+  updatedAt: DateTime
+}

@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  gocrm-test-db:
+    image: postgres:latest
+    container_name: gocrm-test-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 4784961Edc!
+      POSTGRES_DB: gocrm_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - gocrm-test-data:/var/lib/postgresql/data
+    networks:
+      - gocrm-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.2-alpine 
+    container_name: crm_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379" 
+    volumes:
+      - redis_data:/data 
+    command: redis-server --requirepass my_strong_password 
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  gocrm-test-data:
+  redis_data:
+
+networks:
+  gocrm-network:
+    name: gocrm-network
+    driver: bridge

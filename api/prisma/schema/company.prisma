@@ -1,0 +1,39 @@
+// schema.prisma
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  website     String?
+  industry    String?
+  linkedinUrl String?
+  address     Json?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  channelToken String?
+  channel      Channel? @relation(fields: [channelToken], references: [token], onDelete: Restrict)
+
+  deletedAt DateTime?
+
+  notes CompanyNote[]
+}
+
+model CompanyNote {
+  id        String   @id @default(cuid())
+  content   String
+  type      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  channelToken String
+  channel      Channel @relation(fields: [channelToken], references: [token])
+
+  @@index([companyId])
+  @@index([userId])
+}
