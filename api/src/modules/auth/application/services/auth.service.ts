@@ -201,13 +201,6 @@ export class AuthService {
       return { success: false }
     }
 
-    if (!jwtPayload || !jwtPayload.jti || typeof jwtPayload.exp !== 'number') {
-      this.logger.warn(
-        `Logout attempt with missing or invalid JTI/EXP in token payload.`,
-      )
-      return { success: false }
-    }
-
     const jti = jwtPayload.jti
     const exp = jwtPayload.exp
 

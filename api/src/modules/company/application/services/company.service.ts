@@ -139,7 +139,7 @@ export class CompanyService {
 
     try {
       const company = await this.prisma.company.findUnique({
-        where: { id, channelToken: ct },
+        where: { id, channelToken: ct, deletedAt: null },
       })
 
       if (!company) {

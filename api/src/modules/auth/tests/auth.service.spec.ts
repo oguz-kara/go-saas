@@ -2,28 +2,28 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcryptjs'
 import { ConfigService } from '@nestjs/config'
-import { AuthService } from '../../application/services/auth.service'
+import { AuthService } from '../application/services/auth.service'
 import { PrismaService } from 'src/common'
-import { RegisterUserInput } from '../../api/graphql/dto/register-user.input'
+import { RegisterUserInput } from '../api/graphql/dto/register-user.input'
 
 import { User } from '@prisma/client'
-import { EmailAlreadyExistsError } from '../../domain/exceptions/email-already-exists.exception'
+import { EmailAlreadyExistsError } from '../domain/exceptions/email-already-exists.exception'
 import {
   CtxUser,
   RequestContext,
 } from 'src/common/request-context/request-context'
-import { LoginUserInput } from '../../api/graphql/dto/login-user.input'
-import { UserEntity } from '../../api/graphql/entities/user.entity'
-import { UserNotFoundError } from '../../domain/exceptions/user-not-found.exception'
-import { InvalidCredentialsError } from '../../domain/exceptions/invalid-credentials.exception'
-import { LogoutOutput } from '../../api/graphql/dto/logout.output'
+import { LoginUserInput } from '../api/graphql/dto/login-user.input'
+import { UserEntity } from '../api/graphql/entities/user.entity'
+import { UserNotFoundError } from '../domain/exceptions/user-not-found.exception'
+import { InvalidCredentialsError } from '../domain/exceptions/invalid-credentials.exception'
+import { LogoutOutput } from '../api/graphql/dto/logout.output'
 import { CacheService } from 'src/common/services/cache/cache.service'
 
 import { MissingTokenClaimException } from 'src/modules/auth/domain/exceptions/missing-token-claim.exception'
 import { UnauthorizedException } from '@nestjs/common'
 import { DeepMocked } from 'src/common/test/types/deep-mocked.type'
 import { ChannelService } from 'src/modules/channel/application/services/channel.service'
-import { RegisterNewTenantInput } from '../../api/graphql/dto/register-new-tenant.input'
+import { RegisterNewTenantInput } from '../api/graphql/dto/register-new-tenant.input'
 
 jest.mock('bcryptjs', () => ({
   hash: jest.fn(),

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { ChannelService } from '../../application/services/channel.service'
+import { ChannelService } from '../application/services/channel.service'
 import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import {
   CtxUser,
@@ -11,9 +11,9 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common'
-import { CreateChannelInput } from '../../api/graphql/dto/create-channel.input'
+import { CreateChannelInput } from '../api/graphql/dto/create-channel.input'
 import { Prisma, Channel } from '@prisma/client'
-import * as tokenUtils from '../../domain/utils/token' // To mock generateChannelToken
+import * as tokenUtils from '../domain/utils/token' // To mock generateChannelToken
 import { PaginationArgs } from 'src/common'
 
 // Mock Logger
@@ -274,7 +274,7 @@ describe('ChannelService', () => {
         orderBy: { createdAt: 'desc' },
       })
       expect(prisma.channel.count).toHaveBeenCalledWith() // No where clause currently
-      expect(result.channels).toEqual(mockChannelsList)
+      expect(result.items).toEqual(mockChannelsList)
       expect(result.totalCount).toBe(mockTotalCount)
     })
 
@@ -290,7 +290,7 @@ describe('ChannelService', () => {
         take: customArgs.take,
         orderBy: { createdAt: 'desc' },
       })
-      expect(result.channels).toEqual([mockChannel1])
+      expect(result.items).toEqual([mockChannel1])
       expect(result.totalCount).toBe(mockTotalCount) // Total count should remain the same
     })
 

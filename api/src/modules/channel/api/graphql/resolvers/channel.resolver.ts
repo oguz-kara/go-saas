@@ -27,22 +27,14 @@ export class ChannelResolver {
     @Ctx() ctx: RequestContext,
     @Args() paginationArgs: PaginationArgs,
   ): Promise<ChannelConnection> {
-    const { channels, totalCount } = await this.channelService.getChannels(
-      ctx,
-      paginationArgs,
-    )
-    return {
-      items: channels,
-      totalCount,
-    }
+    return this.channelService.getChannels(ctx, paginationArgs)
   }
 
-  // Optional: Query to get a single channel by token or ID if needed
-  // @Query(() => ChannelEntity, { name: 'channelByToken', nullable: true })
-  // async getChannelByToken(
-  //   @Ctx() ctx: RequestContext,
-  //   @Args('token', { type: () => String }) token: string,
-  // ): Promise<ChannelEntity | null> {
-  //   return this.channelService.findChannelByToken(ctx, token);
-  // }
+  @Query(() => ChannelEntity, { name: 'channelByToken', nullable: true })
+  async getChannelByToken(
+    @Ctx() ctx: RequestContext,
+    @Args('token', { type: () => String }) token: string,
+  ): Promise<ChannelEntity | null> {
+    return this.channelService.findChannelByToken(ctx, token)
+  }
 }

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { CompanyNoteService } from '../../application/services/company-note.service'
+import { CompanyNoteService } from '../application/services/company-note.service'
 import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import {
   CtxUser,
@@ -9,11 +9,11 @@ import { DeepMocked } from 'src/common/test/types/deep-mocked.type'
 import { InternalServerErrorException, Logger } from '@nestjs/common'
 
 import { Prisma, Company, CompanyNote } from '@prisma/client'
-import { AddCompanyNoteInput } from '../../api/graphql/dto/add-company-note.input'
-import { CompanyNotFoundError } from '../../domain/exceptions/company-not-found.exception'
+import { AddCompanyNoteInput } from '../api/graphql/dto/add-company-note.input'
+import { CompanyNotFoundError } from '../domain/exceptions/company-not-found.exception'
 import { PaginationArgs } from 'src/common'
-import { UpdateCompanyNoteInput } from '../../api/graphql/dto/update-company-note.input'
-import { CompanyNoteNotFoundError } from '../../domain/exceptions/company-note-not-found.exception'
+import { UpdateCompanyNoteInput } from '../api/graphql/dto/update-company-note.input'
+import { CompanyNoteNotFoundError } from '../domain/exceptions/company-note-not-found.exception'
 
 // Mock Logger
 beforeAll(() => {

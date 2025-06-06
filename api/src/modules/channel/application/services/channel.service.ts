@@ -83,7 +83,7 @@ export class ChannelService {
   async getChannels(
     ctx: RequestContext,
     args: PaginationArgs,
-  ): Promise<{ channels: ChannelEntity[]; totalCount: number }> {
+  ): Promise<{ items: ChannelEntity[]; totalCount: number }> {
     const { user } = ctx
     const { skip = 0, take = 10 } = args
 
@@ -103,7 +103,7 @@ export class ChannelService {
 
       const totalCount = await this.prisma.channel.count() // Add where clause if filtering is introduced
 
-      return { channels: channels as ChannelEntity[], totalCount }
+      return { items: channels as ChannelEntity[], totalCount }
     } catch (error) {
       this.logger.error(
         `Failed to fetch channels: ${error.message}`,
@@ -114,7 +114,6 @@ export class ChannelService {
     }
   }
 
-  // Optional: A helper to find a channel by token, might be useful for CompanyService validation
   async findChannelByToken(
     ctx: RequestContext,
     token: string,

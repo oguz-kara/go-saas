@@ -13,10 +13,12 @@ type AuthenticationPayload {
 }
 
 type Channel {
+  createdAt: DateTime!
   description: String
   id: ID!
   name: String!
   token: String!
+  updatedAt: DateTime!
 }
 
 type ChannelConnection {
@@ -114,6 +116,7 @@ type Mutation {
 }
 
 type Query {
+  channelByToken(token: String!): Channel
   channels(
     """Number of items to skip"""
     skip: Int = 0

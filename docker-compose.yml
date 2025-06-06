@@ -1,9 +1,10 @@
 version: "3.8"
 
 services:
-  gocrm-test-db:
+
+  gocrm-db:
     image: postgres:latest
-    container_name: gocrm-test-db
+    container_name: gocrm-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 4784961Edc!
@@ -15,6 +16,24 @@ services:
     networks:
       - gocrm-network
     restart: unless-stopped
+
+  gocrm-test-db:
+    image: postgres:latest
+    container_name: gocrm-test-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 4784961Edc!
+      POSTGRES_DB: gocrm_test_dev
+    ports:
+      - "5434:5432"
+    volumes:
+      - gocrm-test-data:/var/lib/postgresql/data
+    networks:
+      - gocrm-network
+    restart: unless-stopped
+
+
+ 
 
   redis:
     image: redis:7.2-alpine 
