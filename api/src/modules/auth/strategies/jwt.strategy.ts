@@ -9,6 +9,7 @@ export interface JwtPayload {
   email: string
   jti?: string
   exp?: number
+  channelToken?: string
 }
 
 @Injectable()
@@ -31,6 +32,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     return {
       id: payload.sub,
       email: payload.email,
+      channelToken: payload.channelToken,
       jti: payload.jti,
       exp: payload.exp,
     }
