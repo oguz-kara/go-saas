@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 
 export const GET_COMPANY_DETAIL_QUERY = gql`
-  query GetCompanyDetail($id: ID!, $notesSkip: Int, $notesTake: Int) {
+  query getCompanyDetail($id: ID!, $notesSkip: Int, $notesTake: Int) {
     company(id: $id) {
       id
       name

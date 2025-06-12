@@ -10,7 +10,6 @@ import {
 import { signOut } from 'next-auth/react'
 import { onError } from '@apollo/client/link/error'
 import { GraphQLError } from '@gocrm/types/graphql-error.type'
-import { useSessionStore } from '@gocrm/stores/session-store'
 
 // makeClient fonksiyonu artık herhangi bir React hook'una bağlı değil,
 // bu yüzden component'in dışında tanımlanabilir. Bu, her render'da yeniden oluşmasını engeller.
@@ -39,9 +38,10 @@ function makeClient() {
     )
     if (isAccessDenied) {
       console.log(
-        'Client-side: Auth error detected, opening session expired dialog.',
+        'Client-side: Auth error detected, redirecting via signOut...',
       )
-      useSessionStore.getState().openExpiredDialog()
+
+      signOut({ callbackUrl: '/session-expired' })
     }
   })
 

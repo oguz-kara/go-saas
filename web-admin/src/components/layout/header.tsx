@@ -122,7 +122,7 @@ export default function Header() {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => signOut({ callbackUrl: '/login' })}
+              onClick={() => signOut({ callbackUrl: '/login?logged_out=true' })}
               className="text-red-600 focus:bg-red-50 focus:text-red-700"
             >
               <LogOut className="mr-2 h-4 w-4" />

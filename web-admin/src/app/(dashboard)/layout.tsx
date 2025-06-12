@@ -1,5 +1,4 @@
 import Header from '@gocrm/components/layout/header'
-import SessionExpiredDialog from '@gocrm/components/layout/session-expired-dialog'
 
 export default function ProtectedAppLayout({
   children,
@@ -14,7 +13,6 @@ export default function ProtectedAppLayout({
           {children}
         </main>
       </div>
-      <SessionExpiredDialog />
     </div>
   )
 }

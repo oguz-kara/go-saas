@@ -9,24 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@gocrm/components/ui/card'
-import { useSearchParams } from 'next/navigation'
-import { toast } from 'sonner'
-import { useEffect } from 'react'
+import { useAuthNotifications } from '@gocrm/features/auth/hooks/use-auth-notifications'
 
 export default function LoginPage() {
   const { translations, isLoading } = useTranslations()
-  const searchParams = useSearchParams()
-  const sessionExpired = searchParams.get('session_expired')
 
-  useEffect(() => {
-    console.log('sessionExpired', sessionExpired)
-    if (sessionExpired === 'true') {
-      console.log('toast not working')
-      toast.info('Oturum Süreniz Doldu', {
-        description: 'Lütfen devam etmek için tekrar giriş yapın.',
-      })
-    }
-  }, [searchParams])
+  useAuthNotifications()
 
   if (isLoading || !translations) {
     return <div>Yükleniyor...</div>
@@ -37,10 +25,10 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">
-            {translations.loginPage.title}
+            {translations?.loginPage.title}
           </CardTitle>
           <CardDescription>
-            {translations.loginPage.description}
+            {translations?.loginPage.description}
           </CardDescription>
         </CardHeader>
         <CardContent>

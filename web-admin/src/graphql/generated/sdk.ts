@@ -528,7 +528,7 @@ export const CompaniesDocument = gql`
 }
     `;
 export const GetCompanyDetailDocument = gql`
-    query GetCompanyDetail($id: ID!, $notesSkip: Int, $notesTake: Int) {
+    query getCompanyDetail($id: ID!, $notesSkip: Int, $notesTake: Int) {
   company(id: $id) {
     id
     name
@@ -628,7 +628,7 @@ export function getSdk<C>(requester: Requester<C>) {
     companies(variables?: CompaniesQueryVariables, options?: C): Promise<CompaniesQuery> {
       return requester<CompaniesQuery, CompaniesQueryVariables>(CompaniesDocument, variables, options) as Promise<CompaniesQuery>;
     },
-    GetCompanyDetail(variables: GetCompanyDetailQueryVariables, options?: C): Promise<GetCompanyDetailQuery> {
+    getCompanyDetail(variables: GetCompanyDetailQueryVariables, options?: C): Promise<GetCompanyDetailQuery> {
       return requester<GetCompanyDetailQuery, GetCompanyDetailQueryVariables>(GetCompanyDetailDocument, variables, options) as Promise<GetCompanyDetailQuery>;
     },
     getCompany(variables: GetCompanyQueryVariables, options?: C): Promise<GetCompanyQuery> {

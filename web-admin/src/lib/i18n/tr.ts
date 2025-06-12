@@ -94,6 +94,28 @@ export const tr: TwoLevelTranslations = {
     successToastTitle: 'Başarılı!',
     successToastDescription: 'Uygulamaya yönlendiriliyorsunuz...',
   },
+  sessionExpiredDialog: {
+    title: 'Oturum Süresi Doldu',
+    description:
+      'Güvenliğiniz için oturumunuzun süresi doldu. Devam etmek için lütfen tekrar giriş yapın.',
+    loginButton: 'Giriş Yap',
+  },
+  authNotifications: {
+    sessionExpiredTitle: 'Oturum Süreniz Doldu',
+    sessionExpiredDescription: 'Lütfen devam etmek için tekrar giriş yapın.',
+    loggedOutTitle: 'Başarıyla Çıkış Yapıldı',
+    loggedOutDescription: 'Tekrar görüşmek üzere!',
+    loginRedirectTitle: 'Oturum süreniz doldu',
+    loginRedirectDescription:
+      'Güvenliğiniz için oturumunuz sonlandırıldı. Lütfen tekrar giriş yapın.',
+  },
+  pagination: {
+    previous: 'Önceki',
+    next: 'Sonraki',
+    goToFirstPage: 'İlk Sayfaya Git',
+    goToLastPage: 'Son Sayfaya Git',
+    goToPage: 'Sayfa',
+  },
 }
 
 export type Translations = typeof tr

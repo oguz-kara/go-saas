@@ -929,7 +929,7 @@ export type CompaniesLazyQueryHookResult = ReturnType<typeof useCompaniesLazyQue
 export type CompaniesSuspenseQueryHookResult = ReturnType<typeof useCompaniesSuspenseQuery>;
 export type CompaniesQueryResult = Apollo.QueryResult<CompaniesQuery, CompaniesQueryVariables>;
 export const GetCompanyDetailDocument = gql`
-    query GetCompanyDetail($id: ID!, $notesSkip: Int, $notesTake: Int) {
+    query getCompanyDetail($id: ID!, $notesSkip: Int, $notesTake: Int) {
   company(id: $id) {
     id
     name
