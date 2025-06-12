@@ -1,4 +1,3 @@
-// src/modules/auth/auth.resolver.ts
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { AuthenticationPayloadObject } from '../dto/authetication-payload.object-type'
 import { AuthService } from 'src/modules/auth/application/services/auth.service'
@@ -41,8 +40,8 @@ export class AuthResolver {
     return this.authService.login(ctx, loginUserInput)
   }
 
-  @ProtectResource()
   @Mutation(() => LogoutOutput, { name: 'logoutUser' })
+  @ProtectResource()
   async logoutUser(@Ctx() ctx: RequestContext): Promise<LogoutOutput> {
     return this.authService.logout(ctx)
   }
