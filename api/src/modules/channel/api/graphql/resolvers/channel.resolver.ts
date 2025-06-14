@@ -8,7 +8,7 @@ import { ChannelConnectionObject as ChannelConnection } from 'src/modules/channe
 
 import { RequestContext } from 'src/common/request-context/request-context'
 import { Ctx } from 'src/common/request-context/request-context.decorator'
-import { PaginationArgs } from 'src/common'
+import { ListQueryArgs } from 'src/common'
 
 @Resolver(() => ChannelEntity)
 export class ChannelResolver {
@@ -25,7 +25,7 @@ export class ChannelResolver {
   @Query(() => ChannelConnection, { name: 'channels' })
   async getChannels(
     @Ctx() ctx: RequestContext,
-    @Args() paginationArgs: PaginationArgs,
+    @Args() paginationArgs: ListQueryArgs,
   ): Promise<ChannelConnection> {
     return this.channelService.getChannels(ctx, paginationArgs)
   }

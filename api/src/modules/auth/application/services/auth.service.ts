@@ -17,8 +17,8 @@ import { UserNotFoundError } from '../../domain/exceptions/user-not-found.except
 import { LogoutOutput } from '../../api/graphql/dto/logout.output'
 import { MissingTokenClaimException } from '../../domain/exceptions/missing-token-claim.exception'
 import { CacheService } from 'src/common/services/cache/cache.service'
-import { ChannelService } from 'src/modules/channel/application/services/channel.service'
 import { RegisterNewTenantInput } from '../../api/graphql/dto/register-new-tenant.input'
+import { ChannelService } from 'src/modules/channel/application/services/channel.service'
 
 @Injectable()
 export class AuthService {
@@ -35,6 +35,7 @@ export class AuthService {
   async registerNewTenant(
     ctx: RequestContext,
     registerNewTenantInput: RegisterNewTenantInput,
+    channelToken?: string,
   ): Promise<AuthenticationPayloadObject> {
     const { email, password, userName, tenantName, tenantDescription } =
       registerNewTenantInput
@@ -53,6 +54,7 @@ export class AuthService {
         {
           name: tenantName,
           description: tenantDescription,
+          token: channelToken,
         },
         { tx },
       )

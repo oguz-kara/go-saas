@@ -4,8 +4,10 @@ import { CompanyResolver } from './api/graphql/resolvers/company.resolver'
 import { PrismaService } from 'src/common'
 import { CompanyNoteService } from './application/services/company-note.service'
 import { CompanyNoteResolver } from './api/graphql/resolvers/company-note.resolver'
+import { AttributeModule } from '../attribute'
 
 @Module({
+  imports: [AttributeModule],
   providers: [
     CompanyService,
     PrismaService,

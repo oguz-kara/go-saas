@@ -24,6 +24,42 @@ export type AddCompanyNoteInput = {
   type?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type AttributeType = {
+  __typename?: 'AttributeType';
+  channelToken: Scalars['String']['output'];
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type AttributeTypeConnection = {
+  __typename?: 'AttributeTypeConnection';
+  items: Array<AttributeType>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AttributeValue = {
+  __typename?: 'AttributeValue';
+  attributeTypeId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  type: AttributeType;
+  value: Scalars['String']['output'];
+};
+
+export type AttributeValueConnection = {
+  __typename?: 'AttributeValueConnection';
+  items: Array<AttributeValue>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AttributeWithType = {
+  __typename?: 'AttributeWithType';
+  attributeTypeId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
 export type AuthenticationPayload = {
   __typename?: 'AuthenticationPayload';
   token: Scalars['String']['output'];
@@ -49,6 +85,7 @@ export type ChannelConnection = {
 export type Company = {
   __typename?: 'Company';
   address?: Maybe<Scalars['JSON']['output']>;
+  attributes?: Maybe<Array<AttributeWithType>>;
   channelToken?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -64,6 +101,7 @@ export type Company = {
 
 
 export type CompanyNotesArgs = {
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -92,18 +130,38 @@ export type CompanyNote = {
   userId: Scalars['ID']['output'];
 };
 
+export type CreateAttributeInput = {
+  attributeTypeId: Scalars['ID']['input'];
+  value: Scalars['String']['input'];
+};
+
+export type CreateAttributeTypeInput = {
+  name: Scalars['String']['input'];
+};
+
 export type CreateChannelInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  token?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CreateCompanyInput = {
   address?: InputMaybe<Scalars['JSON']['input']>;
+  attributeIds?: InputMaybe<Array<Scalars['String']['input']>>;
   description?: InputMaybe<Scalars['String']['input']>;
   industry?: InputMaybe<Scalars['String']['input']>;
   linkedinUrl?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   website?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ListQueryArgs = {
+  /** Search query */
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  /** Number of items to skip */
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  /** Number of items to take */
+  take?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type LoginUserInput = {
@@ -119,14 +177,20 @@ export type LogoutOutput = {
 export type Mutation = {
   __typename?: 'Mutation';
   addNoteToCompany: CompanyNote;
+  createAttribute: AttributeValue;
+  createAttributeType: AttributeType;
   createChannel: Channel;
   createCompany: Company;
+  deleteAttribute: Scalars['Boolean']['output'];
+  deleteAttributeType: Scalars['Boolean']['output'];
   deleteCompany: Company;
   deleteCompanyNote: CompanyNote;
   loginUser: AuthenticationPayload;
   logoutUser: LogoutOutput;
   registerNewTenant: AuthenticationPayload;
   registerUser: AuthenticationPayload;
+  updateAttribute: AttributeValue;
+  updateAttributeType: AttributeType;
   updateCompany: Company;
   updateCompanyNote: CompanyNote;
 };
@@ -138,6 +202,16 @@ export type MutationAddNoteToCompanyArgs = {
 };
 
 
+export type MutationCreateAttributeArgs = {
+  createAttributeInput: CreateAttributeInput;
+};
+
+
+export type MutationCreateAttributeTypeArgs = {
+  createAttributeTypeInput: CreateAttributeTypeInput;
+};
+
+
 export type MutationCreateChannelArgs = {
   createChannelInput: CreateChannelInput;
 };
@@ -145,6 +219,16 @@ export type MutationCreateChannelArgs = {
 
 export type MutationCreateCompanyArgs = {
   createCompanyInput: CreateCompanyInput;
+};
+
+
+export type MutationDeleteAttributeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteAttributeTypeArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -174,6 +258,18 @@ export type MutationRegisterUserArgs = {
 };
 
 
+export type MutationUpdateAttributeArgs = {
+  id: Scalars['ID']['input'];
+  updateAttributeInput: UpdateAttributeInput;
+};
+
+
+export type MutationUpdateAttributeTypeArgs = {
+  id: Scalars['ID']['input'];
+  updateAttributeTypeInput: UpdateAttributeTypeInput;
+};
+
+
 export type MutationUpdateCompanyArgs = {
   id: Scalars['ID']['input'];
   updateCompanyInput: UpdateCompanyInput;
@@ -187,11 +283,27 @@ export type MutationUpdateCompanyNoteArgs = {
 
 export type Query = {
   __typename?: 'Query';
+  attributeTypes: AttributeTypeConnection;
+  attributeValues: AttributeValueConnection;
   channelByToken?: Maybe<Channel>;
   channels: ChannelConnection;
   companies: CompanyConnection;
   company?: Maybe<Company>;
+  companyNotes?: Maybe<CompanyConnectionNotes>;
   me?: Maybe<User>;
+};
+
+
+export type QueryAttributeTypesArgs = {
+  args?: InputMaybe<ListQueryArgs>;
+};
+
+
+export type QueryAttributeValuesArgs = {
+  attributeTypeId: Scalars['ID']['input'];
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -201,6 +313,7 @@ export type QueryChannelByTokenArgs = {
 
 
 export type QueryChannelsArgs = {
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -208,6 +321,7 @@ export type QueryChannelsArgs = {
 
 export type QueryCompaniesArgs = {
   channelToken?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -215,6 +329,14 @@ export type QueryCompaniesArgs = {
 
 export type QueryCompanyArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryCompanyNotesArgs = {
+  companyId: Scalars['ID']['input'];
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type RegisterNewTenantInput = {
@@ -231,8 +353,17 @@ export type RegisterUserInput = {
   password: Scalars['String']['input'];
 };
 
+export type UpdateAttributeInput = {
+  value: Scalars['String']['input'];
+};
+
+export type UpdateAttributeTypeInput = {
+  name: Scalars['String']['input'];
+};
+
 export type UpdateCompanyInput = {
   address?: InputMaybe<Scalars['JSON']['input']>;
+  attributeIds?: InputMaybe<Array<Scalars['String']['input']>>;
   description?: InputMaybe<Scalars['String']['input']>;
   industry?: InputMaybe<Scalars['String']['input']>;
   linkedinUrl?: InputMaybe<Scalars['String']['input']>;
@@ -253,6 +384,52 @@ export type User = {
   name?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
+
+export type CreateAttributeMutationVariables = Exact<{
+  createAttributeInput: CreateAttributeInput;
+}>;
+
+
+export type CreateAttributeMutation = { __typename?: 'Mutation', createAttribute: { __typename?: 'AttributeValue', id: string, value: string, attributeTypeId: string } };
+
+export type UpdateAttributeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  updateAttributeInput: UpdateAttributeInput;
+}>;
+
+
+export type UpdateAttributeMutation = { __typename?: 'Mutation', updateAttribute: { __typename?: 'AttributeValue', id: string, value: string } };
+
+export type DeleteAttributeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteAttributeMutation = { __typename?: 'Mutation', deleteAttribute: boolean };
+
+export type CreateAttributeTypeMutationVariables = Exact<{
+  createAttributeTypeInput: CreateAttributeTypeInput;
+}>;
+
+
+export type CreateAttributeTypeMutation = { __typename?: 'Mutation', createAttributeType: { __typename?: 'AttributeType', id: string, name: string, channelToken: string, createdAt?: any | null } };
+
+export type GetAttributeTypesQueryVariables = Exact<{
+  args?: InputMaybe<ListQueryArgs>;
+}>;
+
+
+export type GetAttributeTypesQuery = { __typename?: 'Query', attributeTypes: { __typename?: 'AttributeTypeConnection', totalCount: number, items: Array<{ __typename?: 'AttributeType', id: string, name: string, channelToken: string, createdAt?: any | null }> } };
+
+export type GetAttributeValuesQueryVariables = Exact<{
+  attributeTypeId: Scalars['ID']['input'];
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetAttributeValuesQuery = { __typename?: 'Query', attributeValues: { __typename?: 'AttributeValueConnection', totalCount: number, items: Array<{ __typename?: 'AttributeValue', id: string, value: string, attributeTypeId: string }> } };
 
 export type LoginUserMutationVariables = Exact<{
   input: LoginUserInput;
@@ -343,7 +520,15 @@ export type GetCompaniesQueryVariables = Exact<{
 }>;
 
 
-export type GetCompaniesQuery = { __typename?: 'Query', companies: { __typename?: 'CompanyConnection', totalCount: number, items: Array<{ __typename?: 'Company', id: string, name: string, website?: string | null, industry?: string | null, createdAt: any }> } };
+export type GetCompaniesQuery = { __typename?: 'Query', companies: { __typename?: 'CompanyConnection', totalCount: number, items: Array<{ __typename?: 'Company', id: string, name: string, website?: string | null, industry?: string | null, description?: string | null, createdAt: any }> } };
+
+export type GetCompaniesWithAttributesQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetCompaniesWithAttributesQuery = { __typename?: 'Query', companies: { __typename?: 'CompanyConnection', totalCount: number, items: Array<{ __typename?: 'Company', id: string, address?: any | null, channelToken?: string | null, name: string, industry?: string | null, website?: string | null, createdAt: any, updatedAt: any, deletedAt?: any | null, linkedinUrl?: string | null, attributes?: Array<{ __typename?: 'AttributeWithType', id: string, attributeTypeId: string, name: string, value: string }> | null }> } };
 
 export type CompaniesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -359,12 +544,19 @@ export type GetCompanyDetailQueryVariables = Exact<{
 
 export type GetCompanyDetailQuery = { __typename?: 'Query', company?: { __typename?: 'Company', id: string, name: string, website?: string | null, industry?: string | null, linkedinUrl?: string | null, address?: any | null, description?: string | null, channelToken?: string | null, createdAt: any, updatedAt: any, notes: { __typename?: 'CompanyConnectionNotes', totalCount: number, items: Array<{ __typename?: 'CompanyNote', id: string, content: string, type?: string | null, userId: string, createdAt: any, updatedAt: any }> } } | null };
 
+export type GetCompanyWithAttributesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetCompanyWithAttributesQuery = { __typename?: 'Query', company?: { __typename?: 'Company', id: string, address?: any | null, channelToken?: string | null, name: string, industry?: string | null, website?: string | null, createdAt: any, updatedAt: any, deletedAt?: any | null, linkedinUrl?: string | null, notes: { __typename?: 'CompanyConnectionNotes', totalCount: number, items: Array<{ __typename?: 'CompanyNote', id: string, content: string, createdAt: any }> }, attributes?: Array<{ __typename?: 'AttributeWithType', id: string, attributeTypeId: string, name: string, value: string }> | null } | null };
+
 export type GetCompanyQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetCompanyQuery = { __typename?: 'Query', company?: { __typename?: 'Company', id: string, name: string, website?: string | null, channelToken?: string | null } | null };
+export type GetCompanyQuery = { __typename?: 'Query', company?: { __typename?: 'Company', address?: any | null, channelToken?: string | null, name: string, industry?: string | null, website?: string | null } | null };
 
 export type UpdateCompanyMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -383,6 +575,242 @@ export type UpdateNoteMutationVariables = Exact<{
 export type UpdateNoteMutation = { __typename?: 'Mutation', updateCompanyNote: { __typename?: 'CompanyNote', id: string, content: string } };
 
 
+export const CreateAttributeDocument = gql`
+    mutation createAttribute($createAttributeInput: CreateAttributeInput!) {
+  createAttribute(createAttributeInput: $createAttributeInput) {
+    id
+    value
+    attributeTypeId
+  }
+}
+    `;
+export type CreateAttributeMutationFn = Apollo.MutationFunction<CreateAttributeMutation, CreateAttributeMutationVariables>;
+
+/**
+ * __useCreateAttributeMutation__
+ *
+ * To run a mutation, you first call `useCreateAttributeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateAttributeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createAttributeMutation, { data, loading, error }] = useCreateAttributeMutation({
+ *   variables: {
+ *      createAttributeInput: // value for 'createAttributeInput'
+ *   },
+ * });
+ */
+export function useCreateAttributeMutation(baseOptions?: Apollo.MutationHookOptions<CreateAttributeMutation, CreateAttributeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateAttributeMutation, CreateAttributeMutationVariables>(CreateAttributeDocument, options);
+      }
+export type CreateAttributeMutationHookResult = ReturnType<typeof useCreateAttributeMutation>;
+export type CreateAttributeMutationResult = Apollo.MutationResult<CreateAttributeMutation>;
+export type CreateAttributeMutationOptions = Apollo.BaseMutationOptions<CreateAttributeMutation, CreateAttributeMutationVariables>;
+export const UpdateAttributeDocument = gql`
+    mutation updateAttribute($id: ID!, $updateAttributeInput: UpdateAttributeInput!) {
+  updateAttribute(id: $id, updateAttributeInput: $updateAttributeInput) {
+    id
+    value
+  }
+}
+    `;
+export type UpdateAttributeMutationFn = Apollo.MutationFunction<UpdateAttributeMutation, UpdateAttributeMutationVariables>;
+
+/**
+ * __useUpdateAttributeMutation__
+ *
+ * To run a mutation, you first call `useUpdateAttributeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateAttributeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateAttributeMutation, { data, loading, error }] = useUpdateAttributeMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      updateAttributeInput: // value for 'updateAttributeInput'
+ *   },
+ * });
+ */
+export function useUpdateAttributeMutation(baseOptions?: Apollo.MutationHookOptions<UpdateAttributeMutation, UpdateAttributeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateAttributeMutation, UpdateAttributeMutationVariables>(UpdateAttributeDocument, options);
+      }
+export type UpdateAttributeMutationHookResult = ReturnType<typeof useUpdateAttributeMutation>;
+export type UpdateAttributeMutationResult = Apollo.MutationResult<UpdateAttributeMutation>;
+export type UpdateAttributeMutationOptions = Apollo.BaseMutationOptions<UpdateAttributeMutation, UpdateAttributeMutationVariables>;
+export const DeleteAttributeDocument = gql`
+    mutation deleteAttribute($id: ID!) {
+  deleteAttribute(id: $id)
+}
+    `;
+export type DeleteAttributeMutationFn = Apollo.MutationFunction<DeleteAttributeMutation, DeleteAttributeMutationVariables>;
+
+/**
+ * __useDeleteAttributeMutation__
+ *
+ * To run a mutation, you first call `useDeleteAttributeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteAttributeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteAttributeMutation, { data, loading, error }] = useDeleteAttributeMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteAttributeMutation(baseOptions?: Apollo.MutationHookOptions<DeleteAttributeMutation, DeleteAttributeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteAttributeMutation, DeleteAttributeMutationVariables>(DeleteAttributeDocument, options);
+      }
+export type DeleteAttributeMutationHookResult = ReturnType<typeof useDeleteAttributeMutation>;
+export type DeleteAttributeMutationResult = Apollo.MutationResult<DeleteAttributeMutation>;
+export type DeleteAttributeMutationOptions = Apollo.BaseMutationOptions<DeleteAttributeMutation, DeleteAttributeMutationVariables>;
+export const CreateAttributeTypeDocument = gql`
+    mutation createAttributeType($createAttributeTypeInput: CreateAttributeTypeInput!) {
+  createAttributeType(createAttributeTypeInput: $createAttributeTypeInput) {
+    id
+    name
+    channelToken
+    createdAt
+  }
+}
+    `;
+export type CreateAttributeTypeMutationFn = Apollo.MutationFunction<CreateAttributeTypeMutation, CreateAttributeTypeMutationVariables>;
+
+/**
+ * __useCreateAttributeTypeMutation__
+ *
+ * To run a mutation, you first call `useCreateAttributeTypeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateAttributeTypeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createAttributeTypeMutation, { data, loading, error }] = useCreateAttributeTypeMutation({
+ *   variables: {
+ *      createAttributeTypeInput: // value for 'createAttributeTypeInput'
+ *   },
+ * });
+ */
+export function useCreateAttributeTypeMutation(baseOptions?: Apollo.MutationHookOptions<CreateAttributeTypeMutation, CreateAttributeTypeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateAttributeTypeMutation, CreateAttributeTypeMutationVariables>(CreateAttributeTypeDocument, options);
+      }
+export type CreateAttributeTypeMutationHookResult = ReturnType<typeof useCreateAttributeTypeMutation>;
+export type CreateAttributeTypeMutationResult = Apollo.MutationResult<CreateAttributeTypeMutation>;
+export type CreateAttributeTypeMutationOptions = Apollo.BaseMutationOptions<CreateAttributeTypeMutation, CreateAttributeTypeMutationVariables>;
+export const GetAttributeTypesDocument = gql`
+    query getAttributeTypes($args: ListQueryArgs) {
+  attributeTypes(args: $args) {
+    items {
+      id
+      name
+      channelToken
+      createdAt
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetAttributeTypesQuery__
+ *
+ * To run a query within a React component, call `useGetAttributeTypesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAttributeTypesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAttributeTypesQuery({
+ *   variables: {
+ *      args: // value for 'args'
+ *   },
+ * });
+ */
+export function useGetAttributeTypesQuery(baseOptions?: Apollo.QueryHookOptions<GetAttributeTypesQuery, GetAttributeTypesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAttributeTypesQuery, GetAttributeTypesQueryVariables>(GetAttributeTypesDocument, options);
+      }
+export function useGetAttributeTypesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAttributeTypesQuery, GetAttributeTypesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAttributeTypesQuery, GetAttributeTypesQueryVariables>(GetAttributeTypesDocument, options);
+        }
+export function useGetAttributeTypesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAttributeTypesQuery, GetAttributeTypesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAttributeTypesQuery, GetAttributeTypesQueryVariables>(GetAttributeTypesDocument, options);
+        }
+export type GetAttributeTypesQueryHookResult = ReturnType<typeof useGetAttributeTypesQuery>;
+export type GetAttributeTypesLazyQueryHookResult = ReturnType<typeof useGetAttributeTypesLazyQuery>;
+export type GetAttributeTypesSuspenseQueryHookResult = ReturnType<typeof useGetAttributeTypesSuspenseQuery>;
+export type GetAttributeTypesQueryResult = Apollo.QueryResult<GetAttributeTypesQuery, GetAttributeTypesQueryVariables>;
+export const GetAttributeValuesDocument = gql`
+    query getAttributeValues($attributeTypeId: ID!, $skip: Int, $take: Int, $searchQuery: String) {
+  attributeValues(
+    attributeTypeId: $attributeTypeId
+    skip: $skip
+    take: $take
+    searchQuery: $searchQuery
+  ) {
+    items {
+      id
+      value
+      attributeTypeId
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetAttributeValuesQuery__
+ *
+ * To run a query within a React component, call `useGetAttributeValuesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAttributeValuesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAttributeValuesQuery({
+ *   variables: {
+ *      attributeTypeId: // value for 'attributeTypeId'
+ *      skip: // value for 'skip'
+ *      take: // value for 'take'
+ *      searchQuery: // value for 'searchQuery'
+ *   },
+ * });
+ */
+export function useGetAttributeValuesQuery(baseOptions: Apollo.QueryHookOptions<GetAttributeValuesQuery, GetAttributeValuesQueryVariables> & ({ variables: GetAttributeValuesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAttributeValuesQuery, GetAttributeValuesQueryVariables>(GetAttributeValuesDocument, options);
+      }
+export function useGetAttributeValuesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAttributeValuesQuery, GetAttributeValuesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAttributeValuesQuery, GetAttributeValuesQueryVariables>(GetAttributeValuesDocument, options);
+        }
+export function useGetAttributeValuesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAttributeValuesQuery, GetAttributeValuesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAttributeValuesQuery, GetAttributeValuesQueryVariables>(GetAttributeValuesDocument, options);
+        }
+export type GetAttributeValuesQueryHookResult = ReturnType<typeof useGetAttributeValuesQuery>;
+export type GetAttributeValuesLazyQueryHookResult = ReturnType<typeof useGetAttributeValuesLazyQuery>;
+export type GetAttributeValuesSuspenseQueryHookResult = ReturnType<typeof useGetAttributeValuesSuspenseQuery>;
+export type GetAttributeValuesQueryResult = Apollo.QueryResult<GetAttributeValuesQuery, GetAttributeValuesQueryVariables>;
 export const LoginUserDocument = gql`
     mutation loginUser($input: LoginUserInput!) {
   loginUser(loginUserInput: $input) {
@@ -841,6 +1269,7 @@ export const GetCompaniesDocument = gql`
       name
       website
       industry
+      description
       createdAt
     }
     totalCount
@@ -881,6 +1310,65 @@ export type GetCompaniesQueryHookResult = ReturnType<typeof useGetCompaniesQuery
 export type GetCompaniesLazyQueryHookResult = ReturnType<typeof useGetCompaniesLazyQuery>;
 export type GetCompaniesSuspenseQueryHookResult = ReturnType<typeof useGetCompaniesSuspenseQuery>;
 export type GetCompaniesQueryResult = Apollo.QueryResult<GetCompaniesQuery, GetCompaniesQueryVariables>;
+export const GetCompaniesWithAttributesDocument = gql`
+    query getCompaniesWithAttributes($skip: Int, $take: Int) {
+  companies(skip: $skip, take: $take) {
+    items {
+      id
+      address
+      channelToken
+      name
+      industry
+      website
+      createdAt
+      updatedAt
+      deletedAt
+      linkedinUrl
+      attributes {
+        id
+        attributeTypeId
+        name
+        value
+      }
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetCompaniesWithAttributesQuery__
+ *
+ * To run a query within a React component, call `useGetCompaniesWithAttributesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCompaniesWithAttributesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCompaniesWithAttributesQuery({
+ *   variables: {
+ *      skip: // value for 'skip'
+ *      take: // value for 'take'
+ *   },
+ * });
+ */
+export function useGetCompaniesWithAttributesQuery(baseOptions?: Apollo.QueryHookOptions<GetCompaniesWithAttributesQuery, GetCompaniesWithAttributesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCompaniesWithAttributesQuery, GetCompaniesWithAttributesQueryVariables>(GetCompaniesWithAttributesDocument, options);
+      }
+export function useGetCompaniesWithAttributesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCompaniesWithAttributesQuery, GetCompaniesWithAttributesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCompaniesWithAttributesQuery, GetCompaniesWithAttributesQueryVariables>(GetCompaniesWithAttributesDocument, options);
+        }
+export function useGetCompaniesWithAttributesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetCompaniesWithAttributesQuery, GetCompaniesWithAttributesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetCompaniesWithAttributesQuery, GetCompaniesWithAttributesQueryVariables>(GetCompaniesWithAttributesDocument, options);
+        }
+export type GetCompaniesWithAttributesQueryHookResult = ReturnType<typeof useGetCompaniesWithAttributesQuery>;
+export type GetCompaniesWithAttributesLazyQueryHookResult = ReturnType<typeof useGetCompaniesWithAttributesLazyQuery>;
+export type GetCompaniesWithAttributesSuspenseQueryHookResult = ReturnType<typeof useGetCompaniesWithAttributesSuspenseQuery>;
+export type GetCompaniesWithAttributesQueryResult = Apollo.QueryResult<GetCompaniesWithAttributesQuery, GetCompaniesWithAttributesQueryVariables>;
 export const CompaniesDocument = gql`
     query companies {
   companies {
@@ -990,13 +1478,77 @@ export type GetCompanyDetailQueryHookResult = ReturnType<typeof useGetCompanyDet
 export type GetCompanyDetailLazyQueryHookResult = ReturnType<typeof useGetCompanyDetailLazyQuery>;
 export type GetCompanyDetailSuspenseQueryHookResult = ReturnType<typeof useGetCompanyDetailSuspenseQuery>;
 export type GetCompanyDetailQueryResult = Apollo.QueryResult<GetCompanyDetailQuery, GetCompanyDetailQueryVariables>;
+export const GetCompanyWithAttributesDocument = gql`
+    query getCompanyWithAttributes($id: ID!) {
+  company(id: $id) {
+    id
+    address
+    channelToken
+    name
+    industry
+    website
+    createdAt
+    updatedAt
+    deletedAt
+    linkedinUrl
+    notes {
+      items {
+        id
+        content
+        createdAt
+      }
+      totalCount
+    }
+    attributes {
+      id
+      attributeTypeId
+      name
+      value
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetCompanyWithAttributesQuery__
+ *
+ * To run a query within a React component, call `useGetCompanyWithAttributesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCompanyWithAttributesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCompanyWithAttributesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetCompanyWithAttributesQuery(baseOptions: Apollo.QueryHookOptions<GetCompanyWithAttributesQuery, GetCompanyWithAttributesQueryVariables> & ({ variables: GetCompanyWithAttributesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCompanyWithAttributesQuery, GetCompanyWithAttributesQueryVariables>(GetCompanyWithAttributesDocument, options);
+      }
+export function useGetCompanyWithAttributesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCompanyWithAttributesQuery, GetCompanyWithAttributesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCompanyWithAttributesQuery, GetCompanyWithAttributesQueryVariables>(GetCompanyWithAttributesDocument, options);
+        }
+export function useGetCompanyWithAttributesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetCompanyWithAttributesQuery, GetCompanyWithAttributesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetCompanyWithAttributesQuery, GetCompanyWithAttributesQueryVariables>(GetCompanyWithAttributesDocument, options);
+        }
+export type GetCompanyWithAttributesQueryHookResult = ReturnType<typeof useGetCompanyWithAttributesQuery>;
+export type GetCompanyWithAttributesLazyQueryHookResult = ReturnType<typeof useGetCompanyWithAttributesLazyQuery>;
+export type GetCompanyWithAttributesSuspenseQueryHookResult = ReturnType<typeof useGetCompanyWithAttributesSuspenseQuery>;
+export type GetCompanyWithAttributesQueryResult = Apollo.QueryResult<GetCompanyWithAttributesQuery, GetCompanyWithAttributesQueryVariables>;
 export const GetCompanyDocument = gql`
     query getCompany($id: ID!) {
   company(id: $id) {
-    id
-    name
-    website
+    address
     channelToken
+    name
+    industry
+    website
   }
 }
     `;

@@ -24,8 +24,15 @@ export class CompanyService {
   ): Promise<CompanyEntity> {
     const { channel, user } = ctx
 
-    const { name, website, industry, linkedinUrl, address, description } =
-      createCompanyInput
+    const {
+      name,
+      website,
+      industry,
+      linkedinUrl,
+      address,
+      description,
+      attributeIds,
+    } = createCompanyInput
 
     const ct = channelToken ? channelToken : channel.token
 
@@ -48,6 +55,9 @@ export class CompanyService {
           address,
           description,
           channelToken: ct,
+          attributes: {
+            connect: attributeIds?.map((id) => ({ id })) || undefined,
+          },
         },
       })
       return company as CompanyEntity
@@ -96,7 +106,7 @@ export class CompanyService {
         skip,
         take,
         orderBy: {
-          createdAt: 'desc', // Default ordering, can be made configurable later
+          createdAt: 'desc',
         },
       })
 
@@ -176,12 +186,15 @@ export class CompanyService {
       'updateCompany',
     )
 
-    const { address, ...rest } = updateData
+    const { address, attributeIds, ...rest } = updateData
 
     const ct = channelToken ? channelToken : channel.token
 
     const prismaUpdateData: Prisma.CompanyUpdateInput = {
       ...rest,
+      attributes: {
+        set: attributeIds?.map((id) => ({ id })) || undefined,
+      },
     }
 
     if (address) {

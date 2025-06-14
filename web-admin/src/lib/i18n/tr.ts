@@ -116,6 +116,23 @@ export const tr: TwoLevelTranslations = {
     goToLastPage: 'Son Sayfaya Git',
     goToPage: 'Sayfa',
   },
+  attributeStudio: {
+    pageTitle: 'Filtre Yöneticisi',
+    pageDescription:
+      'Şirketlerinizi gruplamak için kullanacağınız özel filtreleri ve etiketleri yönetin.',
+    typesColumnTitle: 'Özellik Tipleri',
+    valuesColumnTitle: 'Değerler',
+    addNewTypePlaceholder: 'Yeni tip adı (örn: Bölge)',
+    addNewValuePlaceholder: 'Yeni değer adı (örn: Ege)',
+    addTypeButton: 'Yeni Tip Ekle',
+    addValueButton: 'Yeni Değer Ekle',
+    noTypesFound: 'Henüz bir özellik tipi oluşturulmamış.',
+    noValuesFound: 'Bu tip için henüz bir değer eklenmemiş.',
+    selectTypePrompt: 'Değerlerini görmek için bir tip seçin.',
+    deleteTypeConfirmTitle: 'Özellik Tipini Sil?',
+    deleteTypeConfirmDescription:
+      'Bu işlem geri alınamaz. Bu tipe bağlı tüm değerler de silinecektir.',
+  },
 }
 
 export type Translations = typeof tr

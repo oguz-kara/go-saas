@@ -9,4 +9,6 @@ model Channel {
   companies   Company[]
   users User[]
   companyNotes CompanyNote[]
+  attributeTypes  AttributeType[]
+  attributeValues AttributeValue[]
 }

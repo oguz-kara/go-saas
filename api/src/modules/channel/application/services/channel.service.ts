@@ -11,7 +11,7 @@ import { ChannelEntity } from 'src/modules/channel/api/graphql/entities/channel.
 import { CreateChannelInput } from 'src/modules/channel/api/graphql/dto/create-channel.input'
 import { Prisma } from '@prisma/client'
 import { generateChannelToken } from '../../domain/utils/token'
-import { PaginationArgs } from 'src/common'
+import { ListQueryArgs } from 'src/common'
 
 @Injectable()
 export class ChannelService {
@@ -28,9 +28,9 @@ export class ChannelService {
   ): Promise<ChannelEntity> {
     const dbClient = args?.tx || this.prisma
     const { user } = ctx
-    const { name, description } = input
+    const { name, description, token: inputToken } = input
 
-    const token = generateChannelToken()
+    const token = inputToken || generateChannelToken()
 
     this.logger.log(
       `User ${user?.id || 'System'} creating channel: ${name} (Token: ${token})`,
@@ -82,7 +82,7 @@ export class ChannelService {
 
   async getChannels(
     ctx: RequestContext,
-    args: PaginationArgs,
+    args: ListQueryArgs,
   ): Promise<{ items: ChannelEntity[]; totalCount: number }> {
     const { user } = ctx
     const { skip = 0, take = 10 } = args

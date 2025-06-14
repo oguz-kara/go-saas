@@ -36,4 +36,8 @@ export class UpdateCompanyInput {
   @IsOptional()
   @MaxLength(2000)
   description?: string | null
+
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  attributeIds?: string[]
 }

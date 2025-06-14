@@ -7,6 +7,37 @@ input AddCompanyNoteInput {
   type: String
 }
 
+type AttributeType {
+  channelToken: String!
+  createdAt: DateTime
+  id: ID!
+  name: String!
+}
+
+type AttributeTypeConnection {
+  items: [AttributeType!]!
+  totalCount: Int!
+}
+
+type AttributeValue {
+  attributeTypeId: ID!
+  id: ID!
+  type: AttributeType!
+  value: String!
+}
+
+type AttributeValueConnection {
+  items: [AttributeValue!]!
+  totalCount: Int!
+}
+
+type AttributeWithType {
+  attributeTypeId: ID!
+  id: ID!
+  name: String!
+  value: String!
+}
+
 type AuthenticationPayload {
   token: String!
   user: User!
@@ -28,6 +59,7 @@ type ChannelConnection {
 
 type Company {
   address: JSON
+  attributes: [AttributeWithType!]
   channelToken: String
   createdAt: DateTime!
   deletedAt: DateTime
@@ -37,6 +69,9 @@ type Company {
   linkedinUrl: String
   name: String!
   notes(
+    """Search query"""
+    searchQuery: String
+
     """Number of items to skip"""
     skip: Int = 0
 
@@ -68,13 +103,24 @@ type CompanyNote {
   userId: ID!
 }
 
+input CreateAttributeInput {
+  attributeTypeId: ID!
+  value: String!
+}
+
+input CreateAttributeTypeInput {
+  name: String!
+}
+
 input CreateChannelInput {
   description: String
   name: String!
+  token: String
 }
 
 input CreateCompanyInput {
   address: JSON
+  attributeIds: [String!]
   description: String
   industry: String
   linkedinUrl: String
@@ -92,6 +138,17 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+input ListQueryArgs {
+  """Search query"""
+  searchQuery: String
+
+  """Number of items to skip"""
+  skip: Int = 0
+
+  """Number of items to take"""
+  take: Int = 10
+}
+
 input LoginUserInput {
   email: String!
   password: String!
@@ -103,21 +160,43 @@ type LogoutOutput {
 
 type Mutation {
   addNoteToCompany(addCompanyNoteInput: AddCompanyNoteInput!, companyId: ID!): CompanyNote!
+  createAttribute(createAttributeInput: CreateAttributeInput!): AttributeValue!
+  createAttributeType(createAttributeTypeInput: CreateAttributeTypeInput!): AttributeType!
   createChannel(createChannelInput: CreateChannelInput!): Channel!
   createCompany(createCompanyInput: CreateCompanyInput!): Company!
+  deleteAttribute(id: ID!): Boolean!
+  deleteAttributeType(id: ID!): Boolean!
   deleteCompany(id: ID!): Company!
   deleteCompanyNote(noteId: ID!): CompanyNote!
   loginUser(loginUserInput: LoginUserInput!): AuthenticationPayload!
   logoutUser: LogoutOutput!
   registerNewTenant(registerNewTenantInput: RegisterNewTenantInput!): AuthenticationPayload!
   registerUser(channelToken: String!, registerUserInput: RegisterUserInput!): AuthenticationPayload!
+  updateAttribute(id: ID!, updateAttributeInput: UpdateAttributeInput!): AttributeValue!
+  updateAttributeType(id: ID!, updateAttributeTypeInput: UpdateAttributeTypeInput!): AttributeType!
   updateCompany(id: ID!, updateCompanyInput: UpdateCompanyInput!): Company!
   updateCompanyNote(noteId: ID!, updateCompanyNoteInput: UpdateCompanyNoteInput!): CompanyNote!
 }
 
 type Query {
+  attributeTypes(args: ListQueryArgs): AttributeTypeConnection!
+  attributeValues(
+    attributeTypeId: ID!
+
+    """Search query"""
+    searchQuery: String
+
+    """Number of items to skip"""
+    skip: Int = 0
+
+    """Number of items to take"""
+    take: Int = 10
+  ): AttributeValueConnection!
   channelByToken(token: String!): Channel
   channels(
+    """Search query"""
+    searchQuery: String
+
     """Number of items to skip"""
     skip: Int = 0
 
@@ -127,6 +206,9 @@ type Query {
   companies(
     channelToken: ID
 
+    """Search query"""
+    searchQuery: String
+
     """Number of items to skip"""
     skip: Int = 0
 
@@ -134,6 +216,18 @@ type Query {
     take: Int = 10
   ): CompanyConnection!
   company(id: ID!): Company
+  companyNotes(
+    companyId: ID!
+
+    """Search query"""
+    searchQuery: String
+
+    """Number of items to skip"""
+    skip: Int = 0
+
+    """Number of items to take"""
+    take: Int = 10
+  ): CompanyConnectionNotes
   me: User
 }
 
@@ -151,8 +245,17 @@ input RegisterUserInput {
   password: String!
 }
 
+input UpdateAttributeInput {
+  value: String!
+}
+
+input UpdateAttributeTypeInput {
+  name: String!
+}
+
 input UpdateCompanyInput {
   address: JSON
+  attributeIds: [String!]
   description: String
   industry: String
   linkedinUrl: String

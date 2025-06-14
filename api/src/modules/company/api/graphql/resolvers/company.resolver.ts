@@ -17,7 +17,7 @@ import { CompanyConnectionObject as CompanyConnection } from 'src/modules/compan
 import { RequestContext } from 'src/common/request-context/request-context'
 import { ProtectResource } from 'src/common/decorators/protect-resource.decorator'
 import { Ctx } from 'src/common/request-context/request-context.decorator'
-import { PaginationArgs } from 'src/common'
+import { ListQueryArgs } from 'src/common'
 import { CompanyConnectionNotesObject } from '../dto/company-connection-notes.object-type'
 import { CompanyNoteService } from 'src/modules/company/application/services/company-note.service'
 
@@ -70,19 +70,18 @@ export class CompanyResolver {
     return this.companyService.deleteCompany(ctx, id)
   }
 
-  @ResolveField('notes', () => CompanyConnectionNotesObject) // Or () => [CompanyNoteEntity] if not paginated directly here
+  @ResolveField('notes', () => CompanyConnectionNotesObject)
   async getNotesForCompany(
     @Parent() company: CompanyEntity,
     @Ctx() ctx: RequestContext,
-    @Args() paginationArgs: PaginationArgs, // Add if notes are paginated
+    @Args() listQueryArgs: ListQueryArgs,
   ): Promise<CompanyConnectionNotesObject> {
-    // Or Promise<CompanyNoteEntity[]>
     const { id: companyId } = company
     const { items: notes, totalCount } =
       await this.companyNoteService.getNotesForCompany(
         ctx,
         companyId,
-        paginationArgs,
+        listQueryArgs,
       )
     return { items: notes, totalCount }
   }

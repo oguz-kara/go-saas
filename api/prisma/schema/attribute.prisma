@@ -1,0 +1,35 @@
+model AttributeType {
+  id           String  @id @default(cuid())
+  name         String // Örn: "Sektör", "Müşteri Durumu", "Proje Tipi"
+  channelToken String // Bu tipin hangi tenanta ait olduğu
+  channel      Channel @relation(fields: [channelToken], references: [token])
+
+  // Bu tipe ait değerler (örn: "Yazılım", "Teknoloji"...)
+  values AttributeValue[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([name, channelToken]) // Tip adı, bir tenant içinde benzersiz olmalı
+}
+
+model AttributeValue {
+  id    String @id @default(cuid())
+  value String // Değerin kendisi (örn: "Yazılım")
+
+  attributeTypeId String
+  type            AttributeType @relation(fields: [attributeTypeId], references: [id], onDelete: Cascade)
+
+  channelToken String
+  channel      Channel @relation(fields: [channelToken], references: [token])
+
+  companies Company[] // Bu değere sahip şirketler
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([value, attributeTypeId]) // Bir değer, kendi tipi içinde benzersiz olmalı
+  @@index([attributeTypeId])
+}

@@ -13,10 +13,10 @@ import { AddNoteDialog } from './add-note-dialog'
 import { EditCompanyDialog } from './edit-company-dialog'
 import { DeleteCompanyAlert } from './delete-company-alert'
 
-import type { GetCompanyDetailQuery } from '@gocrm/graphql/generated/sdk'
+import type { GetCompanyWithAttributesQuery } from '@gocrm/graphql/generated/sdk'
 import type { Translations } from '@gocrm/lib/i18n/tr'
 
-type Company = NonNullable<GetCompanyDetailQuery['company']>
+type Company = NonNullable<GetCompanyWithAttributesQuery['company']>
 
 interface CompanyDetailViewProps {
   company: Company
@@ -41,7 +41,7 @@ export const CompanyDetailView = ({
         <h1 className="text-2xl font-bold tracking-tight">{company.name}</h1>
         <div className="flex flex-wrap gap-2">
           {/* Edit ve Delete dialogları artık burada render edilecek */}
-          <EditCompanyDialog company={company} />
+          <EditCompanyDialog company={company} asMenuItem={false} />
           <DeleteCompanyAlert companyId={company.id} />
           <AddNoteDialog companyId={company.id} />
         </div>
@@ -120,7 +120,6 @@ export const CompanyDetailView = ({
             </p>
           )}
         </div>
-        {/* Notlar için sayfalama (pagination) kontrolleri buraya eklenebilir */}
       </div>
     </div>
   )

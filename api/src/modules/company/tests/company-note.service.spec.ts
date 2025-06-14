@@ -11,7 +11,7 @@ import { InternalServerErrorException, Logger } from '@nestjs/common'
 import { Prisma, Company, CompanyNote } from '@prisma/client'
 import { AddCompanyNoteInput } from '../api/graphql/dto/add-company-note.input'
 import { CompanyNotFoundError } from '../domain/exceptions/company-not-found.exception'
-import { PaginationArgs } from 'src/common'
+import { ListQueryArgs } from 'src/common'
 import { UpdateCompanyNoteInput } from '../api/graphql/dto/update-company-note.input'
 import { CompanyNoteNotFoundError } from '../domain/exceptions/company-note-not-found.exception'
 
@@ -260,7 +260,7 @@ describe('CompanyNoteService', () => {
   })
 
   describe('getNotesForCompany', () => {
-    const mockPaginationArgs: PaginationArgs = { skip: 0, take: 10 }
+    const mockPaginationArgs: ListQueryArgs = { skip: 0, take: 10 }
     const mockCompanyNote1: CompanyNote = {
       id: 'note-uuid-1',
       companyId: mockCompanyId,
@@ -366,7 +366,7 @@ describe('CompanyNoteService', () => {
     })
 
     it('should correctly apply pagination (skip, take)', async () => {
-      const customPagination: PaginationArgs = { skip: 1, take: 1 }
+      const customPagination: ListQueryArgs = { skip: 1, take: 1 }
       prisma.company.findFirst.mockResolvedValue(mockExistingCompany)
       prisma.companyNote.findMany.mockResolvedValue([mockCompanyNote1]) // Only second note (index 1) after skipping 1
       prisma.companyNote.count.mockResolvedValue(mockTotalCount) // Total count remains the same

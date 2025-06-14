@@ -12,4 +12,9 @@ export class CreateChannelInput {
   @IsOptional()
   @MaxLength(500)
   description?: string
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @MaxLength(100)
+  token?: string
 }

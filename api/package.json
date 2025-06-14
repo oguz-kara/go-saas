@@ -20,7 +20,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "seed": "ts-node -r tsconfig-paths/register src/command.ts",
+    "cli": "ts-node -r tsconfig-paths/register src/command.ts"
   },
   "dependencies": {
     "@nestjs/apollo": "^13.1.0",
@@ -35,11 +37,15 @@
     "cache-manager": "^6.4.3",
     "cache-manager-redis-yet": "^5.1.5",
     "class-validator": "^0.14.2",
+    "command-runner": "^0.2.2",
     "graphql-type-json": "^0.3.2",
+    "nest-commander": "^3.17.0",
+    "nestjs-command": "^3.1.5",
     "passport-jwt": "^4.0.1",
     "passport-strategy": "^1.0.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -55,6 +61,7 @@
     "@types/node": "^22.10.7",
     "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^6.0.3",
+    "@types/yargs": "^17.0.33",
     "cross-env": "^7.0.3",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",

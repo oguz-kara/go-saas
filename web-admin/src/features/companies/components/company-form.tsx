@@ -20,6 +20,9 @@ import {
   createCompanyFormSchema,
 } from '@gocrm/features/companies/schemas/company-form.schema'
 import { Loader2 } from 'lucide-react'
+import { useGetAttributeTypesQuery } from '@gocrm/graphql/generated/hooks'
+import { AttributeMultiSelect } from '@gocrm/features/attributes/components/attribute-multi-select'
+import { useEffect } from 'react'
 
 interface CompanyFormProps {
   onSubmit: (values: CompanyFormValues) => void
@@ -32,6 +35,7 @@ export const CompanyForm = ({
   isSubmitting,
   initialValues,
 }: CompanyFormProps) => {
+  console.log({ initialValues })
   const { translations } = useTranslations()
   const formSchema = createCompanyFormSchema(translations?.companyForm ?? {})
 
@@ -42,9 +46,26 @@ export const CompanyForm = ({
       website: '',
       industry: '',
       description: '',
+      attributes: {},
       ...initialValues,
     },
   })
+
+  const { data: attributeTypesData, loading: attributeTypesLoading } =
+    useGetAttributeTypesQuery({
+      variables: {
+        args: {
+          searchQuery: '',
+        },
+      },
+    })
+  const attributeTypes = attributeTypesData?.attributeTypes.items || []
+
+  useEffect(() => {
+    if (attributeTypesData) {
+      console.log({ attributeTypesData })
+    }
+  }, [attributeTypesData])
 
   return (
     <Form {...form}>
@@ -121,6 +142,31 @@ export const CompanyForm = ({
             </FormItem>
           )}
         />
+
+        <hr />
+
+        {attributeTypesLoading && <p>Özellikler yükleniyor...</p>}
+        {attributeTypes.map((attrType) => (
+          <FormField
+            key={attrType.id}
+            control={form.control}
+            name={`attributes.${attrType.id}`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{attrType.name}</FormLabel>
+                <FormControl>
+                  <AttributeMultiSelect
+                    attributeTypeId={attrType.id}
+                    selectedValues={(field.value || []).filter(Boolean)}
+                    onSelectionChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ))}
+
         <Button type="submit" disabled={isSubmitting} className="w-full">
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isSubmitting

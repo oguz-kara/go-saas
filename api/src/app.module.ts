@@ -1,19 +1,26 @@
-import { Module } from '@nestjs/common' //merhaba
-import { AuthModule } from './modules/auth'
-import { CompanyModule } from './modules/company'
-import { ChannelModule } from './modules/channel'
+// NestJS core
+import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { GraphQLModule } from '@nestjs/graphql'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
-import { appConfig } from './common/config/app.config'
-import { redisStore } from 'cache-manager-redis-yet'
 import { CacheModule } from '@nestjs/cache-manager'
 
+// Third party
+import { redisStore } from 'cache-manager-redis-yet'
+import { CommandModule } from 'nestjs-command'
+
+// Application modules
+import { AuthModule } from './modules/auth'
+import { CompanyModule } from './modules/company'
+import { ChannelModule } from './modules/channel'
+import { AttributeModule } from './modules/attribute'
+import { SeederModule } from './seeder/seeder.module'
+
+// Application config
+import { appConfig } from './common/config/app.config'
 @Module({
   imports: [
-    AuthModule,
-    CompanyModule,
-    ChannelModule,
+    // Core modules
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig],
@@ -31,9 +38,7 @@ import { CacheModule } from '@nestjs/cache-manager'
           password: configService.get<string>('REDIS_PASSWORD'),
           ttl: configService.get<number>('CACHE_TTL_SECONDS', 60 * 60),
         })
-        return {
-          store,
-        }
+        return { store }
       },
       inject: [ConfigService],
     }),
@@ -44,7 +49,7 @@ import { CacheModule } from '@nestjs/cache-manager'
       playground: true,
       autoSchemaFile: 'schema.graphql',
       sortSchema: true,
-      include: [AuthModule, CompanyModule, ChannelModule],
+      include: [AuthModule, CompanyModule, ChannelModule, AttributeModule],
       formatError: (formattedError, error: any) => {
         const originalError = formattedError.extensions?.originalError as any
         const defaultMessage =
@@ -58,6 +63,16 @@ import { CacheModule } from '@nestjs/cache-manager'
         }
       },
     }),
+
+    // Feature modules
+    AuthModule,
+    CompanyModule,
+    ChannelModule,
+    AttributeModule,
+
+    // Utility modules
+    SeederModule,
+    CommandModule,
   ],
   controllers: [],
   providers: [],

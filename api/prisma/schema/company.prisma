@@ -15,9 +15,8 @@ model Company {
 
   deletedAt DateTime?
 
-  search_vector Unsupported("tsvector")?
-
-  notes CompanyNote[]
+  attributes AttributeValue[]
+  notes      CompanyNote[]
 }
 
 model CompanyNote {

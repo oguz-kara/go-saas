@@ -11,7 +11,6 @@ import { CompanyNoteEntity } from 'src/modules/company/api/graphql/entities/comp
 import { CompanyNotFoundError } from 'src/modules/company/domain/exceptions/company-not-found.exception'
 import { Prisma } from '@prisma/client'
 import { AddCompanyNoteInput } from '../../api/graphql/dto/add-company-note.input'
-import { PaginationArgs } from 'src/common'
 import { UpdateCompanyNoteInput } from '../../api/graphql/dto/update-company-note.input'
 import { CompanyNoteNotFoundError } from '../../domain/exceptions/company-note-not-found.exception'
 
@@ -78,11 +77,15 @@ export class CompanyNoteService {
   async getNotesForCompany(
     ctx: RequestContext,
     companyId: string,
-    args: PaginationArgs,
-    channelToken?: string,
+    args: {
+      skip?: number
+      take?: number
+      searchQuery?: string
+      channelToken?: string
+    },
   ): Promise<{ items: CompanyNoteEntity[]; totalCount: number }> {
     const { user, channel } = ctx
-    const { skip = 0, take = 10 } = args
+    const { skip = 0, take = 10, searchQuery, channelToken } = args
 
     const ct = channelToken ? channelToken : channel.token
 
@@ -90,6 +93,19 @@ export class CompanyNoteService {
       `User ${user?.id || 'System'} fetching notes for company ${companyId}`,
       'getNotesForCompany',
     )
+
+    const whereClause: any = {}
+
+    if (ct) {
+      whereClause.channelToken = ct
+    }
+
+    if (searchQuery) {
+      whereClause.OR = [
+        { title: { contains: searchQuery, mode: 'insensitive' } },
+        { content: { contains: searchQuery, mode: 'insensitive' } },
+      ]
+    }
 
     try {
       const company = await this.prisma.company.findFirst({
@@ -99,10 +115,7 @@ export class CompanyNoteService {
         throw new CompanyNotFoundError(companyId)
       }
 
-      const whereClause: Prisma.CompanyNoteWhereInput = {
-        companyId,
-        channelToken: ct,
-      }
+      whereClause.companyId = companyId
 
       const [notes, totalCount] = await Promise.all([
         this.prisma.companyNote.findMany({

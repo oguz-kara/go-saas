@@ -1,10 +1,10 @@
-import { CompaniesTable } from '@gocrm/features/companies/components/companies-table'
 import { CreateCompanyDialog } from '@gocrm/features/companies/components/create-company-dialog'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@gocrm/constants'
 import { getTranslations } from '@gocrm/lib/i18n'
 import { sdk } from '@gocrm/graphql'
 import { withAuthProtection } from '@gocrm/lib/auth/with-auth-protection'
 import { AppPagination } from '../../../components/common/app-pagination'
+import { CompaniesList } from '@gocrm/features/companies/components/companies-list'
 
 export default async function CompanyListPage({
   searchParams,
@@ -52,7 +52,7 @@ export default async function CompanyListPage({
           <CreateCompanyDialog pageInfo={pageInfo} />
         </div>
       </div>
-      <CompaniesTable companies={companies} pageInfo={pageInfo} />
+      <CompaniesList companies={companies} pageInfo={pageInfo} />
 
       <div className="mt-auto pt-4">
         <AppPagination

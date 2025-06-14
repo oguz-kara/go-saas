@@ -8,17 +8,15 @@ import { withAuthProtection } from '@gocrm/lib/auth/with-auth-protection'
 export default async function CompanyDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string; locale?: string }>
 }) {
-  const { id } = (await params) || {}
-  const api = sdk('tr')
-  const translations = await getTranslations('tr')
+  const { id, locale } = (await params) || {}
+  const api = sdk(locale)
+  const translations = await getTranslations(locale)
 
   const { company } = await withAuthProtection(async () => {
-    return await api.getCompanyDetail({
+    return await api.getCompanyWithAttributes({
       id: id,
-      notesTake: 10,
-      notesSkip: 0,
     })
   })
 

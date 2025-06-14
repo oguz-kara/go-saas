@@ -57,7 +57,11 @@ export const CreateCompanyDialog = ({
           website: values.website || null,
           industry: values.industry || null,
           description: values.description || null,
-          // address can be added here if it's in the form
+          attributeIds: values.attributes
+            ? Object.values(values.attributes).flatMap((arr) =>
+                arr?.map((attribute) => attribute.id),
+              )
+            : [],
         },
       },
     })

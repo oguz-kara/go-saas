@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql'
 import GraphQLJSON from 'graphql-type-json'
 import { CompanyNoteEntity } from './company-note.entity'
+import { AttributeWithTypeEntity } from 'src/modules/attribute/api/graphql/dto/attribute-with-type.object-type'
 
 @ObjectType('Company')
 export class CompanyEntity {
@@ -39,4 +40,7 @@ export class CompanyEntity {
 
   @Field(() => [CompanyNoteEntity], { nullable: true })
   notes?: CompanyNoteEntity[]
+
+  @Field(() => [AttributeWithTypeEntity], { nullable: true })
+  attributes?: AttributeWithTypeEntity[]
 }

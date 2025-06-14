@@ -7,6 +7,13 @@ export const getCompaniesWithNotesQuery = `
                 items { content }
                 totalCount
               }
+              attributes {
+                items {
+                  id
+                  name
+                  value
+                }
+              }
             }
           }
         }

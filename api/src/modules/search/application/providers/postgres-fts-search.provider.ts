@@ -18,20 +18,20 @@ export class PostgresFtsSearchProvider implements ISearchProvider {
     options: SearchProviderOptions,
     channelToken: string,
   ): Promise<SearchProviderResult> {
-    const { searchQuery } = options
+    // const { searchQuery } = options
 
     const whereClause: Prisma.CompanyWhereInput = {
       channelToken: channelToken,
       deletedAt: null,
     }
 
-    if (searchQuery) {
-      const plainQuery = searchQuery.trim().split(/\s+/).join(' & ')
-      whereClause._search = {
-        path: ['name', 'industry', 'description'],
-        query: plainQuery,
-      }
-    }
+    // if (searchQuery) {
+    //   const plainQuery = searchQuery.trim().split(/\s+/).join(' & ')
+    //   whereClause.search = {
+    //     path: ['name', 'industry', 'description'],
+    //     query: plainQuery,
+    //   }
+    // }
 
     const results = await this.prisma.company.findMany({
       where: whereClause,

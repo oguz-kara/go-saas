@@ -14,7 +14,7 @@ import {
 import { CreateChannelInput } from '../api/graphql/dto/create-channel.input'
 import { Prisma, Channel } from '@prisma/client'
 import * as tokenUtils from '../domain/utils/token' // To mock generateChannelToken
-import { PaginationArgs } from 'src/common'
+import { ListQueryArgs } from 'src/common'
 
 // Mock Logger
 beforeAll(() => {
@@ -239,7 +239,7 @@ describe('ChannelService', () => {
   })
 
   describe('getChannels', () => {
-    const mockPaginationArgsDefault: PaginationArgs = { skip: 0, take: 10 }
+    const mockPaginationArgsDefault: ListQueryArgs = { skip: 0, take: 10 }
     const mockChannel1: Channel = {
       id: 'channel-1',
       name: 'Channel One',
@@ -279,7 +279,7 @@ describe('ChannelService', () => {
     })
 
     it('should get channels with custom pagination', async () => {
-      const customArgs: PaginationArgs = { skip: 1, take: 1 }
+      const customArgs: ListQueryArgs = { skip: 1, take: 1 }
       prisma.channel.findMany.mockResolvedValue([mockChannel1]) // Simulating skip 1, take 1
       prisma.channel.count.mockResolvedValue(mockTotalCount)
 

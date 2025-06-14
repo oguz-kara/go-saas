@@ -100,10 +100,7 @@ export const CompaniesTable = ({
                       <DropdownMenuLabel>
                         {translations?.companiesTable.actionsLabel}
                       </DropdownMenuLabel>
-                      <DropdownMenuItem>
-                        {translations?.companiesTable.actionEdit}
-                      </DropdownMenuItem>
-                      <EditCompanyDialog company={company} />
+                      <EditCompanyDialog company={company} asMenuItem={true} />
                       <DropdownMenuItem className="text-red-600">
                         {translations?.companiesTable.actionDelete}
                       </DropdownMenuItem>

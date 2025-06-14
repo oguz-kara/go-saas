@@ -23,6 +23,42 @@ export type AddCompanyNoteInput = {
   type?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type AttributeType = {
+  __typename?: 'AttributeType';
+  channelToken: Scalars['String']['output'];
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type AttributeTypeConnection = {
+  __typename?: 'AttributeTypeConnection';
+  items: Array<AttributeType>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AttributeValue = {
+  __typename?: 'AttributeValue';
+  attributeTypeId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  type: AttributeType;
+  value: Scalars['String']['output'];
+};
+
+export type AttributeValueConnection = {
+  __typename?: 'AttributeValueConnection';
+  items: Array<AttributeValue>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AttributeWithType = {
+  __typename?: 'AttributeWithType';
+  attributeTypeId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
 export type AuthenticationPayload = {
   __typename?: 'AuthenticationPayload';
   token: Scalars['String']['output'];
@@ -48,6 +84,7 @@ export type ChannelConnection = {
 export type Company = {
   __typename?: 'Company';
   address?: Maybe<Scalars['JSON']['output']>;
+  attributes?: Maybe<Array<AttributeWithType>>;
   channelToken?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -63,6 +100,7 @@ export type Company = {
 
 
 export type CompanyNotesArgs = {
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -91,18 +129,38 @@ export type CompanyNote = {
   userId: Scalars['ID']['output'];
 };
 
+export type CreateAttributeInput = {
+  attributeTypeId: Scalars['ID']['input'];
+  value: Scalars['String']['input'];
+};
+
+export type CreateAttributeTypeInput = {
+  name: Scalars['String']['input'];
+};
+
 export type CreateChannelInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  token?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CreateCompanyInput = {
   address?: InputMaybe<Scalars['JSON']['input']>;
+  attributeIds?: InputMaybe<Array<Scalars['String']['input']>>;
   description?: InputMaybe<Scalars['String']['input']>;
   industry?: InputMaybe<Scalars['String']['input']>;
   linkedinUrl?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   website?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ListQueryArgs = {
+  /** Search query */
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  /** Number of items to skip */
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  /** Number of items to take */
+  take?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type LoginUserInput = {
@@ -118,14 +176,20 @@ export type LogoutOutput = {
 export type Mutation = {
   __typename?: 'Mutation';
   addNoteToCompany: CompanyNote;
+  createAttribute: AttributeValue;
+  createAttributeType: AttributeType;
   createChannel: Channel;
   createCompany: Company;
+  deleteAttribute: Scalars['Boolean']['output'];
+  deleteAttributeType: Scalars['Boolean']['output'];
   deleteCompany: Company;
   deleteCompanyNote: CompanyNote;
   loginUser: AuthenticationPayload;
   logoutUser: LogoutOutput;
   registerNewTenant: AuthenticationPayload;
   registerUser: AuthenticationPayload;
+  updateAttribute: AttributeValue;
+  updateAttributeType: AttributeType;
   updateCompany: Company;
   updateCompanyNote: CompanyNote;
 };
@@ -137,6 +201,16 @@ export type MutationAddNoteToCompanyArgs = {
 };
 
 
+export type MutationCreateAttributeArgs = {
+  createAttributeInput: CreateAttributeInput;
+};
+
+
+export type MutationCreateAttributeTypeArgs = {
+  createAttributeTypeInput: CreateAttributeTypeInput;
+};
+
+
 export type MutationCreateChannelArgs = {
   createChannelInput: CreateChannelInput;
 };
@@ -144,6 +218,16 @@ export type MutationCreateChannelArgs = {
 
 export type MutationCreateCompanyArgs = {
   createCompanyInput: CreateCompanyInput;
+};
+
+
+export type MutationDeleteAttributeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteAttributeTypeArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -173,6 +257,18 @@ export type MutationRegisterUserArgs = {
 };
 
 
+export type MutationUpdateAttributeArgs = {
+  id: Scalars['ID']['input'];
+  updateAttributeInput: UpdateAttributeInput;
+};
+
+
+export type MutationUpdateAttributeTypeArgs = {
+  id: Scalars['ID']['input'];
+  updateAttributeTypeInput: UpdateAttributeTypeInput;
+};
+
+
 export type MutationUpdateCompanyArgs = {
   id: Scalars['ID']['input'];
   updateCompanyInput: UpdateCompanyInput;
@@ -186,11 +282,27 @@ export type MutationUpdateCompanyNoteArgs = {
 
 export type Query = {
   __typename?: 'Query';
+  attributeTypes: AttributeTypeConnection;
+  attributeValues: AttributeValueConnection;
   channelByToken?: Maybe<Channel>;
   channels: ChannelConnection;
   companies: CompanyConnection;
   company?: Maybe<Company>;
+  companyNotes?: Maybe<CompanyConnectionNotes>;
   me?: Maybe<User>;
+};
+
+
+export type QueryAttributeTypesArgs = {
+  args?: InputMaybe<ListQueryArgs>;
+};
+
+
+export type QueryAttributeValuesArgs = {
+  attributeTypeId: Scalars['ID']['input'];
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -200,6 +312,7 @@ export type QueryChannelByTokenArgs = {
 
 
 export type QueryChannelsArgs = {
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -207,6 +320,7 @@ export type QueryChannelsArgs = {
 
 export type QueryCompaniesArgs = {
   channelToken?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -214,6 +328,14 @@ export type QueryCompaniesArgs = {
 
 export type QueryCompanyArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryCompanyNotesArgs = {
+  companyId: Scalars['ID']['input'];
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type RegisterNewTenantInput = {
@@ -230,8 +352,17 @@ export type RegisterUserInput = {
   password: Scalars['String']['input'];
 };
 
+export type UpdateAttributeInput = {
+  value: Scalars['String']['input'];
+};
+
+export type UpdateAttributeTypeInput = {
+  name: Scalars['String']['input'];
+};
+
 export type UpdateCompanyInput = {
   address?: InputMaybe<Scalars['JSON']['input']>;
+  attributeIds?: InputMaybe<Array<Scalars['String']['input']>>;
   description?: InputMaybe<Scalars['String']['input']>;
   industry?: InputMaybe<Scalars['String']['input']>;
   linkedinUrl?: InputMaybe<Scalars['String']['input']>;
@@ -252,6 +383,52 @@ export type User = {
   name?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
+
+export type CreateAttributeMutationVariables = Exact<{
+  createAttributeInput: CreateAttributeInput;
+}>;
+
+
+export type CreateAttributeMutation = { __typename?: 'Mutation', createAttribute: { __typename?: 'AttributeValue', id: string, value: string, attributeTypeId: string } };
+
+export type UpdateAttributeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  updateAttributeInput: UpdateAttributeInput;
+}>;
+
+
+export type UpdateAttributeMutation = { __typename?: 'Mutation', updateAttribute: { __typename?: 'AttributeValue', id: string, value: string } };
+
+export type DeleteAttributeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteAttributeMutation = { __typename?: 'Mutation', deleteAttribute: boolean };
+
+export type CreateAttributeTypeMutationVariables = Exact<{
+  createAttributeTypeInput: CreateAttributeTypeInput;
+}>;
+
+
+export type CreateAttributeTypeMutation = { __typename?: 'Mutation', createAttributeType: { __typename?: 'AttributeType', id: string, name: string, channelToken: string, createdAt?: any | null } };
+
+export type GetAttributeTypesQueryVariables = Exact<{
+  args?: InputMaybe<ListQueryArgs>;
+}>;
+
+
+export type GetAttributeTypesQuery = { __typename?: 'Query', attributeTypes: { __typename?: 'AttributeTypeConnection', totalCount: number, items: Array<{ __typename?: 'AttributeType', id: string, name: string, channelToken: string, createdAt?: any | null }> } };
+
+export type GetAttributeValuesQueryVariables = Exact<{
+  attributeTypeId: Scalars['ID']['input'];
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetAttributeValuesQuery = { __typename?: 'Query', attributeValues: { __typename?: 'AttributeValueConnection', totalCount: number, items: Array<{ __typename?: 'AttributeValue', id: string, value: string, attributeTypeId: string }> } };
 
 export type LoginUserMutationVariables = Exact<{
   input: LoginUserInput;
@@ -342,7 +519,15 @@ export type GetCompaniesQueryVariables = Exact<{
 }>;
 
 
-export type GetCompaniesQuery = { __typename?: 'Query', companies: { __typename?: 'CompanyConnection', totalCount: number, items: Array<{ __typename?: 'Company', id: string, name: string, website?: string | null, industry?: string | null, createdAt: any }> } };
+export type GetCompaniesQuery = { __typename?: 'Query', companies: { __typename?: 'CompanyConnection', totalCount: number, items: Array<{ __typename?: 'Company', id: string, name: string, website?: string | null, industry?: string | null, description?: string | null, createdAt: any }> } };
+
+export type GetCompaniesWithAttributesQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetCompaniesWithAttributesQuery = { __typename?: 'Query', companies: { __typename?: 'CompanyConnection', totalCount: number, items: Array<{ __typename?: 'Company', id: string, address?: any | null, channelToken?: string | null, name: string, industry?: string | null, website?: string | null, createdAt: any, updatedAt: any, deletedAt?: any | null, linkedinUrl?: string | null, attributes?: Array<{ __typename?: 'AttributeWithType', id: string, attributeTypeId: string, name: string, value: string }> | null }> } };
 
 export type CompaniesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -358,12 +543,19 @@ export type GetCompanyDetailQueryVariables = Exact<{
 
 export type GetCompanyDetailQuery = { __typename?: 'Query', company?: { __typename?: 'Company', id: string, name: string, website?: string | null, industry?: string | null, linkedinUrl?: string | null, address?: any | null, description?: string | null, channelToken?: string | null, createdAt: any, updatedAt: any, notes: { __typename?: 'CompanyConnectionNotes', totalCount: number, items: Array<{ __typename?: 'CompanyNote', id: string, content: string, type?: string | null, userId: string, createdAt: any, updatedAt: any }> } } | null };
 
+export type GetCompanyWithAttributesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetCompanyWithAttributesQuery = { __typename?: 'Query', company?: { __typename?: 'Company', id: string, address?: any | null, channelToken?: string | null, name: string, industry?: string | null, website?: string | null, createdAt: any, updatedAt: any, deletedAt?: any | null, linkedinUrl?: string | null, notes: { __typename?: 'CompanyConnectionNotes', totalCount: number, items: Array<{ __typename?: 'CompanyNote', id: string, content: string, createdAt: any }> }, attributes?: Array<{ __typename?: 'AttributeWithType', id: string, attributeTypeId: string, name: string, value: string }> | null } | null };
+
 export type GetCompanyQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetCompanyQuery = { __typename?: 'Query', company?: { __typename?: 'Company', id: string, name: string, website?: string | null, channelToken?: string | null } | null };
+export type GetCompanyQuery = { __typename?: 'Query', company?: { __typename?: 'Company', address?: any | null, channelToken?: string | null, name: string, industry?: string | null, website?: string | null } | null };
 
 export type UpdateCompanyMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -382,6 +574,68 @@ export type UpdateNoteMutationVariables = Exact<{
 export type UpdateNoteMutation = { __typename?: 'Mutation', updateCompanyNote: { __typename?: 'CompanyNote', id: string, content: string } };
 
 
+export const CreateAttributeDocument = gql`
+    mutation createAttribute($createAttributeInput: CreateAttributeInput!) {
+  createAttribute(createAttributeInput: $createAttributeInput) {
+    id
+    value
+    attributeTypeId
+  }
+}
+    `;
+export const UpdateAttributeDocument = gql`
+    mutation updateAttribute($id: ID!, $updateAttributeInput: UpdateAttributeInput!) {
+  updateAttribute(id: $id, updateAttributeInput: $updateAttributeInput) {
+    id
+    value
+  }
+}
+    `;
+export const DeleteAttributeDocument = gql`
+    mutation deleteAttribute($id: ID!) {
+  deleteAttribute(id: $id)
+}
+    `;
+export const CreateAttributeTypeDocument = gql`
+    mutation createAttributeType($createAttributeTypeInput: CreateAttributeTypeInput!) {
+  createAttributeType(createAttributeTypeInput: $createAttributeTypeInput) {
+    id
+    name
+    channelToken
+    createdAt
+  }
+}
+    `;
+export const GetAttributeTypesDocument = gql`
+    query getAttributeTypes($args: ListQueryArgs) {
+  attributeTypes(args: $args) {
+    items {
+      id
+      name
+      channelToken
+      createdAt
+    }
+    totalCount
+  }
+}
+    `;
+export const GetAttributeValuesDocument = gql`
+    query getAttributeValues($attributeTypeId: ID!, $skip: Int, $take: Int, $searchQuery: String) {
+  attributeValues(
+    attributeTypeId: $attributeTypeId
+    skip: $skip
+    take: $take
+    searchQuery: $searchQuery
+  ) {
+    items {
+      id
+      value
+      attributeTypeId
+    }
+    totalCount
+  }
+}
+    `;
 export const LoginUserDocument = gql`
     mutation loginUser($input: LoginUserInput!) {
   loginUser(loginUserInput: $input) {
@@ -506,7 +760,33 @@ export const GetCompaniesDocument = gql`
       name
       website
       industry
+      description
       createdAt
+    }
+    totalCount
+  }
+}
+    `;
+export const GetCompaniesWithAttributesDocument = gql`
+    query getCompaniesWithAttributes($skip: Int, $take: Int) {
+  companies(skip: $skip, take: $take) {
+    items {
+      id
+      address
+      channelToken
+      name
+      industry
+      website
+      createdAt
+      updatedAt
+      deletedAt
+      linkedinUrl
+      attributes {
+        id
+        attributeTypeId
+        name
+        value
+      }
     }
     totalCount
   }
@@ -554,13 +834,44 @@ export const GetCompanyDetailDocument = gql`
   }
 }
     `;
+export const GetCompanyWithAttributesDocument = gql`
+    query getCompanyWithAttributes($id: ID!) {
+  company(id: $id) {
+    id
+    address
+    channelToken
+    name
+    industry
+    website
+    createdAt
+    updatedAt
+    deletedAt
+    linkedinUrl
+    notes {
+      items {
+        id
+        content
+        createdAt
+      }
+      totalCount
+    }
+    attributes {
+      id
+      attributeTypeId
+      name
+      value
+    }
+  }
+}
+    `;
 export const GetCompanyDocument = gql`
     query getCompany($id: ID!) {
   company(id: $id) {
-    id
-    name
-    website
+    address
     channelToken
+    name
+    industry
+    website
   }
 }
     `;
@@ -586,6 +897,24 @@ export const UpdateNoteDocument = gql`
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>
 export function getSdk<C>(requester: Requester<C>) {
   return {
+    createAttribute(variables: CreateAttributeMutationVariables, options?: C): Promise<CreateAttributeMutation> {
+      return requester<CreateAttributeMutation, CreateAttributeMutationVariables>(CreateAttributeDocument, variables, options) as Promise<CreateAttributeMutation>;
+    },
+    updateAttribute(variables: UpdateAttributeMutationVariables, options?: C): Promise<UpdateAttributeMutation> {
+      return requester<UpdateAttributeMutation, UpdateAttributeMutationVariables>(UpdateAttributeDocument, variables, options) as Promise<UpdateAttributeMutation>;
+    },
+    deleteAttribute(variables: DeleteAttributeMutationVariables, options?: C): Promise<DeleteAttributeMutation> {
+      return requester<DeleteAttributeMutation, DeleteAttributeMutationVariables>(DeleteAttributeDocument, variables, options) as Promise<DeleteAttributeMutation>;
+    },
+    createAttributeType(variables: CreateAttributeTypeMutationVariables, options?: C): Promise<CreateAttributeTypeMutation> {
+      return requester<CreateAttributeTypeMutation, CreateAttributeTypeMutationVariables>(CreateAttributeTypeDocument, variables, options) as Promise<CreateAttributeTypeMutation>;
+    },
+    getAttributeTypes(variables?: GetAttributeTypesQueryVariables, options?: C): Promise<GetAttributeTypesQuery> {
+      return requester<GetAttributeTypesQuery, GetAttributeTypesQueryVariables>(GetAttributeTypesDocument, variables, options) as Promise<GetAttributeTypesQuery>;
+    },
+    getAttributeValues(variables: GetAttributeValuesQueryVariables, options?: C): Promise<GetAttributeValuesQuery> {
+      return requester<GetAttributeValuesQuery, GetAttributeValuesQueryVariables>(GetAttributeValuesDocument, variables, options) as Promise<GetAttributeValuesQuery>;
+    },
     loginUser(variables: LoginUserMutationVariables, options?: C): Promise<LoginUserMutation> {
       return requester<LoginUserMutation, LoginUserMutationVariables>(LoginUserDocument, variables, options) as Promise<LoginUserMutation>;
     },
@@ -625,11 +954,17 @@ export function getSdk<C>(requester: Requester<C>) {
     getCompanies(variables?: GetCompaniesQueryVariables, options?: C): Promise<GetCompaniesQuery> {
       return requester<GetCompaniesQuery, GetCompaniesQueryVariables>(GetCompaniesDocument, variables, options) as Promise<GetCompaniesQuery>;
     },
+    getCompaniesWithAttributes(variables?: GetCompaniesWithAttributesQueryVariables, options?: C): Promise<GetCompaniesWithAttributesQuery> {
+      return requester<GetCompaniesWithAttributesQuery, GetCompaniesWithAttributesQueryVariables>(GetCompaniesWithAttributesDocument, variables, options) as Promise<GetCompaniesWithAttributesQuery>;
+    },
     companies(variables?: CompaniesQueryVariables, options?: C): Promise<CompaniesQuery> {
       return requester<CompaniesQuery, CompaniesQueryVariables>(CompaniesDocument, variables, options) as Promise<CompaniesQuery>;
     },
     getCompanyDetail(variables: GetCompanyDetailQueryVariables, options?: C): Promise<GetCompanyDetailQuery> {
       return requester<GetCompanyDetailQuery, GetCompanyDetailQueryVariables>(GetCompanyDetailDocument, variables, options) as Promise<GetCompanyDetailQuery>;
+    },
+    getCompanyWithAttributes(variables: GetCompanyWithAttributesQueryVariables, options?: C): Promise<GetCompanyWithAttributesQuery> {
+      return requester<GetCompanyWithAttributesQuery, GetCompanyWithAttributesQueryVariables>(GetCompanyWithAttributesDocument, variables, options) as Promise<GetCompanyWithAttributesQuery>;
     },
     getCompany(variables: GetCompanyQueryVariables, options?: C): Promise<GetCompanyQuery> {
       return requester<GetCompanyQuery, GetCompanyQueryVariables>(GetCompanyDocument, variables, options) as Promise<GetCompanyQuery>;

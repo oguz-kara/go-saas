@@ -8,8 +8,8 @@ export class UserEntity {
   @Field()
   email: string
 
-  @Field({ nullable: true })
-  name?: string
+  @Field(() => String, { nullable: true })
+  name?: string | null
 
   @Field(() => Date, { nullable: true })
   updatedAt?: Date
