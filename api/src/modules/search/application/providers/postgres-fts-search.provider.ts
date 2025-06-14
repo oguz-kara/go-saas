@@ -47,12 +47,10 @@ export class PostgresFtsSearchProvider implements ISearchProvider {
   }
 
   async indexCompany(company: CompanyEntity): Promise<void> {
-    console.log('company from indexCompany', company)
     return Promise.resolve()
   }
 
   async deleteCompanyFromIndex(companyId: string): Promise<void> {
-    console.log('company from deleteCompanyFromIndex', companyId)
     return Promise.resolve()
   }
 }

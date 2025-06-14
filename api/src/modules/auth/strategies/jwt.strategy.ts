@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config'
 export interface JwtPayload {
   sub: string
   email: string
+  name: string
   jti?: string
   exp?: number
   channelToken?: string

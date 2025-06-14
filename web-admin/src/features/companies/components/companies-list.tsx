@@ -1,9 +1,9 @@
 // src/features/companies/components/companies-list.tsx
-import { GetCompaniesQuery } from '@gocrm/graphql/generated/hooks'
+import { GetCompaniesWithAttributesQuery } from '@gocrm/graphql/generated/sdk'
 import { CompaniesTable } from './companies-table'
 import { CompanyCard } from './company-card'
 
-type CompanyItem = GetCompaniesQuery['companies']['items'][0]
+type CompanyItem = GetCompaniesWithAttributesQuery['companies']['items'][0]
 
 interface CompaniesListProps {
   companies: CompanyItem[]

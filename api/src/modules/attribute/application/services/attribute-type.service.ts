@@ -4,8 +4,6 @@ import {
   InternalServerErrorException,
   Logger,
   UnauthorizedException,
-  ConflictException,
-  NotFoundException,
 } from '@nestjs/common'
 import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import { RequestContext } from 'src/common/request-context/request-context'
@@ -13,6 +11,15 @@ import { CreateAttributeTypeInput } from '../../api/graphql/dto/create-attribute
 import { UpdateAttributeTypeInput } from '../../api/graphql/dto/update-attribute-type.input'
 import { Prisma } from '@prisma/client'
 import { ListQueryArgs } from 'src/common/graphql/dto/list-query.args'
+import {
+  AttributeTypeNotFoundError,
+  AttributeTypeHasValuesError,
+  AttributeTypeAlreadyExistsError,
+} from 'src/modules/attribute/domain/exceptions'
+import {
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_SIZE,
+} from 'src/common/constants/default-pagination-values'
 
 @Injectable()
 export class AttributeTypeService {
@@ -24,6 +31,24 @@ export class AttributeTypeService {
     const { channel } = ctx
     if (!channel.token) {
       throw new UnauthorizedException('Channel could not be identified.')
+    }
+
+    const isAttributeTypeWasDeleted = await this.prisma.attributeType.findFirst(
+      {
+        where: {
+          name: input.name,
+          channelToken: channel.token,
+          deletedAt: { not: null },
+        },
+      },
+    )
+
+    if (isAttributeTypeWasDeleted) {
+      await this.prisma.attributeType.update({
+        where: { id: isAttributeTypeWasDeleted.id },
+        data: { deletedAt: null, name: input.name },
+      })
+      return isAttributeTypeWasDeleted
     }
 
     try {
@@ -38,9 +63,7 @@ export class AttributeTypeService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new ConflictException(
-          `Attribute type with name "${input.name}" already exists in this channel.`,
-        )
+        throw new AttributeTypeAlreadyExistsError(input.name)
       }
       this.logger.error(
         `Failed to create attribute type: ${error.message}`,
@@ -57,10 +80,17 @@ export class AttributeTypeService {
       throw new UnauthorizedException('Channel could not be identified.')
     }
 
-    const { skip = 0, take = 10, searchQuery } = args
+    console.log({ args })
+
+    const {
+      skip = DEFAULT_PAGE,
+      take = DEFAULT_PAGE_SIZE,
+      searchQuery,
+    } = args || {}
 
     const whereClause: Prisma.AttributeTypeWhereInput = {
       channelToken: channel.token,
+      deletedAt: null,
     }
 
     if (searchQuery) {
@@ -69,6 +99,8 @@ export class AttributeTypeService {
         mode: 'insensitive',
       }
     }
+
+    console.log({ whereClause })
 
     const [totalCount, items] = await this.prisma.$transaction([
       this.prisma.attributeType.count({ where: whereClause }),
@@ -97,7 +129,7 @@ export class AttributeTypeService {
       where: { id, channelToken: channel.token, deletedAt: null },
     })
     if (!existingType) {
-      throw new NotFoundException(`Attribute type with ID "${id}" not found.`)
+      throw new AttributeTypeNotFoundError(id)
     }
 
     try {
@@ -110,9 +142,7 @@ export class AttributeTypeService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new ConflictException(
-          `Another attribute type with name "${input.name}" already exists.`,
-        )
+        throw new AttributeTypeAlreadyExistsError(input.name)
       }
       this.logger.error(
         `Failed to update attribute type ${id}: ${error.message}`,
@@ -134,13 +164,11 @@ export class AttributeTypeService {
     })
 
     if (!existingType) {
-      throw new NotFoundException(`Attribute type with ID "${id}" not found.`)
+      throw new AttributeTypeNotFoundError(id)
     }
 
     if (existingType._count.values > 0) {
-      throw new ConflictException(
-        `Cannot delete attribute type "${existingType.name}" because it has associated values.`,
-      )
+      throw new AttributeTypeHasValuesError(existingType.name)
     }
 
     await this.prisma.attributeType.update({

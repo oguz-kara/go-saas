@@ -1,8 +1,12 @@
 import { gql } from '@apollo/client'
 
 export const GetCompaniesWithAttributesQuery = gql`
-  query getCompaniesWithAttributes($skip: Int, $take: Int) {
-    companies(skip: $skip, take: $take) {
+  query getCompaniesWithAttributes(
+    $skip: Int
+    $take: Int
+    $filters: [AttributeFilterInput!]
+  ) {
+    companies(skip: $skip, take: $take, filters: $filters) {
       items {
         id
         address

@@ -1,7 +1,7 @@
-import { Building2, Waypoints, LayoutDashboard } from 'lucide-react'
+import { Building2, ListChecks, LayoutDashboard } from 'lucide-react'
 
 export const navigationHierarchy = [
   { href: '/companies', label: 'CRM Dashboard', icon: LayoutDashboard },
   { href: '/companies', label: 'Şirketler', icon: Building2 },
-  { href: '/channels', label: 'Kanallar', icon: Waypoints },
+  { href: '/settings/attributes', label: 'Özellikler', icon: ListChecks },
 ]

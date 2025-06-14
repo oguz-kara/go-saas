@@ -1,35 +1,64 @@
+// Enums
+enum AttributeTypeKind {
+  TEXT
+  SELECT
+  MULTI_SELECT
+  HIERARCHICAL
+}
+
+// Models
 model AttributeType {
-  id           String  @id @default(cuid())
-  name         String // Örn: "Sektör", "Müşteri Durumu", "Proje Tipi"
-  channelToken String // Bu tipin hangi tenanta ait olduğu
-  channel      Channel @relation(fields: [channelToken], references: [token])
+  // Primary Key
+  id String @id @default(cuid())
 
-  // Bu tipe ait değerler (örn: "Yazılım", "Teknoloji"...)
-  values AttributeValue[]
+  // Basic Fields
+  name            String
+  code            String
+  kind            AttributeTypeKind
+  isSystemDefined Boolean           @default(false)
 
+  // Relations
+  channelToken String
+  channel      Channel          @relation(fields: [channelToken], references: [token])
+  values       AttributeValue[]
+
+  // Timestamps
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  @@unique([name, channelToken]) // Tip adı, bir tenant içinde benzersiz olmalı
+  // Constraints
+  @@unique([name, channelToken])
+  @@unique([code, channelToken])
 }
 
 model AttributeValue {
-  id    String @id @default(cuid())
-  value String // Değerin kendisi (örn: "Yazılım")
+  // Primary Key
+  id String @id @default(cuid())
 
+  // Basic Fields
+  value String
+  code  String
+
+  // Relations
   attributeTypeId String
   type            AttributeType @relation(fields: [attributeTypeId], references: [id], onDelete: Cascade)
+  channelToken    String
+  channel         Channel       @relation(fields: [channelToken], references: [token])
+  companies       Company[]
 
-  channelToken String
-  channel      Channel @relation(fields: [channelToken], references: [token])
+  // Hierarchical Relations
+  parentId String? // Parent value ID (e.g., Turkey's ID for Izmir)
+  parent   AttributeValue?  @relation("AttributeHierarchy", fields: [parentId], references: [id], onDelete: NoAction)
+  children AttributeValue[] @relation("AttributeHierarchy")
 
-  companies Company[] // Bu değere sahip şirketler
-
+  // Timestamps
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  @@unique([value, attributeTypeId]) // Bir değer, kendi tipi içinde benzersiz olmalı
+  // Constraints
+  @@unique([value, attributeTypeId])
+  @@unique([code, attributeTypeId])
   @@index([attributeTypeId])
 }

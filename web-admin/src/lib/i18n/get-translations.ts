@@ -9,7 +9,6 @@ export const getTranslations = async (
   locale?: string,
 ): Promise<Translations> => {
   await Promise.resolve()
-  console.log('locale', locale)
 
   return dictionaries.tr
 }

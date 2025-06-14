@@ -285,13 +285,10 @@ describe('CompanyService', () => {
       const mockFilteredCompanies = mockCompaniesList.filter(
         (c) => c.channelToken === specificArgChannelToken,
       )
-      console.log('mockFilteredCompanies', mockFilteredCompanies)
 
       const result = await service.getCompanies(mockRequestContext, {
         channelToken: specificArgChannelToken,
       })
-
-      console.log('result', result)
 
       prisma.company.findMany.mockResolvedValue(mockFilteredCompanies as any[])
       prisma.company.count.mockResolvedValue(mockFilteredCompanies.length)
@@ -401,11 +398,9 @@ describe('CompanyService', () => {
         c.name.toLowerCase().includes(searchQuery.toLowerCase()),
       )
 
-      const result = await service.getCompanies(mockRequestContext, {
+      await service.getCompanies(mockRequestContext, {
         searchQuery,
       })
-
-      console.log('result', result)
 
       prisma.company.findMany.mockResolvedValue(filteredByName as any[])
       prisma.company.count.mockResolvedValue(filteredByName.length)

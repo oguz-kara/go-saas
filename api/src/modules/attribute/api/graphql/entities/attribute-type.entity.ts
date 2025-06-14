@@ -14,4 +14,7 @@ export class AttributeTypeEntity {
 
   @Field({ nullable: true })
   createdAt: Date
+
+  @Field({ nullable: true })
+  updatedAt: Date
 }

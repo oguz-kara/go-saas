@@ -41,8 +41,6 @@ export const EditCompanyDialog = ({
     onCompleted: () => {
       toast.success(translations?.editCompanyDialog.successToast)
       setIsOpen(false)
-      // Değişikliklerin hem liste hem de detay sayfasında görünmesi için
-      // Server Component'i yeniden veri çekmeye zorluyoruz.
       router.refresh()
     },
     onError: (error) => {
@@ -53,8 +51,6 @@ export const EditCompanyDialog = ({
   })
 
   const handleSubmit = (values: CompanyFormValues) => {
-    // Önemli: Formdan gelen değerlerle `updateCompanyInput`'u oluşturuyoruz.
-    // Şimdilik temel alanları içeriyor, Attribute'ları bir sonraki adımda ekleyeceğiz.
     updateCompany({
       variables: {
         id: company.id,
@@ -86,7 +82,10 @@ export const EditCompanyDialog = ({
           {translations?.editCompanyDialog.triggerButton}
         </TriggerComponent>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        aria-describedby={translations?.editCompanyDialog.description}
+      >
         <DialogHeader>
           <DialogTitle>{translations?.editCompanyDialog.title}</DialogTitle>
           <DialogDescription>

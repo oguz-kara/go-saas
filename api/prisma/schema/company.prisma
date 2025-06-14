@@ -1,4 +1,11 @@
-// schema.prisma
+
+enum CompanyNoteType {
+  GENERAL
+  MEETING
+  CALL
+  FOLLOW_UP
+}
+
 model Company {
   id          String   @id @default(cuid())
   name        String
@@ -22,7 +29,7 @@ model Company {
 model CompanyNote {
   id        String   @id @default(cuid())
   content   String
-  type      String?
+  type      CompanyNoteType?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

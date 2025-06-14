@@ -22,6 +22,7 @@ export const Ctx = createParamDecorator(
       jwtPayload = {
         sub: user.id,
         email: user.email,
+        name: user.name,
         jti: user.jti,
         exp: user.exp,
       }
@@ -30,6 +31,11 @@ export const Ctx = createParamDecorator(
       jwtPayload,
       channel: {
         token: user?.channelToken || undefined,
+      },
+      user: {
+        id: user?.id,
+        email: user?.email,
+        name: user?.name,
       },
     })
   },

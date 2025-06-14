@@ -1,7 +1,7 @@
 // src/lib/auth/with-auth-protection.ts
 import 'server-only'
 import { redirect } from 'next/navigation'
-import { AuthError } from '@gocrm/lib/errors/auth-error'
+import { AuthError } from '@gocrm/lib/errors/errors/auth-error'
 
 export async function withAuthProtection<T>(
   dataFetcher: () => Promise<T>,

@@ -4,4 +4,5 @@ export const routes: Routes = {
   home: '/',
   companies: '/companies',
   channels: '/channels',
+  attributes: '/settings/attributes',
 }

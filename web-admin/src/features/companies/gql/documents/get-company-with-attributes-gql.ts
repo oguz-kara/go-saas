@@ -13,14 +13,6 @@ export const getCompanyWithAttributesQuery = gql`
       updatedAt
       deletedAt
       linkedinUrl
-      notes {
-        items {
-          id
-          content
-          createdAt
-        }
-        totalCount
-      }
       attributes {
         id
         attributeTypeId

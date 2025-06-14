@@ -7,7 +7,7 @@ import { getToken } from 'next-auth/jwt'
 import { headers as getHeaders } from 'next/headers'
 import { NextRequest } from 'next/server'
 import { OperationVariables } from '@apollo/client'
-import { AuthError } from '@gocrm/lib/errors/auth-error'
+import { AuthError } from '@gocrm/lib/errors/errors/auth-error'
 import { GraphQLError } from '@gocrm/types/graphql-error.type'
 
 const requester = async <TData, TVariables extends OperationVariables>(

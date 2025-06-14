@@ -72,7 +72,10 @@ export const CreateCompanyDialog = ({
       <DialogTrigger asChild>
         <Button>{translations?.createCompanyDialog.triggerButton}</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        aria-describedby={translations?.createCompanyDialog.description}
+      >
         <DialogHeader>
           <DialogTitle>{translations?.createCompanyDialog.title}</DialogTitle>
           <DialogDescription>

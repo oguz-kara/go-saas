@@ -1,6 +1,13 @@
 // src/modules/company-note/api/graphql/dto/add-company-note.input.ts
 import { InputType, Field } from '@nestjs/graphql'
-import { IsNotEmpty, IsString, MaxLength, IsOptional } from 'class-validator'
+import { CompanyNoteType } from '@prisma/client'
+import {
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  IsOptional,
+  IsEnum,
+} from 'class-validator'
 
 @InputType()
 export class AddCompanyNoteInput {
@@ -11,7 +18,7 @@ export class AddCompanyNoteInput {
 
   @Field(() => String, { nullable: true })
   @IsOptional()
-  @IsString()
+  @IsEnum(CompanyNoteType)
   @MaxLength(50)
-  type?: string
+  type?: CompanyNoteType
 }

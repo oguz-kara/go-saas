@@ -3,6 +3,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { SeedUsersSeeder } from './seed-users.seeder'
 import { SeedCompaniesSeeder } from './seed-companies.seeder'
 import { SeedChannelSeeder } from './seed-channel.seeder'
+import { Command } from 'nestjs-command'
 
 @Injectable()
 export class MainSeeder {
@@ -14,6 +15,11 @@ export class MainSeeder {
     private readonly channelSeeder: SeedChannelSeeder,
   ) {}
 
+  @Command({
+    command: 'seed:all',
+    describe:
+      'Seeds the database with initial all like users, companies, channels, etc.',
+  })
   async runAll() {
     this.logger.log('--- STARTING ALL SEEDERS ---')
 

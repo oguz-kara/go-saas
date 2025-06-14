@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql'
+import { CompanyNoteType } from '../enums/company-note-type.enum'
 
 @ObjectType('CompanyNote')
 export class CompanyNoteEntity {
@@ -8,8 +9,8 @@ export class CompanyNoteEntity {
   @Field()
   content: string
 
-  @Field({ nullable: true })
-  type?: string
+  @Field(() => CompanyNoteType, { nullable: true })
+  type?: CompanyNoteType
 
   @Field()
   createdAt: Date

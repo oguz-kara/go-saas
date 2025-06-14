@@ -7,11 +7,17 @@ input AddCompanyNoteInput {
   type: String
 }
 
+input AttributeFilterInput {
+  attributeTypeId: ID!
+  valueIds: [ID!]!
+}
+
 type AttributeType {
   channelToken: String!
   createdAt: DateTime
   id: ID!
   name: String!
+  updatedAt: DateTime
 }
 
 type AttributeTypeConnection {
@@ -22,7 +28,7 @@ type AttributeTypeConnection {
 type AttributeValue {
   attributeTypeId: ID!
   id: ID!
-  type: AttributeType!
+  type: AttributeType
   value: String!
 }
 
@@ -98,9 +104,16 @@ type CompanyNote {
   content: String!
   createdAt: DateTime!
   id: ID!
-  type: String
+  type: CompanyNoteType
   updatedAt: DateTime!
   userId: ID!
+}
+
+enum CompanyNoteType {
+  CALL
+  FOLLOW_UP
+  GENERAL
+  MEETING
 }
 
 input CreateAttributeInput {
@@ -205,6 +218,7 @@ type Query {
   ): ChannelConnection!
   companies(
     channelToken: ID
+    filters: [AttributeFilterInput!]
 
     """Search query"""
     searchQuery: String

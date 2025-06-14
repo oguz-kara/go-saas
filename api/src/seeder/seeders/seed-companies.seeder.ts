@@ -19,6 +19,7 @@ export class SeedCompaniesSeeder {
 
     const existingCompanies = await this.prisma.company.findMany({
       where: {
+        deletedAt: null,
         OR: companiesToSeed.map((company) => ({
           name: company.name,
           channelToken: company.channelToken,

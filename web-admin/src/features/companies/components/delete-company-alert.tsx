@@ -12,24 +12,26 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@gocrm/components/ui/alert-dialog'
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-} from '@gocrm/components/ui/dropdown-menu'
 import { useTranslations } from '@gocrm/hooks/use-translations'
 import { useDeleteCompanyMutation } from '@gocrm/graphql/generated/hooks'
 import { GetCompaniesQuery } from '@gocrm/features/companies/gql/documents/get-companies-query-gql'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface DeleteCompanyAlertProps {
   companyId: string
+  children: React.ReactNode
 }
 
-export const DeleteCompanyAlert = ({ companyId }: DeleteCompanyAlertProps) => {
+export const DeleteCompanyAlert = ({
+  companyId,
+  children,
+}: DeleteCompanyAlertProps) => {
   const { translations } = useTranslations()
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
 
   const [deleteCompany, { loading }] = useDeleteCompanyMutation({
     onCompleted: () => {
@@ -44,19 +46,14 @@ export const DeleteCompanyAlert = ({ companyId }: DeleteCompanyAlertProps) => {
     refetchQueries: [{ query: GetCompaniesQuery }],
   })
 
-  const handleDelete = () => {
-    deleteCompany({ variables: { id: companyId } })
+  const handleDelete = async () => {
+    await deleteCompany({ variables: { id: companyId } })
+    router.refresh()
   }
 
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-      <AlertDialogTrigger asChild>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            {translations?.deleteCompanyAlert.triggerButton}
-          </DropdownMenuTrigger>
-        </DropdownMenu>
-      </AlertDialogTrigger>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>

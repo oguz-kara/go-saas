@@ -10,6 +10,7 @@ import { CreateCompanyInput } from '../../api/graphql/dto/create-company.input'
 import { Prisma } from '@prisma/client'
 import { CompanyNotFoundError } from '../../domain/exceptions/company-not-found.exception'
 import { UpdateCompanyInput } from '../../api/graphql/dto/update-company.input'
+import { AttributeFilterInput } from '../../api/graphql/dto/attribute-filter.input'
 
 @Injectable()
 export class CompanyService {
@@ -77,17 +78,20 @@ export class CompanyService {
       take?: number
       searchQuery?: string
       channelToken?: string
+      filters?: AttributeFilterInput[]
     },
   ): Promise<{ items: CompanyEntity[]; totalCount: number }> {
     const { user, channel } = ctx
-    const { skip = 0, take = 10, searchQuery, channelToken } = args
+    const { skip = 0, take = 10, searchQuery, channelToken, filters } = args
     const ct = channelToken ? channelToken : channel.token
 
     this.logger.log(
       `User ${user?.id} fetching companies with args: ${JSON.stringify(args)}`,
     )
 
-    const whereClause: any = {}
+    const whereClause: any = {
+      deletedAt: null,
+    }
 
     if (ct) {
       whereClause.channelToken = ct
@@ -98,6 +102,17 @@ export class CompanyService {
         { name: { contains: searchQuery, mode: 'insensitive' } },
         { description: { contains: searchQuery, mode: 'insensitive' } },
       ]
+    }
+
+    if (filters && filters.length > 0) {
+      whereClause.AND = filters.map((filter) => ({
+        attributes: {
+          some: {
+            id: { in: filter.valueIds },
+            attributeTypeId: filter.attributeTypeId,
+          },
+        },
+      }))
     }
 
     try {

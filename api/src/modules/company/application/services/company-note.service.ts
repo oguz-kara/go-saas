@@ -9,7 +9,7 @@ import { RequestContext } from 'src/common/request-context/request-context'
 import { CompanyNoteEntity } from 'src/modules/company/api/graphql/entities/company-note.entity'
 
 import { CompanyNotFoundError } from 'src/modules/company/domain/exceptions/company-not-found.exception'
-import { Prisma } from '@prisma/client'
+import { CompanyNoteType, Prisma } from '@prisma/client'
 import { AddCompanyNoteInput } from '../../api/graphql/dto/add-company-note.input'
 import { UpdateCompanyNoteInput } from '../../api/graphql/dto/update-company-note.input'
 import { CompanyNoteNotFoundError } from '../../domain/exceptions/company-note-not-found.exception'
@@ -27,6 +27,8 @@ export class CompanyNoteService {
     channelToken?: string,
   ): Promise<CompanyNoteEntity> {
     const { user, channel } = ctx
+
+    console.log('user', user)
 
     const ct = channelToken ? channelToken : channel.token
 
@@ -56,7 +58,8 @@ export class CompanyNoteService {
 
       const newNote = await this.prisma.companyNote.create({
         data: {
-          ...input,
+          content: input.content,
+          type: input.type as CompanyNoteType,
           channelToken: ct as string,
           companyId,
           userId,
@@ -94,7 +97,9 @@ export class CompanyNoteService {
       'getNotesForCompany',
     )
 
-    const whereClause: any = {}
+    const whereClause: Prisma.CompanyNoteWhereInput = {
+      userId: user?.id,
+    }
 
     if (ct) {
       whereClause.channelToken = ct
@@ -102,7 +107,6 @@ export class CompanyNoteService {
 
     if (searchQuery) {
       whereClause.OR = [
-        { title: { contains: searchQuery, mode: 'insensitive' } },
         { content: { contains: searchQuery, mode: 'insensitive' } },
       ]
     }
@@ -180,7 +184,8 @@ export class CompanyNoteService {
       const updatedNote = await this.prisma.companyNote.update({
         where: { id: noteId, channelToken: ct },
         data: {
-          ...input,
+          content: input.content,
+          type: input.type as CompanyNoteType,
         },
       })
       return updatedNote as CompanyNoteEntity

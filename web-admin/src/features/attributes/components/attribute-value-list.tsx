@@ -165,13 +165,13 @@ export const AttributeValueList = ({
                       onClick={() =>
                         setEditingValue({ id: val.id, text: val.value })
                       }
-                      className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="ml-2 md:opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Pencil className="h-3 w-3" />
                     </button>
                     <button
                       onClick={() => deleteValue({ variables: { id: val.id } })}
-                      className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="ml-1 md:opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X className="h-3 w-3 text-red-500" />
                     </button>

@@ -8,10 +8,10 @@ export class AttributeValueEntity {
   id: string
 
   @Field()
-  value: string // Değerin kendisi, örn: "Yazılım"
+  value: string
 
-  @Field(() => AttributeTypeEntity) // Hangi tipe ait olduğunu da döndürebiliriz
-  type: AttributeTypeEntity
+  @Field(() => AttributeTypeEntity, { nullable: true })
+  type?: AttributeTypeEntity
 
   @Field(() => ID)
   attributeTypeId: string

@@ -131,12 +131,27 @@ export class AttributeService {
       where: {
         id: attributeTypeId,
         channelToken: channel.token,
-        deletedAt: null,
       },
     })
     if (!attributeTypeExists) {
       throw new NotFoundException(
         `Attribute type with ID "${attributeTypeId}" not found in this channel.`,
+      )
+    }
+
+    const isAttributeExists = await this.prisma.attributeValue.findFirst({
+      where: {
+        value,
+        attributeTypeId,
+        channelToken: channel.token,
+      },
+    })
+
+    this.logger.log('isAttributeExists', isAttributeExists)
+
+    if (isAttributeExists) {
+      this.logger.log(
+        `Attribute value "${value}" already exists for this attribute type.`,
       )
     }
 
@@ -146,16 +161,34 @@ export class AttributeService {
     )
 
     try {
-      const newValue = await this.prisma.attributeValue.create({
-        data: {
-          value,
-          attributeTypeId,
-          channelToken: channel.token,
-        },
-        include: { type: true },
-      })
-      return newValue as AttributeValueEntity
+      if (isAttributeExists) {
+        const newValue = await this.prisma.attributeValue.update({
+          where: {
+            id: isAttributeExists.id,
+            value: value,
+          },
+          data: {
+            value,
+            deletedAt: null,
+            attributeTypeId,
+            channelToken: channel.token,
+          },
+        })
+
+        return { ...newValue }
+      } else {
+        const newValue = await this.prisma.attributeValue.create({
+          data: {
+            value,
+            attributeTypeId,
+            channelToken: channel.token,
+          },
+        })
+
+        return { ...newValue }
+      }
     } catch (error) {
+      this.logger.error('error', error)
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'

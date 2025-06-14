@@ -8,23 +8,31 @@ import {
   CardTitle,
 } from '@gocrm/components/ui/card'
 import { Button } from '@gocrm/components/ui/button'
-import { ArrowLeft, Building, Globe, Linkedin } from 'lucide-react'
-import { AddNoteDialog } from './add-note-dialog'
+import { ArrowLeft, Building, Globe, Linkedin, Trash2 } from 'lucide-react'
 import { EditCompanyDialog } from './edit-company-dialog'
 import { DeleteCompanyAlert } from './delete-company-alert'
 
-import type { GetCompanyWithAttributesQuery } from '@gocrm/graphql/generated/sdk'
 import type { Translations } from '@gocrm/lib/i18n/tr'
+import {
+  CompanyNote,
+  GetCompanyWithAttributesAndNotesQuery,
+} from '@gocrm/graphql/generated/hooks'
+import { CompanyNotesSection } from './company-notes-section'
 
-type Company = NonNullable<GetCompanyWithAttributesQuery['company']>
+type Company = NonNullable<GetCompanyWithAttributesAndNotesQuery['company']>
+type CompanyNotes = NonNullable<
+  GetCompanyWithAttributesAndNotesQuery['companyNotes']
+>
 
 interface CompanyDetailViewProps {
   company: Company
+  companyNotes: CompanyNotes
   translations: Translations
 }
 
 export const CompanyDetailView = ({
   company,
+  companyNotes,
   translations,
 }: CompanyDetailViewProps) => {
   const router = useRouter()
@@ -42,8 +50,12 @@ export const CompanyDetailView = ({
         <div className="flex flex-wrap gap-2">
           {/* Edit ve Delete dialogları artık burada render edilecek */}
           <EditCompanyDialog company={company} asMenuItem={false} />
-          <DeleteCompanyAlert companyId={company.id} />
-          <AddNoteDialog companyId={company.id} />
+          <DeleteCompanyAlert companyId={company.id}>
+            <Button variant="outline">
+              <Trash2 className="mr-2 h-4 w-4" />
+              {translations.companyDetailPage.deleteCompany}
+            </Button>
+          </DeleteCompanyAlert>
         </div>
       </div>
 
@@ -90,37 +102,11 @@ export const CompanyDetailView = ({
         </Card>
       </div>
 
-      {/* Notlar Bölümü */}
-      <div>
-        <h2 className="text-xl font-semibold">
-          {translations.companyDetailPage.notesTitle} (
-          {company.notes?.totalCount || 0})
-        </h2>
-        <div className="mt-4 space-y-4">
-          {company.notes && company.notes.items.length > 0 ? (
-            company.notes.items.map((note) => (
-              <Card key={note.id}>
-                <CardHeader className="p-4">
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(note.createdAt).toLocaleString('tr-TR', {
-                      dateStyle: 'long',
-                      timeStyle: 'short',
-                    })}
-                  </p>
-                </CardHeader>
-                <CardContent className="p-4 pt-0">{note.content}</CardContent>
-              </Card>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              {translations.companiesPage.noCompaniesFound.replace(
-                'Şirket',
-                'Not',
-              )}
-            </p>
-          )}
-        </div>
-      </div>
+      <CompanyNotesSection
+        companyId={company.id}
+        notes={companyNotes.items as CompanyNote[]}
+        totalCount={companyNotes.totalCount}
+      />
     </div>
   )
 }

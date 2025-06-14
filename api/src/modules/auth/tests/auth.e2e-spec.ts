@@ -279,7 +279,6 @@ describe('AuthResolver (E2E)', () => {
           variables: { input, token: channel.token },
         })
 
-      console.log(JSON.stringify(response.body, null, 2))
 
       // ASSERT
       expect(response.status).toBe(200)

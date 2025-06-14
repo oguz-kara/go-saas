@@ -8,6 +8,13 @@ export const tr: TwoLevelTranslations = {
     noCompaniesFound: 'Şirket bulunamadı.',
     errorTitle: 'Şirketler Yüklenirken Hata Oluştu',
     errorDescription: 'Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin.',
+    noFiltersFound: 'Hiç filtre bulunamadı.',
+    noFiltersFoundDescription:
+      'Henüz bir filtre oluşturulmamış. Lütfen özelliklerinize göre filtreler oluşturun.',
+    createFilterButton: 'Filtre Oluştur',
+    openFiltersButton: 'Filtreleri Aç',
+    filterDescription:
+      'Şirketlerinizi gruplamak için kullanacağınız özel filtreleri ve etiketleri yönetin.',
   },
   companiesTable: {
     headerName: 'İsim',
@@ -73,13 +80,21 @@ export const tr: TwoLevelTranslations = {
   addNoteDialog: {
     title: 'Yeni Not Ekle',
     description: 'Bu şirket için yeni bir not oluşturun.',
+    typeLabel: 'Not Tipi',
+    typePlaceholder: 'Bir tip seçin...',
+    contentLabel: 'Not İçeriği',
+    contentPlaceholder: 'Notunuzu buraya yazın...',
     successToast: 'Not başarıyla eklendi!',
     errorToast: 'Not eklenirken bir hata oluştu.',
   },
   noteCard: {
     authorLabel: 'Yazar',
-    typeLabel: 'Tür',
+    typeLabel: 'Not Tipi',
     lastUpdatedLabel: 'Son Güncelleme',
+    editButton: 'Düzenle',
+    deleteButton: 'Sil',
+    deleteConfirmTitle: 'Notu Silmek İstediğinizden Emin misiniz?',
+    deleteConfirmDescription: 'Bu işlem geri alınamaz.',
   },
   loginPage: {
     title: 'Giriş Yap',
@@ -132,6 +147,44 @@ export const tr: TwoLevelTranslations = {
     deleteTypeConfirmTitle: 'Özellik Tipini Sil?',
     deleteTypeConfirmDescription:
       'Bu işlem geri alınamaz. Bu tipe bağlı tüm değerler de silinecektir.',
+  },
+  sidebar: {
+    description:
+      'Şirketlerinizi ve müşterilerinizi yönetmek için ana navigasyon menüsü',
+  },
+
+  exceptionMessages: {
+    EMAIL_ALREADY_EXISTS_EXCEPTION: 'Bu e-posta adresi zaten kayıtlı.',
+    USER_NOT_FOUND_EXCEPTION: 'Kullanıcı bulunamadı.',
+    INVALID_CREDENTIALS_EXCEPTION: 'Girdiğiniz bilgiler geçersiz.',
+    COMPANY_NOT_FOUND_EXCEPTION: 'Belirtilen şirket bulunamadı.',
+    MISSING_TOKEN_CLAIM_EXCEPTION:
+      'Kimlik doğrulama belirteci gerekli bilgileri içermiyor.',
+    COMPANY_NOTE_NOT_FOUND_EXCEPTION: 'İstenen şirket notu bulunamadı.',
+    ACCESS_DENIED_EXCEPTION: 'Bu işlemi gerçekleştirmek için yetkiniz yok.',
+    ATTRIBUTE_TYPE_NOT_FOUND_EXCEPTION: 'Belirtilen özellik tipi bulunamadı.',
+    ATTRIBUTE_TYPE_HAS_VALUES_EXCEPTION:
+      'Bu özellik tipi ilişkili değerlere sahip olduğu için silinemez.',
+    ATTRIBUTE_TYPE_ALREADY_EXISTS_EXCEPTION:
+      'Bu isimde bir özellik tipi zaten mevcut.',
+  },
+  editNoteDialog: {
+    title: 'Notu Düzenle',
+    successToast: 'Not başarıyla güncellendi.',
+    submitButton: 'Güncelle',
+  },
+  noteCardDialog: {
+    title: 'Notu Silmek İstediğinizden Emin misiniz?',
+    description: 'Bu işlem geri alınamaz.',
+    cancelButton: 'İptal',
+    confirmButton: 'Evet, Sil',
+    successToast: 'Not başarıyla silindi.',
+  },
+  header: {
+    openNavigation: 'Navigasyonu Aç',
+    settings: 'Ayarlar',
+    signOut: 'Çıkış Yap',
+    signingOut: 'Çıkış Yapılıyor...',
   },
 }
 

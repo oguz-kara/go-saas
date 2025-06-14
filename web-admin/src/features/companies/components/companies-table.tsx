@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@gocrm/components/ui/table'
-import { GetCompaniesQuery } from '@gocrm/graphql/generated/hooks'
+import { GetCompaniesWithAttributesQuery } from '@gocrm/graphql/generated/sdk'
 import { useTranslations } from '@gocrm/hooks/use-translations'
 import { MoreHorizontal } from 'lucide-react'
 
@@ -24,7 +24,7 @@ import { EditCompanyDialog } from './edit-company-dialog'
 import { DeleteCompanyAlert } from './delete-company-alert'
 import Link from '@gocrm/components/common/link'
 
-type CompanyItem = GetCompaniesQuery['companies']['items'][0]
+type CompanyItem = GetCompaniesWithAttributesQuery['companies']['items'][0]
 
 interface CompaniesTableProps {
   companies: CompanyItem[]
@@ -35,7 +35,6 @@ export const CompaniesTable = ({
   companies,
   pageInfo,
 }: CompaniesTableProps) => {
-  console.log(pageInfo)
   const { translations } = useTranslations()
 
   return (
@@ -101,10 +100,16 @@ export const CompaniesTable = ({
                         {translations?.companiesTable.actionsLabel}
                       </DropdownMenuLabel>
                       <EditCompanyDialog company={company} asMenuItem={true} />
-                      <DropdownMenuItem className="text-red-600">
-                        {translations?.companiesTable.actionDelete}
-                      </DropdownMenuItem>
-                      <DeleteCompanyAlert companyId={company.id} />
+                      <DeleteCompanyAlert companyId={company.id}>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onSelect={(e) => {
+                            e.preventDefault()
+                          }}
+                        >
+                          {translations?.companiesTable.actionDelete}
+                        </DropdownMenuItem>
+                      </DeleteCompanyAlert>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

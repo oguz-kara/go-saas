@@ -35,7 +35,6 @@ export const CompanyForm = ({
   isSubmitting,
   initialValues,
 }: CompanyFormProps) => {
-  console.log({ initialValues })
   const { translations } = useTranslations()
   const formSchema = createCompanyFormSchema(translations?.companyForm ?? {})
 
@@ -60,12 +59,6 @@ export const CompanyForm = ({
       },
     })
   const attributeTypes = attributeTypesData?.attributeTypes.items || []
-
-  useEffect(() => {
-    if (attributeTypesData) {
-      console.log({ attributeTypesData })
-    }
-  }, [attributeTypesData])
 
   return (
     <Form {...form}>
