@@ -1,4 +1,4 @@
-
+// Enums
 enum CompanyNoteType {
   GENERAL
   MEETING
@@ -6,33 +6,44 @@ enum CompanyNoteType {
   FOLLOW_UP
 }
 
+// Models
 model Company {
-  id          String   @id @default(cuid())
+  // Primary Key
+  id String @id @default(cuid())
+
+  // Basic Fields
   name        String
   website     String?
   industry    String?
   linkedinUrl String?
   address     Json?
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
+  // Relations
   channelToken String?
   channel      Channel? @relation(fields: [channelToken], references: [token], onDelete: Restrict)
 
-  deletedAt DateTime?
+  // Attribute System Relations
+  attributeAssignments AttributeAssignment[]
 
-  attributes AttributeValue[]
-  notes      CompanyNote[]
+  // Note Relations
+  notes CompanyNote[]
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model CompanyNote {
-  id        String   @id @default(cuid())
-  content   String
-  type      CompanyNoteType?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Primary Key
+  id String @id @default(cuid())
 
+  // Basic Fields
+  content String
+  type    CompanyNoteType?
+
+  // Relations
   companyId String
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
@@ -42,6 +53,11 @@ model CompanyNote {
   channelToken String
   channel      Channel @relation(fields: [channelToken], references: [token])
 
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Indexes
   @@index([companyId])
   @@index([userId])
 }

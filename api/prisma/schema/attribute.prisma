@@ -6,6 +6,37 @@ enum AttributeTypeKind {
   HIERARCHICAL
 }
 
+enum AttributeDataType {
+  TEXT
+  NUMBER
+  DATE
+  BOOLEAN
+  CURRENCY
+  USER
+}
+
+enum AttributableType {
+  COMPANY
+}
+
+model AttributeGroup {
+  id              String  @id @default(cuid())
+  name            String // Örn: "Genel Bilgiler", "Adres Detayları"
+  isSystemDefined Boolean @default(false)
+
+  channelToken String
+  channel      Channel @relation(fields: [channelToken], references: [token])
+
+  // Bu gruba ait özellik tipleri
+  attributeTypes AttributeType[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([name, channelToken])
+}
+
 // Models
 model AttributeType {
   // Primary Key
@@ -15,12 +46,24 @@ model AttributeType {
   name            String
   code            String
   kind            AttributeTypeKind
+  dataType        AttributeDataType
   isSystemDefined Boolean           @default(false)
+  order           Int               @default(0)
+
+  /**
+   * Bu config alanı içinde { "isRequired": true, "minValue": 1, "maxValue": 1000, "defaultValue": 10 } gibi kurallar saklayabiliriz.
+   */
+  config Json? // Özelliğe özel kuralları burada saklarızdataType ornegin calisan sayisi max 1000, bu config'den alabiliriz.
 
   // Relations
   channelToken String
   channel      Channel          @relation(fields: [channelToken], references: [token])
   values       AttributeValue[]
+
+  groupId String?
+  group   AttributeGroup? @relation(fields: [groupId], references: [id])
+
+  availableFor AttributeTypeToEntityType[]
 
   // Timestamps
   createdAt DateTime  @default(now())
@@ -39,13 +82,17 @@ model AttributeValue {
   // Basic Fields
   value String
   code  String
+  order Int    @default(0)
+  meta  Json?
 
   // Relations
   attributeTypeId String
   type            AttributeType @relation(fields: [attributeTypeId], references: [id], onDelete: Cascade)
-  channelToken    String
-  channel         Channel       @relation(fields: [channelToken], references: [token])
-  companies       Company[]
+
+  channelToken String
+  channel      Channel @relation(fields: [channelToken], references: [token])
+
+  assignments AttributeAssignment[]
 
   // Hierarchical Relations
   parentId String? // Parent value ID (e.g., Turkey's ID for Izmir)
@@ -58,7 +105,41 @@ model AttributeValue {
   deletedAt DateTime?
 
   // Constraints
+  @@unique([value, attributeTypeId, parentId]) // Değer, kendi tipi ve parent'ı içinde benzersizdir
   @@unique([value, attributeTypeId])
   @@unique([code, attributeTypeId])
   @@index([attributeTypeId])
+}
+
+model AttributeTypeToEntityType {
+  attributeTypeId String
+  attributeType   AttributeType @relation(fields: [attributeTypeId], references: [id], onDelete: Cascade)
+
+  entityType AttributableType
+
+  @@id([attributeTypeId, entityType])
+}
+
+// Hangi AttributeValue'nun, hangi spesifik kayda atandığını tutan polimorfik tablo.
+model AttributeAssignment {
+  id String @id @default(cuid())
+
+  attributeValueId String
+  attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id], onDelete: Cascade)
+
+  attributableId   String // İlişkilendirilen kaydın ID'si (Company ID, Product ID, vs.)
+  attributableType AttributableType // İlişkilendirilen kaydın TİPİ
+
+  channelToken String
+  channel      Channel @relation(fields: [channelToken], references: [token])
+
+  assignedById String?
+  assignedBy   User?    @relation(fields: [assignedById], references: [id], onDelete: SetNull)
+  assignedAt   DateTime @default(now())
+
+  companyId String? // Company'e olan direkt ilişki (Prisma'nın many-to-many için gerektirdiği)
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  @@unique([attributeValueId, attributableId, attributableType])
+  @@index([attributableId, attributableType])
 }

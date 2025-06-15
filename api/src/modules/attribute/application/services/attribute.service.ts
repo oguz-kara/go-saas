@@ -18,7 +18,8 @@ import {
 import { AttributeValueEntity } from 'src/modules/attribute/api/graphql/entities/attribute.entity'
 import { CreateAttributeInput } from 'src/modules/attribute/api/graphql/dto/create-attribute.input'
 import { UpdateAttributeInput } from 'src/modules/attribute/api/graphql/dto/update-attribute.input'
-import { AttributeWithTypeEntity } from 'src/modules/attribute/api/graphql/dto/attribute-with-type.object-type'
+import slugify from 'slugify'
+import { AttributeTypeEntity } from '../../api/graphql/entities/attribute-type.entity'
 
 @Injectable()
 export class AttributeService {
@@ -39,14 +40,12 @@ export class AttributeService {
       attributeTypeId,
     } = args
 
-    // Ana filtreleme koşulu: Belirtilen tipe ve tenanta ait olmalı
     const whereClause: Prisma.AttributeValueWhereInput = {
       channelToken: channel.token,
       attributeTypeId: attributeTypeId,
       deletedAt: null,
     }
 
-    // Eğer bir arama metni varsa, 'value' alanında `contains` araması yap
     if (searchQuery) {
       whereClause.value = {
         contains: searchQuery,
@@ -60,15 +59,13 @@ export class AttributeService {
     )
 
     try {
-      // Hem listeyi hem de toplam sayıyı tek bir veritabanı işleminde alıyoruz
       const [totalCount, items] = await this.prisma.$transaction([
         this.prisma.attributeValue.count({ where: whereClause }),
         this.prisma.attributeValue.findMany({
           where: whereClause,
           skip,
           take,
-          orderBy: { value: 'asc' }, // Değerleri alfabetik sırala
-          include: { type: true }, // Üst tipi de getir
+          orderBy: { value: 'asc' },
         }),
       ])
 
@@ -84,37 +81,6 @@ export class AttributeService {
     }
   }
 
-  async getCompanyAttributes(
-    ctx: RequestContext,
-    companyId: string,
-  ): Promise<AttributeWithTypeEntity[]> {
-    const { channel } = ctx
-    if (!channel.token) {
-      throw new UnauthorizedException('Channel could not be identified.')
-    }
-
-    const attributes = await this.prisma.attributeValue.findMany({
-      where: {
-        channelToken: channel.token,
-        deletedAt: null,
-        companies: {
-          some: {
-            id: companyId,
-          },
-        },
-      },
-      include: { type: true },
-    })
-
-    return attributes.map((attribute) => ({
-      id: attribute.id,
-      name: attribute.type.name,
-      value: attribute.value,
-      type: attribute.type,
-      attributeTypeId: attribute.attributeTypeId,
-    }))
-  }
-
   async create(
     ctx: RequestContext,
     input: CreateAttributeInput,
@@ -124,7 +90,7 @@ export class AttributeService {
       throw new UnauthorizedException('Channel could not be identified.')
     }
 
-    const { value, attributeTypeId } = input
+    const { value, attributeTypeId, parentId, meta } = input
 
     // Önce AttributeType'ın bu tenanta ait olup olmadığını kontrol et
     const attributeTypeExists = await this.prisma.attributeType.findFirst({
@@ -138,6 +104,25 @@ export class AttributeService {
         `Attribute type with ID "${attributeTypeId}" not found in this channel.`,
       )
     }
+
+    if (parentId) {
+      const parentExists = await this.prisma.attributeValue.findFirst({
+        where: {
+          id: parentId,
+          channelToken: channel.token,
+          attributeTypeId: attributeTypeId,
+        },
+      })
+      if (!parentExists) {
+        throw new NotFoundException(
+          `Parent attribute value with ID "${parentId}" is not valid.`,
+        )
+      }
+    }
+
+    this.logger.log(
+      `User creating attribute value "${value}" for type ${attributeTypeId}`,
+    )
 
     const isAttributeExists = await this.prisma.attributeValue.findFirst({
       where: {
@@ -175,17 +160,25 @@ export class AttributeService {
           },
         })
 
-        return { ...newValue }
+        return { ...newValue, meta: newValue.meta as Record<string, any> }
       } else {
         const newValue = await this.prisma.attributeValue.create({
           data: {
             value,
-            attributeTypeId,
-            channelToken: channel.token,
+            code: slugify(value, { lower: true }),
+            meta: meta || Prisma.JsonNull,
+            type: { connect: { id: attributeTypeId } },
+            channel: { connect: { token: channel.token } },
+            ...(parentId && { parent: { connect: { id: parentId } } }),
           },
+          include: { type: true },
         })
 
-        return { ...newValue }
+        return {
+          ...newValue,
+          meta: newValue.meta as Record<string, any>,
+          type: newValue.type as unknown as AttributeTypeEntity,
+        }
       }
     } catch (error) {
       this.logger.error('error', error)
@@ -225,15 +218,25 @@ export class AttributeService {
       throw new NotFoundException(`Attribute value with ID "${id}" not found.`)
     }
 
+    const { value, parentId, meta } = input
+
     this.logger.log(`User updating attribute value ${id}`, 'update')
 
     try {
       const updatedValue = await this.prisma.attributeValue.update({
         where: { id },
-        data: { value: input.value },
+        data: {
+          value,
+          parentId,
+          meta: meta ? meta : undefined,
+        },
         include: { type: true },
       })
-      return updatedValue as AttributeValueEntity
+      return {
+        ...updatedValue,
+        meta: updatedValue.meta as Record<string, any>,
+        type: updatedValue.type as unknown as AttributeTypeEntity,
+      }
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -266,12 +269,12 @@ export class AttributeService {
       throw new NotFoundException(`Attribute value with ID "${id}" not found.`)
     }
 
-    const assignedCompaniesCount = await this.prisma.company.count({
-      where: { attributes: { some: { id, deletedAt: null } } },
+    const assignmentCount = await this.prisma.attributeAssignment.count({
+      where: { attributeValueId: id },
     })
-    if (assignedCompaniesCount > 0) {
+    if (assignmentCount > 0) {
       throw new ConflictException(
-        `Cannot delete value because it is assigned to ${assignedCompaniesCount} company/companies.`,
+        `Cannot delete value because it is assigned to ${assignmentCount} record(s).`,
       )
     }
 

@@ -1,14 +1,24 @@
 model Channel {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  token       String    @unique
-  description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  // Primary Key
+  id String @id @default(cuid())
 
-  companies   Company[]
-  users User[]
+  // Basic Fields
+  name        String   @unique
+  token       String   @unique
+  description String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations - Core
+  companies    Company[]
+  users        User[]
   companyNotes CompanyNote[]
-  attributeTypes  AttributeType[]
-  attributeValues AttributeValue[]
+
+  // Relations - Attribute System
+  attributeTypes       AttributeType[]
+  attributeValues      AttributeValue[]
+  attributeGroups      AttributeGroup[]
+  attributeAssignments AttributeAssignment[]
 }

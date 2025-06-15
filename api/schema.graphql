@@ -7,15 +7,39 @@ input AddCompanyNoteInput {
   type: String
 }
 
+"""The type of attributable entity"""
+enum AttributableType {
+  COMPANY
+}
+
+"""The data type of the attribute"""
+enum AttributeDataType {
+  BOOLEAN
+  DATE
+  NUMBER
+  TEXT
+}
+
 input AttributeFilterInput {
   attributeTypeId: ID!
   valueIds: [ID!]!
 }
 
+type AttributeGroup {
+  id: ID!
+  isSystemDefined: Boolean!
+  name: String!
+}
+
 type AttributeType {
+  availableFor: [AttributableType!]!
   channelToken: String!
   createdAt: DateTime
+  dataType: AttributeDataType!
+  group: AttributeGroup
   id: ID!
+  isSystemDefined: Boolean!
+  kind: AttributeTypeKind!
   name: String!
   updatedAt: DateTime
 }
@@ -25,9 +49,19 @@ type AttributeTypeConnection {
   totalCount: Int!
 }
 
+"""The kind of attribute type"""
+enum AttributeTypeKind {
+  BOOLEAN
+  DATE
+  NUMBER
+  TEXT
+}
+
 type AttributeValue {
   attributeTypeId: ID!
   id: ID!
+  meta: JSON
+  parentId: ID
   type: AttributeType
   value: String!
 }
@@ -118,10 +152,17 @@ enum CompanyNoteType {
 
 input CreateAttributeInput {
   attributeTypeId: ID!
+  meta: JSON
+  parentId: ID
   value: String!
 }
 
 input CreateAttributeTypeInput {
+  availableFor: [AttributableType!]!
+  config: JSON
+  dataType: AttributeDataType!
+  groupId: ID
+  kind: AttributeTypeKind!
   name: String!
 }
 
@@ -173,20 +214,20 @@ type LogoutOutput {
 
 type Mutation {
   addNoteToCompany(addCompanyNoteInput: AddCompanyNoteInput!, companyId: ID!): CompanyNote!
-  createAttribute(createAttributeInput: CreateAttributeInput!): AttributeValue!
   createAttributeType(createAttributeTypeInput: CreateAttributeTypeInput!): AttributeType!
+  createAttributeValue(createAttributeValueInput: CreateAttributeInput!): AttributeValue!
   createChannel(createChannelInput: CreateChannelInput!): Channel!
   createCompany(createCompanyInput: CreateCompanyInput!): Company!
-  deleteAttribute(id: ID!): Boolean!
   deleteAttributeType(id: ID!): Boolean!
+  deleteAttributeValue(id: ID!): Boolean!
   deleteCompany(id: ID!): Company!
   deleteCompanyNote(noteId: ID!): CompanyNote!
   loginUser(loginUserInput: LoginUserInput!): AuthenticationPayload!
   logoutUser: LogoutOutput!
   registerNewTenant(registerNewTenantInput: RegisterNewTenantInput!): AuthenticationPayload!
   registerUser(channelToken: String!, registerUserInput: RegisterUserInput!): AuthenticationPayload!
-  updateAttribute(id: ID!, updateAttributeInput: UpdateAttributeInput!): AttributeValue!
   updateAttributeType(id: ID!, updateAttributeTypeInput: UpdateAttributeTypeInput!): AttributeType!
+  updateAttributeValue(id: ID!, updateAttributeValueInput: UpdateAttributeInput!): AttributeValue!
   updateCompany(id: ID!, updateCompanyInput: UpdateCompanyInput!): Company!
   updateCompanyNote(noteId: ID!, updateCompanyNoteInput: UpdateCompanyNoteInput!): CompanyNote!
 }
@@ -260,10 +301,19 @@ input RegisterUserInput {
 }
 
 input UpdateAttributeInput {
-  value: String!
+  attributeTypeId: ID
+  meta: JSON
+  parentId: ID
+  value: String
 }
 
 input UpdateAttributeTypeInput {
+  availableFor: [AttributableType!]!
+  config: JSON
+  dataType: AttributeDataType!
+  groupId: ID
+  id: ID!
+  kind: AttributeTypeKind!
   name: String!
 }
 

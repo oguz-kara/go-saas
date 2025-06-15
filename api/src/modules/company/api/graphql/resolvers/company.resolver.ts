@@ -20,6 +20,7 @@ import { Ctx } from 'src/common/request-context/request-context.decorator'
 import { ListQueryArgs } from 'src/common'
 import { CompanyConnectionNotesObject } from '../dto/company-connection-notes.object-type'
 import { CompanyNoteService } from 'src/modules/company/application/services/company-note.service'
+import { AttributeWithTypeEntity } from '../dto/attribute-with-type.object-type'
 
 @Resolver(() => CompanyEntity)
 @ProtectResource()
@@ -84,5 +85,19 @@ export class CompanyResolver {
         listQueryArgs,
       )
     return { items: notes, totalCount }
+  }
+}
+
+@Resolver(() => CompanyEntity)
+@ProtectResource()
+export class AttributeWithTypeResolver {
+  constructor(private readonly companyService: CompanyService) {}
+
+  @ResolveField(() => [AttributeWithTypeEntity], { name: 'attributes' })
+  async attributes(
+    @Parent() company: CompanyEntity,
+    @Ctx() ctx: RequestContext,
+  ): Promise<AttributeWithTypeEntity[]> {
+    return await this.companyService.getCompanyAttributes(ctx, company.id)
   }
 }

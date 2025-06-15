@@ -2,15 +2,18 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common'
 import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import { CompanyEntity } from '../../api/graphql/entities/company.entity'
 import { RequestContext } from 'src/common/request-context/request-context'
 import { CreateCompanyInput } from '../../api/graphql/dto/create-company.input'
-import { Prisma } from '@prisma/client'
+import { AttributableType, Prisma } from '@prisma/client'
 import { CompanyNotFoundError } from '../../domain/exceptions/company-not-found.exception'
 import { UpdateCompanyInput } from '../../api/graphql/dto/update-company.input'
 import { AttributeFilterInput } from '../../api/graphql/dto/attribute-filter.input'
+import { AttributeWithTypeEntity } from '../../api/graphql/dto/attribute-with-type.object-type'
+import { AttributeTypeEntity } from 'src/modules/attribute/api/graphql/entities/attribute-type.entity'
 
 @Injectable()
 export class CompanyService {
@@ -56,8 +59,21 @@ export class CompanyService {
           address,
           description,
           channelToken: ct,
-          attributes: {
-            connect: attributeIds?.map((id) => ({ id })) || undefined,
+          attributeAssignments: {
+            create:
+              attributeIds?.map((valueId) => ({
+                attributeValue: { connect: { id: valueId } },
+                attributableType: AttributableType.COMPANY,
+                attributableId: company.id,
+                channel: { connect: { token: ct } },
+                ...(ctx.user?.id && {
+                  assignedBy: {
+                    connect: {
+                      id: ctx.user.id,
+                    },
+                  },
+                }),
+              })) || [],
           },
         },
       })
@@ -195,20 +211,37 @@ export class CompanyService {
     channelToken?: string,
   ): Promise<CompanyEntity> {
     const { user, channel } = ctx
+    const ct = channelToken ? channelToken : channel.token
 
     this.logger.log(
       `User ${user?.id} updating company with ID: ${id}. Data: ${JSON.stringify(updateData)}`,
       'updateCompany',
     )
 
-    const { address, attributeIds, ...rest } = updateData
+    const existingCompany = await this.prisma.company.findFirst({
+      where: { id, channelToken: ct, deletedAt: null },
+    })
+    if (!existingCompany) throw new CompanyNotFoundError(id)
 
-    const ct = channelToken ? channelToken : channel.token
+    const { address, attributeIds, ...rest } = updateData
 
     const prismaUpdateData: Prisma.CompanyUpdateInput = {
       ...rest,
-      attributes: {
-        set: attributeIds?.map((id) => ({ id })) || undefined,
+      attributeAssignments: {
+        create:
+          attributeIds?.map((valueId) => ({
+            attributeValue: { connect: { id: valueId } },
+            attributableType: AttributableType.COMPANY,
+            attributableId: id,
+            channel: { connect: { token: ct } },
+            ...(ctx.user?.id && {
+              assignedBy: {
+                connect: {
+                  id: ctx.user.id,
+                },
+              },
+            }),
+          })) || [],
       },
     }
 
@@ -221,14 +254,24 @@ export class CompanyService {
     }
 
     try {
-      const updatedCompany = await this.prisma.company.update({
-        where: {
-          id,
-          deletedAt: null,
-          channelToken: ct,
-        },
-        data: prismaUpdateData,
+      const updatedCompany = await this.prisma.$transaction(async (tx) => {
+        if (attributeIds !== undefined) {
+          await tx.attributeAssignment.deleteMany({
+            where: {
+              attributableId: id,
+              attributableType: AttributableType.COMPANY,
+            },
+          })
+        }
+
+        const company = await tx.company.update({
+          where: { id },
+          data: prismaUpdateData,
+        })
+
+        return company
       })
+
       return updatedCompany as CompanyEntity
     } catch (error) {
       if (
@@ -251,7 +294,6 @@ export class CompanyService {
     }
   }
 
-  // New deleteCompany method (Soft Delete)
   async deleteCompany(
     ctx: RequestContext,
     id: string,
@@ -316,5 +358,36 @@ export class CompanyService {
       )
       throw new InternalServerErrorException('Could not delete company.')
     }
+  }
+
+  async getCompanyAttributes(
+    ctx: RequestContext,
+    companyId: string,
+  ): Promise<AttributeWithTypeEntity[]> {
+    const { channel } = ctx
+    if (!channel.token) {
+      throw new UnauthorizedException('Channel could not be identified.')
+    }
+
+    const attributes = await this.prisma.attributeValue.findMany({
+      where: {
+        channelToken: channel.token,
+        deletedAt: null,
+        assignments: {
+          some: {
+            companyId,
+          },
+        },
+      },
+      include: { type: true },
+    })
+
+    return attributes.map((attribute) => ({
+      id: attribute.id,
+      name: attribute.type.name,
+      value: attribute.value,
+      type: attribute.type as unknown as AttributeTypeEntity,
+      attributeTypeId: attribute.attributeTypeId,
+    }))
   }
 }

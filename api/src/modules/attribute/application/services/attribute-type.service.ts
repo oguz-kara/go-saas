@@ -4,22 +4,18 @@ import {
   InternalServerErrorException,
   Logger,
   UnauthorizedException,
+  ConflictException,
+  NotFoundException,
 } from '@nestjs/common'
 import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import { RequestContext } from 'src/common/request-context/request-context'
 import { CreateAttributeTypeInput } from '../../api/graphql/dto/create-attribute-type.input'
 import { UpdateAttributeTypeInput } from '../../api/graphql/dto/update-attribute-type.input'
-import { Prisma } from '@prisma/client'
+import { AttributeTypeKind, Prisma } from '@prisma/client'
 import { ListQueryArgs } from 'src/common/graphql/dto/list-query.args'
-import {
-  AttributeTypeNotFoundError,
-  AttributeTypeHasValuesError,
-  AttributeTypeAlreadyExistsError,
-} from 'src/modules/attribute/domain/exceptions'
-import {
-  DEFAULT_PAGE,
-  DEFAULT_PAGE_SIZE,
-} from 'src/common/constants/default-pagination-values'
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from 'src/common'
+import { AttributeTypeEntity } from '../../api/graphql/entities/attribute-type.entity'
+import slugify from 'slugify'
 
 @Injectable()
 export class AttributeTypeService {
@@ -27,43 +23,65 @@ export class AttributeTypeService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(ctx: RequestContext, input: CreateAttributeTypeInput) {
-    const { channel } = ctx
-    if (!channel.token) {
+  async create(
+    ctx: RequestContext,
+    input: CreateAttributeTypeInput,
+  ): Promise<AttributeTypeEntity> {
+    const channelToken = ctx.channel?.token
+    if (!channelToken) {
       throw new UnauthorizedException('Channel could not be identified.')
     }
 
-    const isAttributeTypeWasDeleted = await this.prisma.attributeType.findFirst(
-      {
-        where: {
-          name: input.name,
-          channelToken: channel.token,
-          deletedAt: { not: null },
-        },
-      },
+    const { name, kind, dataType, groupId, availableFor, config } = input
+
+    this.logger.log(
+      `User creating attribute type "${name}" for channel ${channelToken}`,
     )
 
-    if (isAttributeTypeWasDeleted) {
-      await this.prisma.attributeType.update({
-        where: { id: isAttributeTypeWasDeleted.id },
-        data: { deletedAt: null, name: input.name },
+    if (groupId) {
+      const groupExists = await this.prisma.attributeGroup.findFirst({
+        where: { id: groupId, channelToken: channelToken },
       })
-      return isAttributeTypeWasDeleted
+      if (!groupExists) {
+        throw new NotFoundException(
+          `AttributeGroup with ID "${groupId}" not found in this channel.`,
+        )
+      }
     }
 
     try {
-      return await this.prisma.attributeType.create({
-        data: {
-          name: input.name,
-          channelToken: channel.token,
+      const attributeTypeData: Prisma.AttributeTypeCreateInput = {
+        name,
+        kind: kind as AttributeTypeKind,
+        code: slugify(name, { lower: true }),
+        dataType,
+        config: config || Prisma.JsonNull,
+        channel: { connect: { token: channelToken } },
+        ...(groupId && { group: { connect: { id: groupId } } }),
+        availableFor: {
+          create: availableFor.map((entityType) => ({
+            entityType: entityType,
+          })),
         },
+      }
+
+      const newType = await this.prisma.attributeType.create({
+        data: attributeTypeData,
+        include: { group: true, availableFor: true },
       })
+
+      return {
+        ...newType,
+        availableFor: newType.availableFor.map((item) => item.entityType),
+      } as unknown as AttributeTypeEntity
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new AttributeTypeAlreadyExistsError(input.name)
+        throw new ConflictException(
+          `Attribute type with name "${name}" already exists.`,
+        )
       }
       this.logger.error(
         `Failed to create attribute type: ${error.message}`,
@@ -73,76 +91,112 @@ export class AttributeTypeService {
     }
   }
 
-  async findAll(ctx: RequestContext, args: ListQueryArgs) {
-    // Artık ListQueryArgs alıyor
-    const { channel } = ctx
-    if (!channel.token) {
+  async findAll(
+    ctx: RequestContext,
+    args: ListQueryArgs,
+  ): Promise<{ items: AttributeTypeEntity[]; totalCount: number }> {
+    const channelToken = ctx.channel?.token
+    if (!channelToken) {
       throw new UnauthorizedException('Channel could not be identified.')
     }
 
-    console.log({ args })
-
-    const {
-      skip = DEFAULT_PAGE,
-      take = DEFAULT_PAGE_SIZE,
-      searchQuery,
-    } = args || {}
+    const { skip = DEFAULT_PAGE, take = DEFAULT_PAGE_SIZE, searchQuery } = args
 
     const whereClause: Prisma.AttributeTypeWhereInput = {
-      channelToken: channel.token,
+      channelToken: channelToken,
       deletedAt: null,
     }
 
     if (searchQuery) {
-      whereClause.name = {
-        contains: searchQuery,
-        mode: 'insensitive',
-      }
+      whereClause.name = { contains: searchQuery, mode: 'insensitive' }
     }
 
-    console.log({ whereClause })
+    try {
+      const [totalCount, types] = await this.prisma.$transaction([
+        this.prisma.attributeType.count({ where: whereClause }),
+        this.prisma.attributeType.findMany({
+          where: whereClause,
+          skip,
+          take,
+          orderBy: { name: 'asc' },
+          include: { group: true, availableFor: true },
+        }),
+      ])
 
-    const [totalCount, items] = await this.prisma.$transaction([
-      this.prisma.attributeType.count({ where: whereClause }),
-      this.prisma.attributeType.findMany({
-        where: whereClause,
-        skip,
-        take,
-        orderBy: { name: 'asc' },
-      }),
-    ])
+      const items = types.map((type) => ({
+        ...type,
+        availableFor: type.availableFor.map((item) => item.entityType),
+      }))
 
-    return { items, totalCount }
+      return { items: items as unknown as AttributeTypeEntity[], totalCount }
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch attribute types: ${error.message}`,
+        error.stack,
+      )
+      throw new InternalServerErrorException('Could not fetch attribute types.')
+    }
   }
 
   async update(
     ctx: RequestContext,
     id: string,
     input: UpdateAttributeTypeInput,
-  ) {
-    const { channel } = ctx
-    if (!channel.token) {
+  ): Promise<AttributeTypeEntity> {
+    const channelToken = ctx.channel?.token
+    if (!channelToken) {
       throw new UnauthorizedException('Channel could not be identified.')
     }
 
+    const { name, kind, dataType, groupId, availableFor, config } = input
+
     const existingType = await this.prisma.attributeType.findFirst({
-      where: { id, channelToken: channel.token, deletedAt: null },
+      where: { id, channelToken: channelToken, deletedAt: null },
     })
     if (!existingType) {
-      throw new AttributeTypeNotFoundError(id)
+      throw new NotFoundException(`Attribute type with ID "${id}" not found.`)
     }
 
     try {
-      return await this.prisma.attributeType.update({
-        where: { id }, // id'ye göre güncelle
-        data: { name: input.name },
+      return await this.prisma.$transaction(async (tx) => {
+        if (availableFor) {
+          await tx.attributeTypeToEntityType.deleteMany({
+            where: { attributeTypeId: id },
+          })
+        }
+
+        const updatedType = await tx.attributeType.update({
+          where: { id },
+          data: {
+            name,
+            kind: kind as AttributeTypeKind,
+            dataType,
+            config: config ? (config as Prisma.JsonObject) : undefined,
+            groupId,
+            ...(availableFor && {
+              availableFor: {
+                create: availableFor.map((entityType) => ({
+                  entityType: entityType,
+                })),
+              },
+            }),
+          },
+          include: { group: true, availableFor: true },
+        })
+
+        return {
+          ...updatedType,
+          availableFor: updatedType.availableFor.map((item) => item.entityType),
+        } as unknown as AttributeTypeEntity
       })
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new AttributeTypeAlreadyExistsError(input.name)
+        throw new ConflictException(
+          `Another attribute type with name "${input.name}" already exists.`,
+        )
       }
       this.logger.error(
         `Failed to update attribute type ${id}: ${error.message}`,
@@ -153,22 +207,30 @@ export class AttributeTypeService {
   }
 
   async delete(ctx: RequestContext, id: string): Promise<{ success: boolean }> {
-    const { channel } = ctx
-    if (!channel.token) {
+    const channelToken = ctx.channel?.token
+    if (!channelToken) {
       throw new UnauthorizedException('Channel could not be identified.')
     }
 
     const existingType = await this.prisma.attributeType.findFirst({
-      where: { id, channelToken: channel.token, deletedAt: null },
-      include: { _count: { select: { values: true } } }, // İlişkili değer var mı diye kontrol et
+      where: { id, channelToken: channelToken, deletedAt: null },
+      include: { _count: { select: { values: true } } },
     })
 
     if (!existingType) {
-      throw new AttributeTypeNotFoundError(id)
+      throw new NotFoundException(`Attribute type with ID "${id}" not found.`)
+    }
+
+    if (existingType.isSystemDefined) {
+      throw new ConflictException(
+        `System-defined attribute type "${existingType.name}" cannot be deleted.`,
+      )
     }
 
     if (existingType._count.values > 0) {
-      throw new AttributeTypeHasValuesError(existingType.name)
+      throw new ConflictException(
+        `Cannot delete attribute type "${existingType.name}" because it has associated values.`,
+      )
     }
 
     await this.prisma.attributeType.update({
