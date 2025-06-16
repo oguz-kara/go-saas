@@ -30,11 +30,20 @@ export class AttributeTypeResolver {
     @Ctx() ctx: RequestContext,
     @Args('args', { type: () => ListQueryArgs, nullable: true })
     args: ListQueryArgs,
+    @Args('includeSystemDefined', {
+      type: () => Boolean,
+      nullable: true,
+      defaultValue: false,
+    })
+    includeSystemDefined: boolean,
   ): Promise<{
     items: Partial<AttributeTypeEntity>[]
     totalCount: number
   }> {
-    return await this.attributeTypeService.findAll(ctx, args)
+    return await this.attributeTypeService.findAll(ctx, {
+      ...args,
+      includeSystemDefined,
+    })
   }
 
   @Mutation(() => AttributeTypeEntity, { name: 'updateAttributeType' })

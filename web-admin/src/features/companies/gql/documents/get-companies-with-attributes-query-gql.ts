@@ -5,14 +5,14 @@ export const GetCompaniesWithAttributesQuery = gql`
     $skip: Int
     $take: Int
     $filters: [AttributeFilterInput!]
+    $address: String
   ) {
-    companies(skip: $skip, take: $take, filters: $filters) {
+    companies(skip: $skip, take: $take, filters: $filters, address: $address) {
       items {
         id
         address
         channelToken
         name
-        industry
         website
         createdAt
         updatedAt
@@ -20,7 +20,6 @@ export const GetCompaniesWithAttributesQuery = gql`
         linkedinUrl
         attributes {
           id
-          attributeTypeId
           name
           value
         }

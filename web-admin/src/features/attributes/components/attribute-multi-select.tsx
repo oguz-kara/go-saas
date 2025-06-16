@@ -20,8 +20,11 @@ import {
 } from '@gocrm/components/ui/popover'
 import { Badge } from '@gocrm/components/ui/badge'
 import {
+  AttributableType,
+  AttributeDataType,
+  AttributeTypeKind,
+  useCreateAttributeTypeMutation,
   useGetAttributeValuesQuery,
-  useCreateAttributeMutation,
 } from '@gocrm/graphql/generated/hooks'
 import { useDebounce } from '@gocrm/hooks/use-debounce'
 import { toast } from 'sonner'
@@ -50,15 +53,15 @@ export const AttributeMultiSelect = ({
     variables: { attributeTypeId, searchQuery: debouncedSearch },
   })
 
-  const [createValue, { loading: creating }] = useCreateAttributeMutation({
+  const [createValue, { loading: creating }] = useCreateAttributeTypeMutation({
     onCompleted: (data) => {
-      const newValue = data.createAttribute
+      const newValue = data.createAttributeType
       onSelectionChange([
         ...selectedValues,
-        { id: newValue.id, value: newValue.value },
+        { id: newValue.id, value: newValue.name },
       ])
       setSearchQuery('')
-      toast.success(`"${newValue.value}" değeri oluşturuldu ve eklendi.`)
+      toast.success(`"${newValue.name}" değeri oluşturuldu ve eklendi.`)
     },
     onError: (error) => toast.error(error.message),
   })
@@ -67,9 +70,11 @@ export const AttributeMultiSelect = ({
     if (!searchQuery.trim()) return
     createValue({
       variables: {
-        createAttributeInput: {
-          value: searchQuery.trim(),
-          attributeTypeId,
+        createAttributeTypeInput: {
+          name: searchQuery.trim(),
+          availableFor: [AttributableType.Company],
+          dataType: AttributeDataType.Text,
+          kind: AttributeTypeKind.Text,
         },
       },
     })

@@ -3,9 +3,9 @@
 
 import { useState } from 'react'
 import {
-  useCreateAttributeMutation,
-  useDeleteAttributeMutation,
-  useUpdateAttributeMutation,
+  useCreateAttributeValueMutation,
+  useDeleteAttributeValueMutation,
+  useUpdateAttributeValueMutation,
   useGetAttributeValuesQuery,
 } from '@gocrm/graphql/generated/hooks'
 import { useTranslations } from '@gocrm/hooks/use-translations'
@@ -46,7 +46,7 @@ export const AttributeValueList = ({
     fetchPolicy: 'cache-and-network',
   })
 
-  const [createValue, { loading: creating }] = useCreateAttributeMutation({
+  const [createValue, { loading: creating }] = useCreateAttributeValueMutation({
     onCompleted: () => {
       setNewValue('')
       refetch()
@@ -55,7 +55,7 @@ export const AttributeValueList = ({
     onError: (err) => toast.error(err.message),
   })
 
-  const [deleteValue] = useDeleteAttributeMutation({
+  const [deleteValue] = useDeleteAttributeValueMutation({
     onCompleted: () => {
       refetch()
       toast.success('Değer silindi.')
@@ -63,7 +63,7 @@ export const AttributeValueList = ({
     onError: (err) => toast.error(err.message),
   })
 
-  const [updateValue] = useUpdateAttributeMutation({
+  const [updateValue] = useUpdateAttributeValueMutation({
     onCompleted: () => {
       setEditingValue(null)
       refetch()
@@ -76,9 +76,9 @@ export const AttributeValueList = ({
     if (!newValue.trim() || !selectedTypeId) return
     createValue({
       variables: {
-        createAttributeInput: {
+        createAttributeValueInput: {
           value: newValue.trim(),
-          attributeTypeId: selectedTypeId,
+          attributeTypeId: selectedTypeId!,
         },
       },
     })
@@ -89,7 +89,9 @@ export const AttributeValueList = ({
     updateValue({
       variables: {
         id: editingValue.id,
-        updateAttributeInput: { value: editingValue.text.trim() },
+        updateAttributeValueInput: {
+          value: editingValue.text.trim(),
+        },
       },
     })
   }

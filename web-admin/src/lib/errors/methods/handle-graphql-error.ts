@@ -6,6 +6,7 @@ export function handleGraphQLError(
   exceptionMessages: Record<string, string> | undefined,
   fallbackMessage = 'Bilinmeyen bir hata oluştu.',
 ) {
+  console.log({ error })
   if (!exceptionMessages) {
     toast.error(fallbackMessage)
     return

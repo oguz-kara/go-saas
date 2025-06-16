@@ -9,6 +9,10 @@ import {
   useDeleteAttributeTypeMutation,
   GetAttributeTypesDocument,
   AttributeType,
+  AttributeDataType,
+  AttributeTypeKind,
+  AttributableType,
+  GetAttributeArchitectureQuery,
 } from '@gocrm/graphql/generated/hooks'
 import { useTranslations } from '@gocrm/hooks/use-translations'
 import { useDebounce } from '@gocrm/hooks/use-debounce'
@@ -39,15 +43,24 @@ import {
   X,
 } from 'lucide-react'
 import { handleGraphQLError } from '@gocrm/lib/errors/methods/handle-graphql-error'
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from '@gocrm/components/ui/select'
 
 interface AttributeTypeListProps {
   selectedType: AttributeType | null
   onSelectType: (type: AttributeType | null) => void
+  initialData: GetAttributeArchitectureQuery
 }
 
 export const AttributeTypeList = ({
   selectedType,
   onSelectType,
+  initialData,
 }: AttributeTypeListProps) => {
   const { translations } = useTranslations()
   const t = translations?.attributeStudio
@@ -60,6 +73,9 @@ export const AttributeTypeList = ({
     id: string
     name: string
   } | null>(null)
+  const [selectedGroupId, setSelectedGroupId] = useState(
+    initialData.attributeGroups.items[0]?.id || '',
+  )
 
   // Data Fetching
   const { data, loading, refetch } = useGetAttributeTypesQuery({
@@ -71,8 +87,8 @@ export const AttributeTypeList = ({
     onCompleted: (data) => {
       const newType = data.createAttributeType
       setNewTypeName('')
-      refetch() // Listeyi yeniden çekerek anında güncelle
-      onSelectType(newType)
+      refetch()
+      onSelectType(newType as AttributeType)
       toast.success(`"${newType.name}" tipi başarıyla oluşturuldu.`)
     },
     onError: (error) => toast.error(error.message),
@@ -83,7 +99,8 @@ export const AttributeTypeList = ({
       setEditingState(null) // Düzenleme modundan çık
       toast.success('Tip başarıyla güncellendi.')
     },
-    onError: (error) => toast.error(error.message),
+    onError: (error) =>
+      handleGraphQLError(error, translations?.exceptionMessages),
   })
 
   const [deleteType] = useDeleteAttributeTypeMutation({
@@ -107,7 +124,14 @@ export const AttributeTypeList = ({
   const handleAddNewType = () => {
     if (!newTypeName.trim() || creating) return
     createType({
-      variables: { createAttributeTypeInput: { name: newTypeName.trim() } },
+      variables: {
+        createAttributeTypeInput: {
+          name: newTypeName.trim(),
+          availableFor: [AttributableType.Company],
+          dataType: AttributeDataType.Text,
+          kind: AttributeTypeKind.Text,
+        },
+      },
     })
   }
 
@@ -116,7 +140,13 @@ export const AttributeTypeList = ({
     updateType({
       variables: {
         id: editingState.id,
-        updateAttributeTypeInput: { name: editingState.name.trim() },
+        updateAttributeTypeInput: {
+          id: editingState.id,
+          name: editingState.name.trim(),
+          availableFor: [AttributableType.Company],
+          dataType: AttributeDataType.Text,
+          kind: AttributeTypeKind.Text,
+        },
       },
     })
   }
@@ -194,7 +224,7 @@ export const AttributeTypeList = ({
               >
                 <button
                   className="flex-1 text-left"
-                  onClick={() => onSelectType(type)}
+                  onClick={() => onSelectType(type as AttributeType)}
                 >
                   {type.name}
                 </button>
@@ -244,6 +274,21 @@ export const AttributeTypeList = ({
 
       {/* Yeni Ekleme Alanı */}
       <div className="border-t p-4 space-y-2 bg-muted/50">
+        {/* Select box for attribute groups using shadcn/ui Select */}
+        <div className="mb-2">
+          <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Grup seçin" />
+            </SelectTrigger>
+            <SelectContent>
+              {initialData.attributeGroups.items.map((group) => (
+                <SelectItem key={group.id} value={group.id}>
+                  {group.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div className="flex gap-2">
           <Input
             placeholder={t?.addNewTypePlaceholder}

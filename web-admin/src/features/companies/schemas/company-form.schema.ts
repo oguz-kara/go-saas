@@ -17,10 +17,18 @@ export const createCompanyFormSchema = (t: Translations['companyForm']) =>
       .nullable(),
     industry: z.string().optional().nullable(),
     description: z.string().optional().nullable(),
+    taxId: z.string().optional().nullable(),
+    phoneNumber: z.string().optional().nullable(),
+    email: z.string().email().optional().nullable(),
+    socialProfiles: z.record(z.string()).optional().nullable(),
+    addressLine1: z.string().optional().nullable(),
+    addressLine2: z.string().optional().nullable(),
+    postalCode: z.string().optional().nullable(),
     attributes: z
       .record(z.string(), z.array(attributeValueSchema))
       .optional()
       .nullable(),
+    addressAttributeCodes: z.array(z.string()).optional().nullable(),
   })
 
 export type CompanyFormValues = z.infer<

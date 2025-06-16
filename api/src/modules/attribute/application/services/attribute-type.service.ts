@@ -16,6 +16,8 @@ import { ListQueryArgs } from 'src/common/graphql/dto/list-query.args'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from 'src/common'
 import { AttributeTypeEntity } from '../../api/graphql/entities/attribute-type.entity'
 import slugify from 'slugify'
+import { AttributeTypeHasValuesError } from '../../domain/exceptions'
+import { SystemDefinedAttributeTypeError } from '../../domain/exceptions/system-defined-attribute-type.exception'
 
 @Injectable()
 export class AttributeTypeService {
@@ -93,18 +95,24 @@ export class AttributeTypeService {
 
   async findAll(
     ctx: RequestContext,
-    args: ListQueryArgs,
+    args: ListQueryArgs & { includeSystemDefined?: boolean },
   ): Promise<{ items: AttributeTypeEntity[]; totalCount: number }> {
     const channelToken = ctx.channel?.token
     if (!channelToken) {
       throw new UnauthorizedException('Channel could not be identified.')
     }
 
-    const { skip = DEFAULT_PAGE, take = DEFAULT_PAGE_SIZE, searchQuery } = args
+    const {
+      skip = DEFAULT_PAGE,
+      take = DEFAULT_PAGE_SIZE,
+      searchQuery,
+      includeSystemDefined = false,
+    } = args
 
     const whereClause: Prisma.AttributeTypeWhereInput = {
       channelToken: channelToken,
       deletedAt: null,
+      isSystemDefined: includeSystemDefined,
     }
 
     if (searchQuery) {
@@ -222,15 +230,11 @@ export class AttributeTypeService {
     }
 
     if (existingType.isSystemDefined) {
-      throw new ConflictException(
-        `System-defined attribute type "${existingType.name}" cannot be deleted.`,
-      )
+      throw new SystemDefinedAttributeTypeError(existingType.name)
     }
 
     if (existingType._count.values > 0) {
-      throw new ConflictException(
-        `Cannot delete attribute type "${existingType.name}" because it has associated values.`,
-      )
+      throw new AttributeTypeHasValuesError(existingType.name)
     }
 
     await this.prisma.attributeType.update({

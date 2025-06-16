@@ -3,7 +3,7 @@ import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@gocrm/constants'
 import { getTranslations } from '@gocrm/lib/i18n'
 import { sdk } from '@gocrm/graphql'
 import { withAuthProtection } from '@gocrm/lib/auth/with-auth-protection'
-import { AppPagination } from '../../../components/common/app-pagination'
+import { AppPagination } from '../../../../components/common/app-pagination'
 import { CompaniesList } from '@gocrm/features/companies/components/companies-list'
 import { AttributeFilterInput } from '@gocrm/graphql/generated/hooks'
 import { CompanyFilterSidebar } from '@gocrm/features/companies/components/company-filter-sidebar'
@@ -21,11 +21,18 @@ export default async function CompanyListPage({
   searchParams,
   params,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-  params?: Promise<{ locale?: string }>
+  searchParams: Promise<{
+    [key: string]: string | string[] | undefined
+    skip: string
+    take: string
+  }>
+  params: Promise<{ locale?: string; address?: string[] }>
 }) {
   const sp = await searchParams
-  const { locale } = (await params) || {}
+  const { locale, address } = (await params) || {}
+
+  const addressSlug = address?.[0]
+  const addressParts = addressSlug ? addressSlug.split('-') : []
   const api = sdk(locale)
   const translations = await getTranslations(locale)
 
@@ -45,10 +52,13 @@ export default async function CompanyListPage({
       }
     })
 
-    const { companies: companiesData } = await api.getCompaniesWithAttributes({
-      skip: pageInfo.skip,
-      take: pageInfo.take,
-      filters,
+    const { companies: companiesData } = await withAuthProtection(async () => {
+      return api.getCompaniesWithAttributes({
+        skip: pageInfo.skip,
+        take: pageInfo.take,
+        filters,
+        address: addressSlug,
+      })
     })
 
     const companies = companiesData.items || []
@@ -64,7 +74,7 @@ export default async function CompanyListPage({
   return (
     <div className="flex flex-col lg:flex-row lg:gap-8">
       <aside className="hidden lg:block lg:w-64">
-        <CompanyFilterSidebar />
+        <CompanyFilterSidebar address={addressParts} />
       </aside>
 
       <div className="flex-1 space-y-6">
@@ -92,7 +102,7 @@ export default async function CompanyListPage({
                 <SheetDescription>
                   {translations?.companiesPage.filterDescription}
                 </SheetDescription>
-                <CompanyFilterSidebar />
+                <CompanyFilterSidebar address={addressParts} />
               </SheetContent>
             </Sheet>
             <CreateCompanyDialog pageInfo={pageInfo} />

@@ -1,6 +1,5 @@
 // src/modules/attribute-group/api/graphql/resolvers/attribute-group.resolver.ts
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql'
-import { UsePipes, ValidationPipe } from '@nestjs/common'
 import { AttributeGroupService } from '../../../application/services/attribute-group.service'
 import { AttributeGroupEntity } from '../entities/attribute-group.entity'
 import { CreateAttributeGroupInput } from '../dto/create-attribute-group.input'
@@ -17,7 +16,6 @@ export class AttributeGroupResolver {
   constructor(private readonly attributeGroupService: AttributeGroupService) {}
 
   @Mutation(() => AttributeGroupEntity, { name: 'createAttributeGroup' })
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async createAttributeGroup(
     @Ctx() ctx: RequestContext,
     @Args('createAttributeGroupInput') input: CreateAttributeGroupInput,
@@ -34,7 +32,6 @@ export class AttributeGroupResolver {
   }
 
   @Mutation(() => AttributeGroupEntity, { name: 'updateAttributeGroup' })
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async updateAttributeGroup(
     @Ctx() ctx: RequestContext,
     @Args('id', { type: () => ID }) id: string,

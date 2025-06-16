@@ -6,7 +6,6 @@ export const getCompanyQuery = gql`
       address
       channelToken
       name
-      industry
       website
     }
   }

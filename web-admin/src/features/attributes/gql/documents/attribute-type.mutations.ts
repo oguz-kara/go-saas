@@ -8,13 +8,15 @@ export const CREATE_ATTRIBUTE_TYPE_MUTATION = gql`
     createAttributeType(createAttributeTypeInput: $createAttributeTypeInput) {
       id
       name
+      kind
+      dataType
+      isSystemDefined
+      order
       channelToken
       createdAt
     }
   }
 `
-
-// --- YENİ EKLENEN MUTATION'LAR ---
 
 export const UPDATE_ATTRIBUTE_TYPE_MUTATION = gql`
   mutation updateAttributeType(
@@ -27,7 +29,12 @@ export const UPDATE_ATTRIBUTE_TYPE_MUTATION = gql`
     ) {
       id
       name
-      updatedAt
+      kind
+      dataType
+      isSystemDefined
+      order
+      channelToken
+      createdAt
     }
   }
 `

@@ -17,7 +17,7 @@ export class CreateCompanyInput {
   @Field({ nullable: true })
   @IsOptional()
   @MaxLength(200)
-  industry?: string
+  taxId?: string
 
   @Field({ nullable: true })
   @IsOptional()
@@ -27,6 +27,20 @@ export class CreateCompanyInput {
   @Field(() => GraphQLJSON, { nullable: true })
   @IsOptional()
   address?: Record<string, any>
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @MaxLength(200)
+  phoneNumber?: string
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @MaxLength(200)
+  email?: string
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
+  socialProfiles?: Record<string, any>
 
   @Field({ nullable: true })
   @IsOptional()

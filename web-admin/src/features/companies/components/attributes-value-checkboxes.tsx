@@ -1,13 +1,16 @@
 // src/features/companies/components/attribute-value-checkboxes.tsx
 'use client'
 
-import { useGetAttributeValuesQuery } from '@gocrm/graphql/generated/hooks'
+import {
+  AttributeType,
+  useGetAttributeValuesByCodeQuery,
+} from '@gocrm/graphql/generated/hooks'
 import { Skeleton } from '@gocrm/components/ui/skeleton'
 import { Checkbox } from '@gocrm/components/ui/checkbox'
 import { Label } from '@gocrm/components/ui/label'
 
 interface AttributeValueCheckboxesProps {
-  attributeTypeId: string
+  attributeType: AttributeType
   selectedValues: string[] // URL'den gelen, bu tip için seçili olan ID'ler
   onFilterChange: (
     attributeTypeId: string,
@@ -17,14 +20,17 @@ interface AttributeValueCheckboxesProps {
 }
 
 export const AttributeValueCheckboxes = ({
-  attributeTypeId,
+  attributeType,
   selectedValues,
   onFilterChange,
 }: AttributeValueCheckboxesProps) => {
-  const { data, loading } = useGetAttributeValuesQuery({
+  const { data, loading } = useGetAttributeValuesByCodeQuery({
     variables: {
-      attributeTypeId: attributeTypeId,
-      take: 200,
+      args: {
+        attributeTypeCode: attributeType.code,
+        take: 200,
+        skip: 0,
+      },
     },
   })
 
@@ -37,7 +43,7 @@ export const AttributeValueCheckboxes = ({
     )
   }
 
-  const values = data?.attributeValues.items || []
+  const values = data?.attributeValuesByCode.items || []
 
   if (values.length === 0) {
     return <p className="text-xs text-muted-foreground">Seçenek bulunmuyor.</p>
@@ -49,9 +55,9 @@ export const AttributeValueCheckboxes = ({
         <div className="flex items-center space-x-2" key={value.id}>
           <Checkbox
             id={value.id}
-            checked={selectedValues.includes(value.id)}
+            checked={selectedValues.includes(value.code)}
             onCheckedChange={(checked) => {
-              onFilterChange(attributeTypeId, value.id, !!checked)
+              onFilterChange(attributeType.code, value.code, !!checked)
             }}
           />
           <Label htmlFor={value.id} className="font-normal text-sm">

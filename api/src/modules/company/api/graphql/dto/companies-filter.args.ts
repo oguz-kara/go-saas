@@ -12,4 +12,8 @@ export class CompaniesFilterArgs extends ListQueryArgs {
   @Field(() => [AttributeFilterInput], { nullable: true })
   @IsOptional()
   filters?: AttributeFilterInput[]
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  address?: string
 }

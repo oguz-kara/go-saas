@@ -31,10 +31,13 @@ export class CompanyService {
     const {
       name,
       website,
-      industry,
       linkedinUrl,
       address,
       description,
+      email,
+      phoneNumber,
+      socialProfiles,
+      taxId,
       attributeIds,
     } = createCompanyInput
 
@@ -54,10 +57,13 @@ export class CompanyService {
         data: {
           name,
           website,
-          industry,
           linkedinUrl,
           address,
           description,
+          email,
+          phoneNumber,
+          socialProfiles,
+          taxId,
           channelToken: ct,
           attributeAssignments: {
             create:
@@ -95,17 +101,25 @@ export class CompanyService {
       searchQuery?: string
       channelToken?: string
       filters?: AttributeFilterInput[]
+      address?: string
     },
   ): Promise<{ items: CompanyEntity[]; totalCount: number }> {
     const { user, channel } = ctx
-    const { skip = 0, take = 10, searchQuery, channelToken, filters } = args
+    const {
+      skip = 0,
+      take = 10,
+      searchQuery,
+      channelToken,
+      filters,
+      address,
+    } = args
     const ct = channelToken ? channelToken : channel.token
 
     this.logger.log(
       `User ${user?.id} fetching companies with args: ${JSON.stringify(args)}`,
     )
 
-    const whereClause: any = {
+    const whereClause: Prisma.CompanyWhereInput = {
       deletedAt: null,
     }
 
@@ -121,15 +135,56 @@ export class CompanyService {
     }
 
     if (filters && filters.length > 0) {
-      whereClause.AND = filters.map((filter) => ({
-        attributes: {
-          some: {
-            id: { in: filter.valueIds },
-            attributeTypeId: filter.attributeTypeId,
+      const groupedFilters = filters.reduce(
+        (acc, filter) => {
+          if (!acc[filter.attributeTypeId]) {
+            acc[filter.attributeTypeId] = new Set()
+          }
+          filter.valueIds.forEach((id) => acc[filter.attributeTypeId].add(id))
+          return acc
+        },
+        {} as Record<string, Set<string>>,
+      )
+
+      whereClause.AND = Object.entries(groupedFilters).map(
+        ([attributeTypeId, valueIdSet]) => ({
+          attributeAssignments: {
+            some: {
+              attributeValue: {
+                OR: [
+                  {
+                    code: { in: Array.from(valueIdSet) },
+                  },
+                  {
+                    attributeTypeId,
+                  },
+                ],
+              },
+            },
           },
+        }),
+      )
+    }
+
+    if (address) {
+      const addressParts = address.split('-')
+
+      // Build an array of address filters, one for each part
+      const addressFilters = addressParts.map((part) => ({
+        attributeAssignments: {
+          some: { attributeValue: { code: part } },
         },
       }))
+
+      // Merge with any existing AND conditions
+      if (whereClause.AND && Array.isArray(whereClause.AND)) {
+        whereClause.AND = [...whereClause.AND, ...addressFilters]
+      } else {
+        whereClause.AND = addressFilters
+      }
     }
+
+    console.log({ whereClause: JSON.stringify(whereClause, null, 4) })
 
     try {
       const companies = await this.prisma.company.findMany({

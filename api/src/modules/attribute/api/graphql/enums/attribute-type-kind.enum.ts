@@ -3,9 +3,9 @@ import { registerEnumType } from '@nestjs/graphql'
 
 export enum AttributeTypeKind {
   TEXT = 'TEXT',
-  NUMBER = 'NUMBER',
-  DATE = 'DATE',
-  BOOLEAN = 'BOOLEAN',
+  SELECT = 'SELECT',
+  MULTI_SELECT = 'MULTI_SELECT',
+  HIERARCHICAL = 'HIERARCHICAL',
 }
 
 registerEnumType(AttributeTypeKind, {

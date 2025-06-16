@@ -5,7 +5,6 @@ export const updateMutation = gql`
     updateCompany(id: $id, updateCompanyInput: $input) {
       id
       name
-      industry
       website
       updatedAt
     }

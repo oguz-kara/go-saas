@@ -6,7 +6,6 @@ export const GET_COMPANY_DETAIL_QUERY = gql`
       id
       name
       website
-      industry
       linkedinUrl
       address
       description

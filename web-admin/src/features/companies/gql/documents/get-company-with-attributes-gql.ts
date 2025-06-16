@@ -7,7 +7,6 @@ export const getCompanyWithAttributesQuery = gql`
       address
       channelToken
       name
-      industry
       website
       createdAt
       updatedAt
@@ -15,7 +14,6 @@ export const getCompanyWithAttributesQuery = gql`
       linkedinUrl
       attributes {
         id
-        attributeTypeId
         name
         value
       }

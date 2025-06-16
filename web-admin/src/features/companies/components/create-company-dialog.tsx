@@ -55,7 +55,6 @@ export const CreateCompanyDialog = ({
         input: {
           name: values.name,
           website: values.website || null,
-          industry: values.industry || null,
           description: values.description || null,
           attributeIds: values.attributes
             ? Object.values(values.attributes).flatMap((arr) =>
@@ -73,7 +72,7 @@ export const CreateCompanyDialog = ({
         <Button>{translations?.createCompanyDialog.triggerButton}</Button>
       </DialogTrigger>
       <DialogContent
-        className="sm:max-w-[425px]"
+        className="sm:max-w-[750px] overflow-y-auto max-h-[calc(100vh-10rem)]"
         aria-describedby={translations?.createCompanyDialog.description}
       >
         <DialogHeader>

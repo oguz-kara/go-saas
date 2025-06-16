@@ -14,6 +14,8 @@ CREATE TYPE "CompanyNoteType" AS ENUM ('GENERAL', 'MEETING', 'CALL', 'FOLLOW_UP'
 CREATE TABLE "AttributeGroup" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "order" INTEGER,
     "isSystemDefined" BOOLEAN NOT NULL DEFAULT false,
     "channelToken" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -111,10 +113,13 @@ CREATE TABLE "Company" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "website" TEXT,
-    "industry" TEXT,
-    "linkedinUrl" TEXT,
-    "address" JSONB,
+    "taxId" TEXT,
     "description" TEXT,
+    "address" JSONB,
+    "phoneNumber" TEXT,
+    "email" TEXT,
+    "linkedinUrl" TEXT,
+    "socialProfiles" JSONB,
     "channelToken" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -139,6 +144,9 @@ CREATE TABLE "CompanyNote" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AttributeGroup_name_channelToken_key" ON "AttributeGroup"("name", "channelToken");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AttributeGroup_code_channelToken_key" ON "AttributeGroup"("code", "channelToken");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AttributeType_name_channelToken_key" ON "AttributeType"("name", "channelToken");

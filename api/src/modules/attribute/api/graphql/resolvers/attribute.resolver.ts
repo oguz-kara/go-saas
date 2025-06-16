@@ -9,11 +9,23 @@ import { AttributeService } from 'src/modules/attribute/application/services/att
 import { GetAttributeValuesArgs } from '../args/get-attribute-values.args'
 import { CreateAttributeInput } from '../dto/create-attribute.input'
 import { UpdateAttributeInput } from '../dto/update-attribute.input'
+import { GetAttributeValuesByCodeArgs } from '../args/get-attribute-values-by-code.args'
 
 @Resolver(() => AttributeValueEntity)
 @ProtectResource()
 export class AttributeResolver {
   constructor(private readonly attributeValueService: AttributeService) {}
+
+  @Query(() => AttributeValueConnection, { name: 'attributeValuesByCode' })
+  async getAttributeValuesByCode(
+    @Ctx() ctx: RequestContext,
+    @Args('args') args: GetAttributeValuesByCodeArgs,
+  ): Promise<AttributeValueConnection> {
+    return (await this.attributeValueService.getValuesByCode(
+      ctx,
+      args,
+    )) as unknown as AttributeValueConnection
+  }
 
   @Query(() => AttributeValueConnection, { name: 'attributeValues' })
   async getAttributeValues(

@@ -7,7 +7,6 @@ export const GetCompaniesQuery = gql`
         id
         name
         website
-        industry
         description
         createdAt
       }

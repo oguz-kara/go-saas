@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql'
+import { ObjectType, Field, ID, Int } from '@nestjs/graphql'
 
 @ObjectType('AttributeGroup')
 export class AttributeGroupEntity {
@@ -7,6 +7,12 @@ export class AttributeGroupEntity {
 
   @Field()
   name: string
+
+  @Field()
+  code: string
+
+  @Field(() => Int, { nullable: true })
+  order: number | null
 
   @Field()
   isSystemDefined: boolean

@@ -14,14 +14,21 @@ model Company {
   // Basic Fields
   name        String
   website     String?
-  industry    String?
-  linkedinUrl String?
-  address     Json?
+  taxId       String?
   description String?
+
+  // --- Contact & Location ---
+
+  address        Json?
+  phoneNumber    String?
+  email          String?
+  linkedinUrl    String?
+  socialProfiles Json?
 
   // Relations
   channelToken String?
   channel      Channel? @relation(fields: [channelToken], references: [token], onDelete: Restrict)
+
 
   // Attribute System Relations
   attributeAssignments AttributeAssignment[]

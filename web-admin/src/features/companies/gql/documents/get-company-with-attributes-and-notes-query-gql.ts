@@ -12,7 +12,6 @@ export const GET_COMPANY_WITH_ATTRIBUTES_AND_NOTES_QUERY = gql`
       address
       channelToken
       name
-      industry
       website
       createdAt
       updatedAt
@@ -20,7 +19,6 @@ export const GET_COMPANY_WITH_ATTRIBUTES_AND_NOTES_QUERY = gql`
       linkedinUrl
       attributes {
         id
-        attributeTypeId
         name
         value
       }

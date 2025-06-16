@@ -20,6 +20,7 @@ import { CreateAttributeInput } from 'src/modules/attribute/api/graphql/dto/crea
 import { UpdateAttributeInput } from 'src/modules/attribute/api/graphql/dto/update-attribute.input'
 import slugify from 'slugify'
 import { AttributeTypeEntity } from '../../api/graphql/entities/attribute-type.entity'
+import { GetAttributeValuesByCodeArgs } from '../../api/graphql/args/get-attribute-values-by-code.args'
 
 @Injectable()
 export class AttributeService {
@@ -28,6 +29,7 @@ export class AttributeService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getValues(ctx: RequestContext, args: GetAttributeValuesArgs) {
+    console.log({ attribute: 'values' })
     const { channel } = ctx
     if (!channel.token) {
       throw new UnauthorizedException('Channel could not be identified.')
@@ -38,12 +40,19 @@ export class AttributeService {
       take = DEFAULT_PAGE_SIZE,
       searchQuery,
       attributeTypeId,
+      parentId,
     } = args
 
     const whereClause: Prisma.AttributeValueWhereInput = {
       channelToken: channel.token,
-      attributeTypeId: attributeTypeId,
+      attributeTypeId,
       deletedAt: null,
+    }
+
+    if (parentId !== undefined) {
+      whereClause.parent = {
+        code: parentId as string,
+      }
     }
 
     if (searchQuery) {
@@ -57,6 +66,79 @@ export class AttributeService {
       `Fetching attribute values with args: ${JSON.stringify(args)}`,
       'getValues',
     )
+
+    console.log({ whereClause: JSON.stringify(whereClause) })
+
+    try {
+      const [totalCount, items] = await this.prisma.$transaction([
+        this.prisma.attributeValue.count({ where: whereClause }),
+        this.prisma.attributeValue.findMany({
+          where: whereClause,
+          skip,
+          take,
+          orderBy: { value: 'asc' },
+        }),
+      ])
+
+      return { items, totalCount }
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch attribute values: ${error.message}`,
+        error.stack,
+      )
+      throw new InternalServerErrorException(
+        'Could not fetch attribute values.',
+      )
+    }
+  }
+
+  async getValuesByCode(
+    ctx: RequestContext,
+    args: GetAttributeValuesByCodeArgs,
+  ) {
+    console.log({ attribute: 'values by code' })
+    const { channel } = ctx
+    if (!channel.token) {
+      throw new UnauthorizedException('Channel could not be identified.')
+    }
+
+    const {
+      skip = DEFAULT_PAGE,
+      take = DEFAULT_PAGE_SIZE,
+      searchQuery,
+      attributeTypeCode,
+      parentCode,
+    } = args
+
+    const whereClause: Prisma.AttributeValueWhereInput = {
+      channelToken: channel.token,
+      type: {
+        code: attributeTypeCode,
+      },
+      deletedAt: null,
+    }
+
+    if (parentCode) {
+      whereClause.parent = {
+        code: parentCode,
+      }
+    } else {
+      whereClause.parentId = null
+    }
+
+    if (searchQuery) {
+      whereClause.value = {
+        contains: searchQuery,
+        mode: 'insensitive',
+      }
+    }
+
+    this.logger.log(
+      `Fetching attribute values with args: ${JSON.stringify(args)}`,
+      'getValues',
+    )
+
+    console.log({ whereClause: JSON.stringify(whereClause) })
 
     try {
       const [totalCount, items] = await this.prisma.$transaction([

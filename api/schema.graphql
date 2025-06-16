@@ -26,21 +26,31 @@ input AttributeFilterInput {
 }
 
 type AttributeGroup {
+  code: String!
   id: ID!
   isSystemDefined: Boolean!
   name: String!
+  order: Int
+}
+
+type AttributeGroupConnection {
+  items: [AttributeGroup!]!
+  totalCount: Int!
 }
 
 type AttributeType {
   availableFor: [AttributableType!]!
   channelToken: String!
+  code: String!
   createdAt: DateTime
   dataType: AttributeDataType!
   group: AttributeGroup
+  groupId: String
   id: ID!
   isSystemDefined: Boolean!
   kind: AttributeTypeKind!
   name: String!
+  order: Int!
   updatedAt: DateTime
 }
 
@@ -51,14 +61,15 @@ type AttributeTypeConnection {
 
 """The kind of attribute type"""
 enum AttributeTypeKind {
-  BOOLEAN
-  DATE
-  NUMBER
+  HIERARCHICAL
+  MULTI_SELECT
+  SELECT
   TEXT
 }
 
 type AttributeValue {
   attributeTypeId: ID!
+  code: String!
   id: ID!
   meta: JSON
   parentId: ID
@@ -72,7 +83,6 @@ type AttributeValueConnection {
 }
 
 type AttributeWithType {
-  attributeTypeId: ID!
   id: ID!
   name: String!
   value: String!
@@ -99,13 +109,13 @@ type ChannelConnection {
 
 type Company {
   address: JSON
-  attributes: [AttributeWithType!]
+  attributes: [AttributeWithType!]!
   channelToken: String
   createdAt: DateTime!
   deletedAt: DateTime
   description: String
+  email: String
   id: ID!
-  industry: String
   linkedinUrl: String
   name: String!
   notes(
@@ -118,6 +128,9 @@ type Company {
     """Number of items to take"""
     take: Int = 10
   ): CompanyConnectionNotes!
+  phoneNumber: String
+  socialProfiles: JSON
+  taxId: String
   updatedAt: DateTime!
   website: String
 }
@@ -150,6 +163,10 @@ enum CompanyNoteType {
   MEETING
 }
 
+input CreateAttributeGroupInput {
+  name: String!
+}
+
 input CreateAttributeInput {
   attributeTypeId: ID!
   meta: JSON
@@ -176,9 +193,12 @@ input CreateCompanyInput {
   address: JSON
   attributeIds: [String!]
   description: String
-  industry: String
+  email: String
   linkedinUrl: String
   name: String!
+  phoneNumber: String
+  socialProfiles: JSON
+  taxId: String
   website: String
 }
 
@@ -186,6 +206,20 @@ input CreateCompanyInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+input GetAttributeValuesByCodeArgs {
+  attributeTypeCode: String!
+  parentCode: String
+
+  """Search query"""
+  searchQuery: String
+
+  """Number of items to skip"""
+  skip: Int = 0
+
+  """Number of items to take"""
+  take: Int = 10
+}
 
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
@@ -214,10 +248,12 @@ type LogoutOutput {
 
 type Mutation {
   addNoteToCompany(addCompanyNoteInput: AddCompanyNoteInput!, companyId: ID!): CompanyNote!
+  createAttributeGroup(createAttributeGroupInput: CreateAttributeGroupInput!): AttributeGroup!
   createAttributeType(createAttributeTypeInput: CreateAttributeTypeInput!): AttributeType!
   createAttributeValue(createAttributeValueInput: CreateAttributeInput!): AttributeValue!
   createChannel(createChannelInput: CreateChannelInput!): Channel!
   createCompany(createCompanyInput: CreateCompanyInput!): Company!
+  deleteAttributeGroup(id: ID!): Boolean!
   deleteAttributeType(id: ID!): Boolean!
   deleteAttributeValue(id: ID!): Boolean!
   deleteCompany(id: ID!): Company!
@@ -226,6 +262,7 @@ type Mutation {
   logoutUser: LogoutOutput!
   registerNewTenant(registerNewTenantInput: RegisterNewTenantInput!): AuthenticationPayload!
   registerUser(channelToken: String!, registerUserInput: RegisterUserInput!): AuthenticationPayload!
+  updateAttributeGroup(id: ID!, updateAttributeGroupInput: UpdateAttributeGroupInput!): AttributeGroup!
   updateAttributeType(id: ID!, updateAttributeTypeInput: UpdateAttributeTypeInput!): AttributeType!
   updateAttributeValue(id: ID!, updateAttributeValueInput: UpdateAttributeInput!): AttributeValue!
   updateCompany(id: ID!, updateCompanyInput: UpdateCompanyInput!): Company!
@@ -233,9 +270,20 @@ type Mutation {
 }
 
 type Query {
-  attributeTypes(args: ListQueryArgs): AttributeTypeConnection!
+  attributeGroups(
+    """Search query"""
+    searchQuery: String
+
+    """Number of items to skip"""
+    skip: Int = 0
+
+    """Number of items to take"""
+    take: Int = 10
+  ): AttributeGroupConnection!
+  attributeTypes(args: ListQueryArgs, includeSystemDefined: Boolean = false): AttributeTypeConnection!
   attributeValues(
     attributeTypeId: ID!
+    parentId: ID
 
     """Search query"""
     searchQuery: String
@@ -246,6 +294,7 @@ type Query {
     """Number of items to take"""
     take: Int = 10
   ): AttributeValueConnection!
+  attributeValuesByCode(args: GetAttributeValuesByCodeArgs!): AttributeValueConnection!
   channelByToken(token: String!): Channel
   channels(
     """Search query"""
@@ -258,6 +307,7 @@ type Query {
     take: Int = 10
   ): ChannelConnection!
   companies(
+    address: String
     channelToken: ID
     filters: [AttributeFilterInput!]
 
@@ -300,6 +350,10 @@ input RegisterUserInput {
   password: String!
 }
 
+input UpdateAttributeGroupInput {
+  name: String!
+}
+
 input UpdateAttributeInput {
   attributeTypeId: ID
   meta: JSON
@@ -321,9 +375,12 @@ input UpdateCompanyInput {
   address: JSON
   attributeIds: [String!]
   description: String
-  industry: String
+  email: String
   linkedinUrl: String
   name: String
+  phoneNumber: String
+  socialProfiles: JSON
+  taxId: String
   website: String
 }
 

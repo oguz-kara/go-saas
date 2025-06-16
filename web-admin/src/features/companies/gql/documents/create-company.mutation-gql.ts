@@ -5,7 +5,6 @@ export const createCompanyMutation = gql`
     createCompany(createCompanyInput: $input) {
       id
       name
-      industry
       website
       createdAt
     }

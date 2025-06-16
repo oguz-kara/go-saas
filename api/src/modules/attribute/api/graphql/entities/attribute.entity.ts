@@ -12,6 +12,9 @@ export class AttributeValueEntity {
   @Field()
   value: string
 
+  @Field()
+  code: string
+
   // Relations
   @Field(() => AttributeTypeEntity, { nullable: true })
   type?: AttributeTypeEntity

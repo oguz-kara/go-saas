@@ -1,7 +1,6 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql'
 import GraphQLJSON from 'graphql-type-json'
 import { CompanyNoteEntity } from './company-note.entity'
-import { AttributeWithTypeEntity } from 'src/modules/attribute/api/graphql/dto/attribute-with-type.object-type'
 
 @ObjectType('Company')
 export class CompanyEntity {
@@ -15,16 +14,31 @@ export class CompanyEntity {
   website?: string | null
 
   @Field(() => String, { nullable: true })
-  industry?: string | null
+  taxId?: string | null
+
+  @Field(() => String, { nullable: true })
+  description?: string | null
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  address?: Record<string, any> | null
+
+  @Field(() => String, { nullable: true })
+  phoneNumber?: string | null
+
+  @Field(() => String, { nullable: true })
+  email?: string | null
 
   @Field(() => String, { nullable: true })
   linkedinUrl?: string | null
 
   @Field(() => GraphQLJSON, { nullable: true })
-  address?: Record<string, any>
+  socialProfiles?: Record<string, any> | null
 
   @Field(() => String, { nullable: true })
-  description?: string
+  channelToken?: string | null
+
+  @Field(() => [CompanyNoteEntity], { nullable: true })
+  notes?: CompanyNoteEntity[]
 
   @Field(() => Date)
   createdAt: Date
@@ -34,13 +48,4 @@ export class CompanyEntity {
 
   @Field(() => Date, { nullable: true })
   deletedAt?: Date | null
-
-  @Field(() => String, { nullable: true })
-  channelToken?: string
-
-  @Field(() => [CompanyNoteEntity], { nullable: true })
-  notes?: CompanyNoteEntity[]
-
-  @Field(() => [AttributeWithTypeEntity], { nullable: true })
-  attributes?: AttributeWithTypeEntity[]
 }

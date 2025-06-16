@@ -21,7 +21,9 @@ enum AttributableType {
 
 model AttributeGroup {
   id              String  @id @default(cuid())
-  name            String // Örn: "Genel Bilgiler", "Adres Detayları"
+  name            String
+  code            String
+  order           Int?
   isSystemDefined Boolean @default(false)
 
   channelToken String
@@ -35,6 +37,7 @@ model AttributeGroup {
   deletedAt DateTime?
 
   @@unique([name, channelToken])
+  @@unique([code, channelToken])
 }
 
 // Models

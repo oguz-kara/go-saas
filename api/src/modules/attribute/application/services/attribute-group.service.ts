@@ -12,6 +12,7 @@ import { RequestContext } from 'src/common/request-context/request-context'
 import { CreateAttributeGroupInput } from '../../api/graphql/dto/create-attribute-group.input'
 import { UpdateAttributeGroupInput } from '../../api/graphql/dto/update-attribute-group.input'
 import { Prisma } from '@prisma/client'
+import slugify from 'slugify'
 
 @Injectable()
 export class AttributeGroupService {
@@ -29,6 +30,7 @@ export class AttributeGroupService {
       return await this.prisma.attributeGroup.create({
         data: {
           name: input.name,
+          code: slugify(input.name, { lower: true }),
           channelToken: userChannelToken,
         },
       })
@@ -63,7 +65,7 @@ export class AttributeGroupService {
     const [items, totalCount] = await Promise.all([
       this.prisma.attributeGroup.findMany({
         where: { channelToken: userChannelToken, deletedAt: null },
-        orderBy: { name: 'asc' },
+        orderBy: { order: 'asc' },
         skip: args.skip,
         take: args.take,
         cursor: args.cursor,

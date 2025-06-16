@@ -1,5 +1,5 @@
 // src/modules/attribute-type/api/graphql/entities/attribute-type.entity.ts
-import { ObjectType, Field, ID } from '@nestjs/graphql'
+import { ObjectType, Field, ID, Int } from '@nestjs/graphql'
 import { AttributableType } from '../enums/attributable-type.enum'
 import { AttributeDataType } from '../enums/attribute-data-type.enum'
 import { AttributeTypeKind } from '../enums/attribute-type-kind.enum'
@@ -15,7 +15,16 @@ export class AttributeTypeEntity {
   name: string
 
   @Field()
+  code: string
+
+  @Field(() => Int)
+  order: number
+
+  @Field()
   channelToken: string
+
+  @Field(() => String, { nullable: true })
+  groupId?: string | null
 
   // Type Configuration
   @Field(() => AttributeTypeKind)

@@ -31,10 +31,7 @@ interface CompaniesTableProps {
   pageInfo: { skip: number; take: number }
 }
 
-export const CompaniesTable = ({
-  companies,
-  pageInfo,
-}: CompaniesTableProps) => {
+export const CompaniesTable = ({ companies }: CompaniesTableProps) => {
   const { translations } = useTranslations()
 
   return (
@@ -43,7 +40,6 @@ export const CompaniesTable = ({
         <TableHeader>
           <TableRow>
             <TableHead>{translations?.companiesTable.headerName}</TableHead>
-            <TableHead>{translations?.companiesTable.headerIndustry}</TableHead>
             <TableHead>{translations?.companiesTable.headerWebsite}</TableHead>
             <TableHead>
               {translations?.companiesTable.headerCreatedAt}
@@ -67,7 +63,6 @@ export const CompaniesTable = ({
                     {company.name}
                   </Link>
                 </TableCell>
-                <TableCell>{company.industry || '–'}</TableCell>
                 <TableCell>
                   {company.website ? (
                     <a

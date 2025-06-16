@@ -1,6 +1,10 @@
 import { TwoLevelTranslations } from './types'
 
 export const tr: TwoLevelTranslations = {
+  common: {
+    select: 'Seç',
+    clearText: 'Temizle',
+  },
   companiesPage: {
     title: 'Şirketler',
     totalCountSuffix: 'toplam',
@@ -40,6 +44,20 @@ export const tr: TwoLevelTranslations = {
     submittingButton: 'Kaydediliyor...',
     validation_nameRequired: 'Şirket ismi zorunludur.',
     validation_urlInvalid: 'Lütfen geçerli bir URL girin.',
+    taxIdLabel: 'Vergi Numarası',
+    taxIdPlaceholder: 'Vergi numarası girin',
+    phoneNumberLabel: 'Telefon Numarası',
+    phoneNumberPlaceholder: '+90...',
+    emailLabel: 'E-posta',
+    emailPlaceholder: 'ornek@mail.com',
+    socialProfilesLabel: 'Sosyal Medya Profilleri',
+    socialProfilesPlaceholder: 'Sosyal medya profillerinizi girin',
+    addressLine1Label: 'Adres Satırı 1',
+    addressLine1Placeholder: 'Sokak, No',
+    addressLine2Label: 'Adres Satırı 2',
+    addressLine2Placeholder: 'Daire, Kat',
+    postalCodeLabel: 'Posta Kodu',
+    postalCodePlaceholder: 'Posta kodu',
   },
   createCompanyDialog: {
     title: 'Yeni Şirket Oluştur',
@@ -185,6 +203,19 @@ export const tr: TwoLevelTranslations = {
     settings: 'Ayarlar',
     signOut: 'Çıkış Yap',
     signingOut: 'Çıkış Yapılıyor...',
+  },
+
+  address: {
+    country: 'Ülke',
+    city: 'İl',
+    district: 'İlçe',
+    neighborhood: 'Mahalle',
+  },
+
+  socials: {
+    facebookPlaceholder: 'Facebook profil linki',
+    twitterPlaceholder: 'Twitter profil linki',
+    linkedinPlaceholder: 'LinkedIn profil linki',
   },
 }
 
