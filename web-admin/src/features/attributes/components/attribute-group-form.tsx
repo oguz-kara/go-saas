@@ -3,11 +3,11 @@
 
 import { useState } from 'react'
 import { useCreateAttributeGroupMutation } from '@gocrm/graphql/generated/hooks'
-import { GET_ATTRIBUTE_ARCHITECTURE_QUERY } from '../gql/documents/attribute-group.mutations'
 import { toast } from 'sonner'
 import { Input } from '@gocrm/components/ui/input'
 import { Button } from '@gocrm/components/ui/button'
 import { PlusCircle, Loader2 } from 'lucide-react'
+import { GET_ATTRIBUTE_ARCHITECTURE_QUERY } from '../gql/documents/attribute-group.query'
 
 export const AttributeGroupForm = () => {
   const [name, setName] = useState('')

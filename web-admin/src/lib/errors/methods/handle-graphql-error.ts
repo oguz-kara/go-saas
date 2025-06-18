@@ -9,7 +9,6 @@ function interpolate(template: string, params: Record<string, string>): string {
 }
 
 export function handleGraphQLError(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any,
   translations:
     | {

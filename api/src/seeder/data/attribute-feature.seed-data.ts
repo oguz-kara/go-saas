@@ -79,21 +79,6 @@ export const systemSeedData = [
         availableFor: [AttributableType.COMPANY],
         values: [{ value: 'Uzaktan' }, { value: 'Ofis' }, { value: 'Hibrit' }],
       },
-      {
-        typeData: {
-          name: 'Ana Ürün',
-          kind: AttributeTypeKind.MULTI_SELECT,
-          dataType: AttributeDataType.TEXT,
-        },
-        availableFor: [AttributableType.COMPANY],
-        values: [
-          { value: 'CRM Yazılımı' },
-          { value: 'ERP Yazılımı' },
-          { value: 'Mobil Uygulama' },
-          { value: 'Danışmanlık' },
-          { value: 'E-Ticaret Platformu' },
-        ],
-      },
     ],
   },
   {
@@ -111,59 +96,6 @@ export const systemSeedData = [
           { value: '1-10M TL' },
           { value: '10-100M TL' },
           { value: '100M+ TL' },
-        ],
-      },
-      {
-        typeData: {
-          name: 'Borsa Durumu',
-          kind: AttributeTypeKind.SELECT,
-          dataType: AttributeDataType.TEXT,
-        },
-        availableFor: [AttributableType.COMPANY],
-        values: [{ value: 'Halka Açık' }, { value: 'Halka Kapalı' }],
-      },
-      {
-        typeData: {
-          name: 'Yatırımcı Türü',
-          kind: AttributeTypeKind.MULTI_SELECT,
-          dataType: AttributeDataType.TEXT,
-        },
-        availableFor: [AttributableType.COMPANY],
-        values: [
-          { value: 'Bireysel' },
-          { value: 'Kurumsal' },
-          { value: 'Yabancı' },
-        ],
-      },
-    ],
-  },
-  {
-    group: { name: 'İletişim Bilgileri', order: 3 },
-    types: [
-      {
-        typeData: {
-          name: 'Email Durumu',
-          kind: AttributeTypeKind.SELECT,
-          dataType: AttributeDataType.TEXT,
-        },
-        availableFor: [AttributableType.COMPANY],
-        values: [
-          { value: 'Doğrulandı' },
-          { value: 'Doğrulanmadı' },
-          { value: 'Hatalı' },
-        ],
-      },
-      {
-        typeData: {
-          name: 'Telefon Durumu',
-          kind: AttributeTypeKind.SELECT,
-          dataType: AttributeDataType.TEXT,
-        },
-        availableFor: [AttributableType.COMPANY],
-        values: [
-          { value: 'Doğrulandı' },
-          { value: 'Doğrulanmadı' },
-          { value: 'Eksik' },
         ],
       },
     ],
