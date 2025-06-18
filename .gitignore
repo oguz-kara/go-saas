@@ -3,6 +3,7 @@ node_modules
 .cursorrules
 .cursorignore
 docker-compose.yml
+Dockerfile
 
 # compiled output
 /dist
