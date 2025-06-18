@@ -8,7 +8,16 @@ import {
   CardTitle,
 } from '@gocrm/components/ui/card'
 import { Button } from '@gocrm/components/ui/button'
-import { ArrowLeft, Building, Globe, Linkedin, Trash2 } from 'lucide-react'
+import {
+  ArrowLeft,
+  Globe,
+  Hash,
+  MapPin,
+  Phone,
+  Trash2,
+  Twitter,
+} from 'lucide-react'
+import { Mail } from 'lucide-react'
 import { EditCompanyDialog } from './edit-company-dialog'
 import { DeleteCompanyAlert } from './delete-company-alert'
 
@@ -18,6 +27,7 @@ import {
   GetCompanyWithAttributesAndNotesQuery,
 } from '@gocrm/graphql/generated/hooks'
 import { CompanyNotesSection } from './company-notes-section'
+import { Separator } from '@gocrm/components/ui/separator'
 
 type Company = NonNullable<GetCompanyWithAttributesAndNotesQuery['company']>
 type CompanyNotes = NonNullable<
@@ -68,36 +78,82 @@ export const CompanyDetailView = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            {company.industry && (
+            {/* Mevcut alanlar aynı kalıyor */}
+            <div className="flex items-center">
+              <Mail className="mr-2 h-4 w-4 text-muted-foreground" />{' '}
+              <a
+                href={`mailto:${company.email}`}
+                className="text-primary hover:underline"
+              >
+                {company.email || '-'}
+              </a>
+            </div>
+            <div className="flex items-center">
+              <Phone className="mr-2 h-4 w-4 text-muted-foreground" />{' '}
+              <span>{company.phoneNumber || '-'}</span>
+            </div>
+            <div className="flex items-center">
+              <Globe className="mr-2 h-4 w-4 text-muted-foreground" />{' '}
+              <a
+                href={company.website || '#'}
+                target="_blank"
+                className="text-primary hover:underline"
+              >
+                {company.website || '-'}
+              </a>
+            </div>
+
+            {/* --- YENİ EKLENEN ALANLAR --- */}
+            {company.taxId && (
               <div className="flex items-center">
-                <Building className="mr-2 h-4 w-4 text-muted-foreground" />
-                <span>{company.industry}</span>
+                <Hash className="mr-2 h-4 w-4 text-muted-foreground" />{' '}
+                <span>Vergi No: {company.taxId}</span>
               </div>
             )}
-            {company.website && (
+
+            {company.socialProfiles?.twitter && (
               <div className="flex items-center">
-                <Globe className="mr-2 h-4 w-4 text-muted-foreground" />
+                <Twitter className="mr-2 h-4 w-4 text-muted-foreground" />{' '}
                 <a
-                  href={company.website}
+                  href={company.socialProfiles.twitter}
                   target="_blank"
-                  className="text-blue-600 hover:underline truncate"
+                  className="text-primary hover:underline"
                 >
-                  {company.website}
+                  Twitter Profili
                 </a>
               </div>
             )}
-            {company.linkedinUrl && (
+            {company.socialProfiles?.facebook && (
               <div className="flex items-center">
-                <Linkedin className="mr-2 h-4 w-4 text-muted-foreground" />
+                <Globe className="mr-2 h-4 w-4 text-muted-foreground" />{' '}
                 <a
-                  href={company.linkedinUrl}
+                  href={company.socialProfiles.facebook}
                   target="_blank"
-                  className="text-blue-600 hover:underline truncate"
+                  className="text-primary hover:underline"
                 >
-                  LinkedIn
+                  Facebook Sayfası
                 </a>
               </div>
             )}
+            {/* --- YENİ EKLENEN ALANLAR BİTİŞ --- */}
+
+            <Separator className="my-4" />
+            <div className="flex flex-col items-start">
+              <MapPin className="mr-2 mt-1 h-4 w-4 text-muted-foreground flex-shrink-0" />{' '}
+              <p>
+                {[
+                  company.address?.line1,
+                  company.address?.line2,
+                  company.address?.postalCode,
+                ]
+                  .filter(Boolean)
+                  .join(', ') || 'Adres bilgisi girilmemiş.'}
+              </p>
+              <br />
+              <p>
+                {company.addressAttributeCodes?.map((atc) => atc).join(', ')}
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

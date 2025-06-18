@@ -38,6 +38,7 @@
     "cache-manager-redis-yet": "^5.1.5",
     "class-validator": "^0.14.2",
     "command-runner": "^0.2.2",
+    "graphql": "^16.11.0",
     "graphql-type-json": "^0.3.2",
     "nest-commander": "^3.17.0",
     "nestjs-command": "^3.1.5",

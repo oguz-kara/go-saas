@@ -33,7 +33,7 @@ export class AttributeTypeEntity {
   @Field(() => AttributeDataType)
   dataType: AttributeDataType
 
-  @Field()
+  @Field(() => Boolean)
   isSystemDefined: boolean
 
   // Relations

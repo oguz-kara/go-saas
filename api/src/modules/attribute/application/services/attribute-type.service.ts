@@ -4,8 +4,6 @@ import {
   InternalServerErrorException,
   Logger,
   UnauthorizedException,
-  ConflictException,
-  NotFoundException,
 } from '@nestjs/common'
 import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import { RequestContext } from 'src/common/request-context/request-context'
@@ -16,8 +14,12 @@ import { ListQueryArgs } from 'src/common/graphql/dto/list-query.args'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from 'src/common'
 import { AttributeTypeEntity } from '../../api/graphql/entities/attribute-type.entity'
 import slugify from 'slugify'
-import { AttributeTypeHasValuesError } from '../../domain/exceptions'
-import { SystemDefinedAttributeTypeError } from '../../domain/exceptions/system-defined-attribute-type.exception'
+import {
+  CannotDeleteParentEntityException,
+  EntityNotFoundException,
+  SystemDefinedEntityException,
+  UniqueConstraintViolationException,
+} from 'src/common/exceptions'
 
 @Injectable()
 export class AttributeTypeService {
@@ -36,6 +38,48 @@ export class AttributeTypeService {
 
     const { name, kind, dataType, groupId, availableFor, config } = input
 
+    // Check for a soft-deleted attribute type with the same name and channelToken
+    const softDeleted = await this.prisma.attributeType.findFirst({
+      where: {
+        name,
+        channelToken,
+        deletedAt: { not: null },
+      },
+      include: { availableFor: true },
+    })
+
+    if (softDeleted) {
+      // Remove old availableFor relations
+      await this.prisma.attributeTypeToEntityType.deleteMany({
+        where: { attributeTypeId: softDeleted.id },
+      })
+
+      // Restore and update the soft-deleted attribute type
+      const revived = await this.prisma.attributeType.update({
+        where: { id: softDeleted.id },
+        data: {
+          deletedAt: null,
+          name,
+          kind: kind as AttributeTypeKind,
+          code: slugify(name, { lower: true, strict: true }),
+          dataType,
+          config: config || Prisma.JsonNull,
+          groupId: groupId || undefined,
+          availableFor: {
+            create: availableFor.map((entityType) => ({
+              entityType,
+            })),
+          },
+        },
+        include: { group: true, availableFor: true },
+      })
+
+      return {
+        ...revived,
+        availableFor: revived.availableFor.map((item) => item.entityType),
+      } as unknown as AttributeTypeEntity
+    }
+
     this.logger.log(
       `User creating attribute type "${name}" for channel ${channelToken}`,
     )
@@ -45,9 +89,7 @@ export class AttributeTypeService {
         where: { id: groupId, channelToken: channelToken },
       })
       if (!groupExists) {
-        throw new NotFoundException(
-          `AttributeGroup with ID "${groupId}" not found in this channel.`,
-        )
+        throw new EntityNotFoundException('AttributeGroup', groupId)
       }
     }
 
@@ -55,7 +97,7 @@ export class AttributeTypeService {
       const attributeTypeData: Prisma.AttributeTypeCreateInput = {
         name,
         kind: kind as AttributeTypeKind,
-        code: slugify(name, { lower: true }),
+        code: slugify(name, { lower: true, strict: true }),
         dataType,
         config: config || Prisma.JsonNull,
         channel: { connect: { token: channelToken } },
@@ -81,8 +123,8 @@ export class AttributeTypeService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new ConflictException(
-          `Attribute type with name "${name}" already exists.`,
+        throw new UniqueConstraintViolationException(
+          error.meta?.target as string[],
         )
       }
       this.logger.error(
@@ -112,7 +154,7 @@ export class AttributeTypeService {
     const whereClause: Prisma.AttributeTypeWhereInput = {
       channelToken: channelToken,
       deletedAt: null,
-      isSystemDefined: includeSystemDefined,
+      ...(includeSystemDefined ? {} : { isSystemDefined: false }),
     }
 
     if (searchQuery) {
@@ -135,6 +177,8 @@ export class AttributeTypeService {
         ...type,
         availableFor: type.availableFor.map((item) => item.entityType),
       }))
+
+      console.dir(items, { depth: null })
 
       return { items: items as unknown as AttributeTypeEntity[], totalCount }
     } catch (error) {
@@ -162,7 +206,11 @@ export class AttributeTypeService {
       where: { id, channelToken: channelToken, deletedAt: null },
     })
     if (!existingType) {
-      throw new NotFoundException(`Attribute type with ID "${id}" not found.`)
+      throw new EntityNotFoundException('AttributeType', id)
+    }
+
+    if (existingType.isSystemDefined) {
+      throw new SystemDefinedEntityException('attribute type', 'modify')
     }
 
     try {
@@ -202,8 +250,8 @@ export class AttributeTypeService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new ConflictException(
-          `Another attribute type with name "${input.name}" already exists.`,
+        throw new UniqueConstraintViolationException(
+          error.meta?.target as string[],
         )
       }
       this.logger.error(
@@ -222,19 +270,29 @@ export class AttributeTypeService {
 
     const existingType = await this.prisma.attributeType.findFirst({
       where: { id, channelToken: channelToken, deletedAt: null },
-      include: { _count: { select: { values: true } } },
+      include: {
+        _count: {
+          select: {
+            values: {
+              where: {
+                deletedAt: null,
+              },
+            },
+          },
+        },
+      },
     })
 
     if (!existingType) {
-      throw new NotFoundException(`Attribute type with ID "${id}" not found.`)
+      throw new EntityNotFoundException('AttributeType', id)
     }
 
     if (existingType.isSystemDefined) {
-      throw new SystemDefinedAttributeTypeError(existingType.name)
+      throw new SystemDefinedEntityException('attribute type', 'delete')
     }
 
     if (existingType._count.values > 0) {
-      throw new AttributeTypeHasValuesError(existingType.name)
+      throw new CannotDeleteParentEntityException('attribute type', 'values')
     }
 
     await this.prisma.attributeType.update({

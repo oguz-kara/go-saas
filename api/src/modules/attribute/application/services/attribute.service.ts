@@ -4,8 +4,6 @@ import {
   Logger,
   UnauthorizedException,
   InternalServerErrorException,
-  NotFoundException,
-  ConflictException,
 } from '@nestjs/common'
 import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import { RequestContext } from 'src/common/request-context/request-context'
@@ -21,6 +19,11 @@ import { UpdateAttributeInput } from 'src/modules/attribute/api/graphql/dto/upda
 import slugify from 'slugify'
 import { AttributeTypeEntity } from '../../api/graphql/entities/attribute-type.entity'
 import { GetAttributeValuesByCodeArgs } from '../../api/graphql/args/get-attribute-values-by-code.args'
+import {
+  CannotDeleteParentEntityException,
+  EntityNotFoundException,
+  UniqueConstraintViolationException,
+} from 'src/common/exceptions'
 
 @Injectable()
 export class AttributeService {
@@ -174,17 +177,15 @@ export class AttributeService {
 
     const { value, attributeTypeId, parentId, meta } = input
 
-    // Önce AttributeType'ın bu tenanta ait olup olmadığını kontrol et
     const attributeTypeExists = await this.prisma.attributeType.findFirst({
       where: {
         id: attributeTypeId,
         channelToken: channel.token,
+        deletedAt: null,
       },
     })
     if (!attributeTypeExists) {
-      throw new NotFoundException(
-        `Attribute type with ID "${attributeTypeId}" not found in this channel.`,
-      )
+      throw new EntityNotFoundException('AttributeType', attributeTypeId)
     }
 
     if (parentId) {
@@ -193,83 +194,72 @@ export class AttributeService {
           id: parentId,
           channelToken: channel.token,
           attributeTypeId: attributeTypeId,
+          deletedAt: null,
         },
       })
       if (!parentExists) {
-        throw new NotFoundException(
-          `Parent attribute value with ID "${parentId}" is not valid.`,
-        )
+        throw new EntityNotFoundException('AttributeValue', parentId)
       }
     }
 
-    this.logger.log(
-      `User creating attribute value "${value}" for type ${attributeTypeId}`,
-    )
-
-    const isAttributeExists = await this.prisma.attributeValue.findFirst({
+    // Check for a soft-deleted attribute value with the same value, attributeTypeId, and channelToken
+    const softDeleted = await this.prisma.attributeValue.findFirst({
       where: {
         value,
         attributeTypeId,
         channelToken: channel.token,
+        deletedAt: { not: null },
       },
     })
 
-    this.logger.log('isAttributeExists', isAttributeExists)
-
-    if (isAttributeExists) {
-      this.logger.log(
-        `Attribute value "${value}" already exists for this attribute type.`,
-      )
+    if (softDeleted) {
+      const revived = await this.prisma.attributeValue.update({
+        where: { id: softDeleted.id },
+        data: {
+          deletedAt: null,
+          value,
+          code: slugify(value, { lower: true, strict: true }),
+          parentId: parentId || undefined,
+          meta: meta || Prisma.JsonNull,
+        },
+        include: { type: true },
+      })
+      return {
+        ...revived,
+        meta: revived.meta as Record<string, any>,
+        type: revived.type as unknown as AttributeTypeEntity,
+      }
     }
 
     this.logger.log(
       `User creating attribute value "${value}" for type ${attributeTypeId}`,
-      'create',
     )
 
     try {
-      if (isAttributeExists) {
-        const newValue = await this.prisma.attributeValue.update({
-          where: {
-            id: isAttributeExists.id,
-            value: value,
-          },
-          data: {
-            value,
-            deletedAt: null,
-            attributeTypeId,
-            channelToken: channel.token,
-          },
-        })
+      const newValue = await this.prisma.attributeValue.create({
+        data: {
+          value,
+          code: slugify(value, { lower: true, strict: true }),
+          meta: meta || Prisma.JsonNull,
+          type: { connect: { id: attributeTypeId } },
+          channel: { connect: { token: channel.token } },
+          ...(parentId && { parent: { connect: { id: parentId } } }),
+        },
+        include: { type: true },
+      })
 
-        return { ...newValue, meta: newValue.meta as Record<string, any> }
-      } else {
-        const newValue = await this.prisma.attributeValue.create({
-          data: {
-            value,
-            code: slugify(value, { lower: true }),
-            meta: meta || Prisma.JsonNull,
-            type: { connect: { id: attributeTypeId } },
-            channel: { connect: { token: channel.token } },
-            ...(parentId && { parent: { connect: { id: parentId } } }),
-          },
-          include: { type: true },
-        })
-
-        return {
-          ...newValue,
-          meta: newValue.meta as Record<string, any>,
-          type: newValue.type as unknown as AttributeTypeEntity,
-        }
+      return {
+        ...newValue,
+        meta: newValue.meta as Record<string, any>,
+        type: newValue.type as unknown as AttributeTypeEntity,
       }
     } catch (error) {
-      this.logger.error('error', error)
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new ConflictException(
-          `Value "${value}" already exists for this attribute type.`,
+        throw new UniqueConstraintViolationException(
+          error.meta?.target as string[],
         )
       }
       this.logger.error(
@@ -292,12 +282,11 @@ export class AttributeService {
       throw new UnauthorizedException('Channel could not be identified.')
     }
 
-    // Güncellenecek kaydın bu tenanta ait olduğunu doğrula
     const existingValue = await this.prisma.attributeValue.findFirst({
       where: { id, channelToken: channel.token, deletedAt: null },
     })
     if (!existingValue) {
-      throw new NotFoundException(`Attribute value with ID "${id}" not found.`)
+      throw new EntityNotFoundException('AttributeValue', id)
     }
 
     const { value, parentId, meta } = input
@@ -309,6 +298,7 @@ export class AttributeService {
         where: { id },
         data: {
           value,
+          ...(value && { code: slugify(value, { lower: true, strict: true }) }),
           parentId,
           meta: meta ? meta : undefined,
         },
@@ -324,8 +314,8 @@ export class AttributeService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new ConflictException(
-          `Another value with name "${input.value}" already exists for this attribute type.`,
+        throw new UniqueConstraintViolationException(
+          error.meta?.target as string[],
         )
       }
       this.logger.error(
@@ -348,16 +338,14 @@ export class AttributeService {
       where: { id, channelToken: channel.token, deletedAt: null },
     })
     if (!existingValue) {
-      throw new NotFoundException(`Attribute value with ID "${id}" not found.`)
+      throw new EntityNotFoundException('AttributeValue', id)
     }
 
     const assignmentCount = await this.prisma.attributeAssignment.count({
       where: { attributeValueId: id },
     })
     if (assignmentCount > 0) {
-      throw new ConflictException(
-        `Cannot delete value because it is assigned to ${assignmentCount} record(s).`,
-      )
+      throw new CannotDeleteParentEntityException('value', 'assignments')
     }
 
     await this.prisma.attributeValue.update({

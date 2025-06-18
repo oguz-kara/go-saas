@@ -3,15 +3,18 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  ConflictException, // For duplicate token/name
 } from '@nestjs/common'
 import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import { RequestContext } from 'src/common/request-context/request-context'
-import { ChannelEntity } from 'src/modules/channel/api/graphql/entities/channel.entity' // Your GQL Type
+import { ChannelEntity } from 'src/modules/channel/api/graphql/entities/channel.entity'
 import { CreateChannelInput } from 'src/modules/channel/api/graphql/dto/create-channel.input'
 import { Prisma } from '@prisma/client'
 import { generateChannelToken } from '../../domain/utils/token'
 import { ListQueryArgs } from 'src/common'
+import {
+  EntityNotFoundException,
+  UniqueConstraintViolationException,
+} from 'src/common/exceptions'
 
 @Injectable()
 export class ChannelService {
@@ -47,29 +50,13 @@ export class ChannelService {
       })
       return newChannel as ChannelEntity
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          // Unique constraint violation
-          const target = (error.meta?.target as string[]) || []
-          if (target.includes('token')) {
-            this.logger.warn(
-              `Failed to create channel. Token "${token}" already exists.`,
-              'createChannel',
-            )
-            throw new ConflictException(
-              `Channel token "${token}" already exists.`,
-            )
-          }
-          if (target.includes('name')) {
-            this.logger.warn(
-              `Failed to create channel. Name "${name}" already exists.`,
-              'createChannel',
-            )
-            throw new ConflictException(
-              `Channel name "${name}" already exists.`,
-            )
-          }
-        }
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new UniqueConstraintViolationException(
+          error.meta?.target as string[],
+        )
       }
       this.logger.error(
         `Failed to create channel "${name}": ${error.message}`,
@@ -123,15 +110,19 @@ export class ChannelService {
       const channel = await this.prisma.channel.findUnique({
         where: { token },
       })
+      if (!channel) {
+        throw new EntityNotFoundException('Channel', token)
+      }
       return channel as ChannelEntity | null
     } catch (error) {
+      if (error instanceof EntityNotFoundException) {
+        throw error
+      }
       this.logger.error(
         `Failed to find channel by token ${token}: ${error.message}`,
         error.stack,
         'findChannelByToken',
       )
-      // Depending on expected behavior, you might throw or just return null
-      // For a simple lookup, returning null is fine. If non-existence is an error condition, throw.
       throw new InternalServerErrorException('Error finding channel.')
     }
   }

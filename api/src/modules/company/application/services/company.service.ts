@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -8,12 +9,12 @@ import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import { CompanyEntity } from '../../api/graphql/entities/company.entity'
 import { RequestContext } from 'src/common/request-context/request-context'
 import { CreateCompanyInput } from '../../api/graphql/dto/create-company.input'
-import { AttributableType, Prisma } from '@prisma/client'
-import { CompanyNotFoundError } from '../../domain/exceptions/company-not-found.exception'
+import { AttributableType, AttributeAssignment, Prisma } from '@prisma/client'
 import { UpdateCompanyInput } from '../../api/graphql/dto/update-company.input'
 import { AttributeFilterInput } from '../../api/graphql/dto/attribute-filter.input'
 import { AttributeWithTypeEntity } from '../../api/graphql/dto/attribute-with-type.object-type'
 import { AttributeTypeEntity } from 'src/modules/attribute/api/graphql/entities/attribute-type.entity'
+import { EntityNotFoundException } from 'src/common/exceptions'
 
 @Injectable()
 export class CompanyService {
@@ -39,6 +40,7 @@ export class CompanyService {
       socialProfiles,
       taxId,
       attributeIds,
+      addressAttributeCodes,
     } = createCompanyInput
 
     const ct = channelToken ? channelToken : channel.token
@@ -53,37 +55,92 @@ export class CompanyService {
     this.logger.log(`User ${user?.id} creating company via channel ${ct}`)
 
     try {
-      const company = await this.prisma.company.create({
-        data: {
-          name,
-          website,
-          linkedinUrl,
-          address,
-          description,
-          email,
-          phoneNumber,
-          socialProfiles,
-          taxId,
-          channelToken: ct,
-          attributeAssignments: {
-            create:
-              attributeIds?.map((valueId) => ({
-                attributeValue: { connect: { id: valueId } },
-                attributableType: AttributableType.COMPANY,
-                attributableId: company.id,
-                channel: { connect: { token: ct } },
-                ...(ctx.user?.id && {
-                  assignedBy: {
-                    connect: {
-                      id: ctx.user.id,
-                    },
-                  },
-                }),
-              })) || [],
+      return await this.prisma.$transaction(async (tx) => {
+        let resolvedAddressValueIds: string[] = []
+        let resolvedAttributeValueIds: string[] = []
+
+        if (addressAttributeCodes && addressAttributeCodes.length > 0) {
+          const foundValues = await tx.attributeValue.findMany({
+            where: {
+              code: { in: addressAttributeCodes },
+              channelToken: ct,
+              deletedAt: null,
+            },
+            select: { id: true, code: true },
+          })
+
+          if (foundValues.length !== addressAttributeCodes.length) {
+            const notFoundCodes = addressAttributeCodes.filter(
+              (code) => !foundValues.find((v) => v.code === code),
+            )
+            throw new ConflictException(
+              `The following address codes are invalid: ${notFoundCodes.join(', ')}`,
+            )
+          }
+          resolvedAddressValueIds = foundValues.map((v) => v.id)
+        }
+
+        if (attributeIds && attributeIds.length > 0) {
+          const foundAttributes = await tx.attributeValue.findMany({
+            where: {
+              id: { in: attributeIds },
+              channelToken: ct,
+              deletedAt: null,
+            },
+            select: { id: true },
+          })
+          const foundIds = foundAttributes.map((v) => v.id)
+          if (foundIds.length !== attributeIds.length) {
+            const notFoundIds = attributeIds.filter(
+              (id) => !foundIds.includes(id),
+            )
+            throw new ConflictException(
+              `The following attribute value IDs are invalid: ${notFoundIds.join(', ')}`,
+            )
+          }
+          resolvedAttributeValueIds = foundIds
+        }
+
+        const allAttributeValueIds = [
+          ...resolvedAttributeValueIds,
+          ...resolvedAddressValueIds,
+        ]
+        const uniqueAttributeValueIds = [...new Set(allAttributeValueIds)]
+
+        // 1. Create the company first (without attributeAssignments)
+        const company = await tx.company.create({
+          data: {
+            name,
+            website,
+            linkedinUrl,
+            address: address ? (address as Prisma.JsonObject) : Prisma.JsonNull,
+            socialProfiles: socialProfiles
+              ? (socialProfiles as Prisma.JsonObject)
+              : Prisma.JsonNull,
+            description,
+            email,
+            phoneNumber,
+            taxId,
+            channelToken: ct,
           },
-        },
+        })
+
+        // 2. Create attribute assignments if any
+        if (uniqueAttributeValueIds.length > 0) {
+          await tx.attributeAssignment.createMany({
+            data: uniqueAttributeValueIds.map((valueId) => ({
+              attributeValueId: valueId,
+              attributableType: AttributableType.COMPANY,
+              attributableId: company.id,
+              channelToken: ct,
+              companyId: company.id,
+              assignedById: ctx.user?.id || null,
+            })),
+          })
+        }
+
+        return company as CompanyEntity
       })
-      return company as CompanyEntity
     } catch (error) {
       this.logger.error(
         `Failed to create company via channel ${channelToken}: ${error.message}`,
@@ -234,16 +291,27 @@ export class CompanyService {
     const ct = channelToken ? channelToken : channel.token
 
     try {
-      const company = await this.prisma.company.findUnique({
+      const company = await this.prisma.company.findFirst({
         where: { id, channelToken: ct, deletedAt: null },
+        include: {
+          attributeAssignments: {
+            include: {
+              attributeValue: {
+                include: {
+                  type: true,
+                },
+              },
+            },
+          },
+        },
       })
 
       if (!company) {
-        throw new CompanyNotFoundError(id)
+        throw new EntityNotFoundException('Company', id)
       }
       return company as CompanyEntity
     } catch (error) {
-      if (error instanceof CompanyNotFoundError) {
+      if (error instanceof EntityNotFoundException) {
         this.logger.warn(
           `Company not found for ID: ${id}, requested by user ${user?.id}.`,
           'getCompanyById',
@@ -262,88 +330,125 @@ export class CompanyService {
   async updateCompany(
     ctx: RequestContext,
     id: string,
-    updateData: UpdateCompanyInput,
-    channelToken?: string,
+    input: UpdateCompanyInput,
   ): Promise<CompanyEntity> {
-    const { user, channel } = ctx
-    const ct = channelToken ? channelToken : channel.token
+    const { channel, jwtPayload } = ctx
+    if (!channel.token || !jwtPayload?.sub) {
+      throw new UnauthorizedException(
+        'User or Channel could not be identified.',
+      )
+    }
 
-    this.logger.log(
-      `User ${user?.id} updating company with ID: ${id}. Data: ${JSON.stringify(updateData)}`,
-      'updateCompany',
-    )
+    this.logger.log(`User ${jwtPayload.sub} updating company with ID: ${id}`)
 
     const existingCompany = await this.prisma.company.findFirst({
-      where: { id, channelToken: ct, deletedAt: null },
+      where: { id, channelToken: channel.token, deletedAt: null },
     })
-    if (!existingCompany) throw new CompanyNotFoundError(id)
-
-    const { address, attributeIds, ...rest } = updateData
-
-    const prismaUpdateData: Prisma.CompanyUpdateInput = {
-      ...rest,
-      attributeAssignments: {
-        create:
-          attributeIds?.map((valueId) => ({
-            attributeValue: { connect: { id: valueId } },
-            attributableType: AttributableType.COMPANY,
-            attributableId: id,
-            channel: { connect: { token: ct } },
-            ...(ctx.user?.id && {
-              assignedBy: {
-                connect: {
-                  id: ctx.user.id,
-                },
-              },
-            }),
-          })) || [],
-      },
+    if (!existingCompany) {
+      throw new EntityNotFoundException('Company', id)
     }
 
-    if (address) {
-      prismaUpdateData.address = {
-        toJSON() {
-          return address
-        },
-      }
-    }
+    const { attributeIds, addressAttributeCodes, ...companyData } = input
 
     try {
-      const updatedCompany = await this.prisma.$transaction(async (tx) => {
-        if (attributeIds !== undefined) {
-          await tx.attributeAssignment.deleteMany({
+      return await this.prisma.$transaction(async (tx) => {
+        // --- createCompany'deki ile aynı ID çözümleme mantığı ---
+        let resolvedAddressValueIds: string[] = []
+        if (addressAttributeCodes && addressAttributeCodes.length > 0) {
+          const foundValues = await tx.attributeValue.findMany({
             where: {
-              attributableId: id,
-              attributableType: AttributableType.COMPANY,
+              code: { in: addressAttributeCodes },
+              channelToken: channel.token,
+              deletedAt: null,
             },
+            select: { id: true, code: true },
           })
+
+          if (foundValues.length !== addressAttributeCodes.length) {
+            const notFoundCodes = addressAttributeCodes.filter(
+              (code) => !foundValues.find((v) => v.code === code),
+            )
+            throw new ConflictException(
+              `Invalid address codes: ${notFoundCodes.join(', ')}`,
+            )
+          }
+          resolvedAddressValueIds = foundValues.map((v) => v.id)
         }
 
-        const company = await tx.company.update({
-          where: { id },
-          data: prismaUpdateData,
+        let resolvedAttributeValueIds: string[] = []
+        if (attributeIds && attributeIds.length > 0) {
+          const foundAttributes = await tx.attributeValue.findMany({
+            where: {
+              id: { in: attributeIds },
+              channelToken: channel.token,
+              deletedAt: null,
+            },
+            select: { id: true },
+          })
+          const foundIds = foundAttributes.map((v) => v.id)
+          if (foundIds.length !== attributeIds.length) {
+            const notFoundIds = attributeIds.filter(
+              (id) => !foundIds.includes(id),
+            )
+            throw new ConflictException(
+              `Invalid attribute value IDs: ${notFoundIds.join(', ')}`,
+            )
+          }
+          resolvedAttributeValueIds = foundIds
+        }
+
+        const allAttributeValueIds = [
+          ...resolvedAttributeValueIds,
+          ...resolvedAddressValueIds,
+        ]
+        const uniqueAttributeValueIds = [...new Set(allAttributeValueIds)]
+        // --- Bitiş: ID Çözümleme ---
+
+        // 2. Önce şirketin mevcut tüm attribute atamalarını sil
+        await tx.attributeAssignment.deleteMany({
+          where: {
+            attributableId: id,
+            attributableType: AttributableType.COMPANY,
+          },
         })
 
-        return company
-      })
+        // 3. Şirketin temel bilgilerini güncelle
+        const updatedCompany = await tx.company.update({
+          where: { id },
+          data: {
+            ...companyData,
+            address: companyData.address
+              ? (companyData.address as Prisma.JsonObject)
+              : undefined,
+            socialProfiles: companyData.socialProfiles
+              ? (companyData.socialProfiles as Prisma.JsonObject)
+              : undefined,
+            // Yeni attribute atamalarını `create` ile ekliyoruz
+            attributeAssignments: {
+              create: uniqueAttributeValueIds.map((valueId) => ({
+                attributeValue: { connect: { id: valueId } },
+                attributableType: AttributableType.COMPANY,
+                channel: { connect: { token: channel.token } },
+                assignedBy: { connect: { id: jwtPayload.sub } },
+                attributableId: id,
+              })),
+            },
+          },
+        })
 
-      return updatedCompany as CompanyEntity
+        return updatedCompany as CompanyEntity
+      })
     } catch (error) {
+      // Servis içinde fırlattığımız bilinen hataları olduğu gibi geri döndür
       if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2025'
+        error instanceof EntityNotFoundException ||
+        error instanceof ConflictException
       ) {
-        // "An operation failed because it depends on one or more records that were required but not found. {cause}"
-        this.logger.warn(
-          `Failed to update company. Company not found with ID: ${id}, for user ${user?.id}.`,
-          'updateCompany',
-        )
-        throw new CompanyNotFoundError(id)
+        throw error
       }
       this.logger.error(
-        `Failed to update company with ID ${id} for user ${user?.id}: ${error.message}`,
+        `Failed to update company ${id}: ${error.message}`,
         error.stack,
-        'updateCompany',
       )
       throw new InternalServerErrorException('Could not update company.')
     }
@@ -382,7 +487,7 @@ export class CompanyService {
           `Failed to soft delete company. Company not found or already deleted with ID: ${id}, for user ${user?.id}.`,
           'deleteCompany',
         )
-        throw new CompanyNotFoundError(id)
+        throw new EntityNotFoundException('Company', id)
       }
 
       const softDeletedCompany = await this.prisma.company.update({
@@ -402,8 +507,8 @@ export class CompanyService {
           `Failed to soft delete company during update. Company not found with ID: ${id}, for user ${user?.id}.`,
           'deleteCompany',
         )
-        throw new CompanyNotFoundError(id)
-      } else if (error instanceof CompanyNotFoundError) {
+        throw new EntityNotFoundException('Company', id)
+      } else if (error instanceof EntityNotFoundException) {
         throw error
       }
       this.logger.error(
@@ -444,5 +549,30 @@ export class CompanyService {
       type: attribute.type as unknown as AttributeTypeEntity,
       attributeTypeId: attribute.attributeTypeId,
     }))
+  }
+
+  async getAssignmentsForCompany(
+    ctx: RequestContext,
+    companyId: string,
+  ): Promise<AttributeAssignment[]> {
+    const { channel } = ctx
+    if (!channel.token) {
+      throw new UnauthorizedException('Channel could not be identified.')
+    }
+
+    return await this.prisma.attributeAssignment.findMany({
+      where: {
+        attributableId: companyId,
+        attributableType: 'COMPANY',
+        channelToken: channel.token,
+      },
+      include: {
+        attributeValue: {
+          include: {
+            type: true,
+          },
+        },
+      },
+    })
   }
 }

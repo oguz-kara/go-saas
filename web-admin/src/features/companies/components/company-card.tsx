@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@gocrm/components/ui/card'
-import { Building, Globe, MoreVertical } from 'lucide-react'
+import { Globe, MoreVertical } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,7 +41,10 @@ export const CompanyCard = ({ company }: CompanyCardProps) => {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-base font-medium">
           <Link
-            href={`${routes?.companies}/${company.id}`}
+            href={
+              routes?.companyDetails.replace(':id', company.id) ||
+              `/companies/${company.id}/details`
+            }
             className="text-blue-600 hover:underline"
           >
             {company.name}
@@ -70,12 +73,6 @@ export const CompanyCard = ({ company }: CompanyCardProps) => {
       </CardHeader>
       <CardContent>
         <div className="text-sm text-muted-foreground space-y-2">
-          {company.industry && (
-            <div className="flex items-center">
-              <Building className="mr-2 h-4 w-4" />
-              <span>{company.industry}</span>
-            </div>
-          )}
           {company.website && (
             <div className="flex items-center">
               <Globe className="mr-2 h-4 w-4" />
@@ -88,6 +85,22 @@ export const CompanyCard = ({ company }: CompanyCardProps) => {
               >
                 {company.website}
               </a>
+            </div>
+          )}
+          {/* Address display */}
+          {(company.address?.line1 ||
+            company.address?.line2 ||
+            company.address?.postalCode) && (
+            <div className="flex flex-col items-start mt-2">
+              <span>
+                {[
+                  company.address?.line1,
+                  company.address?.line2,
+                  company.address?.postalCode,
+                ]
+                  .filter(Boolean)
+                  .join(', ') || 'Adres bilgisi girilmemiş.'}
+              </span>
             </div>
           )}
         </div>

@@ -7,6 +7,7 @@ import { withAuthProtection } from '@gocrm/lib/auth/with-auth-protection'
 import { AppPagination } from '@gocrm/components'
 import { DEFAULT_PAGE_SIZE } from '@gocrm/constants'
 import { DEFAULT_PAGE } from '@gocrm/constants'
+import { Company } from '@gocrm/graphql/generated/hooks'
 
 export default async function CompanyDetailPage({
   params,
@@ -27,12 +28,21 @@ export default async function CompanyDetailPage({
   }
 
   const { company, companyNotes } = await withAuthProtection(async () => {
-    return await api.getCompanyWithAttributesAndNotes({
-      id: id,
-      skip: pageInfo.skip,
-      take: pageInfo.take,
-      searchQuery: (notesSearchQuery as string) || undefined,
-    })
+    const { company, companyNotes } =
+      await api.getCompanyWithAttributesAndNotes({
+        id: id,
+        skip: pageInfo.skip,
+        take: pageInfo.take,
+        searchQuery: (notesSearchQuery as string) || undefined,
+      })
+
+    return {
+      company: {
+        ...company,
+        addressAttributeCodes: company?.addressAttributeCodes?.reverse() || [],
+      },
+      companyNotes,
+    }
   })
 
   if (!company) {
@@ -44,7 +54,7 @@ export default async function CompanyDetailPage({
   return (
     <>
       <CompanyDetailView
-        company={company}
+        company={company as Company}
         companyNotes={companyNotes || { items: [], totalCount: 0 }}
         translations={translations}
       />

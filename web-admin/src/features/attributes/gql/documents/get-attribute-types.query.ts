@@ -16,6 +16,7 @@ export const GET_ATTRIBUTE_TYPES_QUERY = gql`
         createdAt
         isSystemDefined
         groupId
+        availableFor
       }
       totalCount
     }

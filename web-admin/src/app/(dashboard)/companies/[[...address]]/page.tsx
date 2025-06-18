@@ -31,6 +31,7 @@ export default async function CompanyListPage({
   const sp = await searchParams
   const { locale, address } = (await params) || {}
 
+  const searchQuery = sp?.searchQuery
   const addressSlug = address?.[0]
   const addressParts = addressSlug ? addressSlug.split('-') : []
   const api = sdk(locale)
@@ -58,6 +59,7 @@ export default async function CompanyListPage({
         take: pageInfo.take,
         filters,
         address: addressSlug,
+        searchQuery: searchQuery as string,
       })
     })
 

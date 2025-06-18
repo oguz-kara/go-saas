@@ -82,12 +82,6 @@ type AttributeValueConnection {
   totalCount: Int!
 }
 
-type AttributeWithType {
-  id: ID!
-  name: String!
-  value: String!
-}
-
 type AuthenticationPayload {
   token: String!
   user: User!
@@ -109,7 +103,8 @@ type ChannelConnection {
 
 type Company {
   address: JSON
-  attributes: [AttributeWithType!]!
+  addressAttributeCodes: [String!]
+  attributes: [AttributeValue!]
   channelToken: String
   createdAt: DateTime!
   deletedAt: DateTime
@@ -191,6 +186,11 @@ input CreateChannelInput {
 
 input CreateCompanyInput {
   address: JSON
+
+  """
+  Hiyerarşik adres değerlerinin kodları (örn: ["turkiye", "izmir", "bornova"])
+  """
+  addressAttributeCodes: [String!]
   attributeIds: [String!]
   description: String
   email: String
@@ -373,6 +373,11 @@ input UpdateAttributeTypeInput {
 
 input UpdateCompanyInput {
   address: JSON
+
+  """
+  Hiyerarşik adres değerlerinin kodları (örn: ["turkiye", "izmir", "bornova"])
+  """
+  addressAttributeCodes: [String!]
   attributeIds: [String!]
   description: String
   email: String

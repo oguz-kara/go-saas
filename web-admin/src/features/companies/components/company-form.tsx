@@ -23,7 +23,7 @@ import {
 import { useTranslations } from '@gocrm/hooks/use-translations'
 import {
   CompanyFormValues,
-  createCompanyFormSchema,
+  companyFormSchema,
 } from '@gocrm/features/companies/schemas/company-form.schema'
 import { Loader2 } from 'lucide-react'
 import {
@@ -48,7 +48,7 @@ export const CompanyForm = ({
   initialValues,
 }: CompanyFormProps) => {
   const { translations } = useTranslations()
-  const formSchema = createCompanyFormSchema(translations?.companyForm ?? {})
+  const formSchema = companyFormSchema(translations?.companyForm ?? {})
 
   const form = useForm<CompanyFormValues>({
     resolver: zodResolver(formSchema),
@@ -63,10 +63,11 @@ export const CompanyForm = ({
       addressLine1: '',
       addressLine2: '',
       postalCode: '',
-      attributes: {},
       ...initialValues,
     },
   })
+
+  const isDirty = form.formState.isDirty
 
   const { data: attributeGroupsData, loading: attributeGroupsLoading } =
     useGetAttributeGroupsQuery({
@@ -117,10 +118,13 @@ export const CompanyForm = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, (err) => console.log({ err }))}
+        className="space-y-4"
+      >
         <Tabs defaultValue={attributeGroups[0]?.code} className="w-full">
           <TabsList
-            className="grid w-full"
+            className="w-full overflow-x-auto whitespace-nowrap justify-start md:grid"
             style={{
               gridTemplateColumns: `repeat(${
                 attributeGroups.length || 1
@@ -249,7 +253,8 @@ export const CompanyForm = ({
                           <FormControl>
                             <Input
                               placeholder={
-                                translations?.companyForm?.phoneNumberPlaceholder
+                                translations?.companyForm
+                                  ?.phoneNumberPlaceholder
                               }
                               {...field}
                               value={field.value ?? ''}
@@ -429,7 +434,10 @@ export const CompanyForm = ({
                         <FormControl>
                           <AttributeMultiSelect
                             attributeTypeId={attrType.id}
-                            selectedValues={(field.value || []).filter(Boolean)}
+                            selectedValues={(field.value || []).filter(
+                              (value): value is { id: string; value: string } =>
+                                value != null,
+                            )}
                             onSelectionChange={field.onChange}
                           />
                         </FormControl>
@@ -443,7 +451,11 @@ export const CompanyForm = ({
           })}
         </Tabs>
 
-        <Button type="submit" disabled={isSubmitting} className="w-full">
+        <Button
+          type="submit"
+          disabled={isSubmitting || !isDirty}
+          className="w-full"
+        >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isSubmitting
             ? translations?.companyForm?.submittingButton

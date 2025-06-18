@@ -1,6 +1,12 @@
 import { InputType, Field } from '@nestjs/graphql'
 import GraphQLJSON from 'graphql-type-json'
-import { IsNotEmpty, IsOptional, MaxLength } from 'class-validator'
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator'
 
 @InputType()
 export class CreateCompanyInput {
@@ -50,4 +56,14 @@ export class CreateCompanyInput {
   @Field(() => [String], { nullable: true })
   @IsOptional()
   attributeIds?: string[]
+
+  @Field(() => [String], {
+    nullable: true,
+    description:
+      'Hiyerarşik adres değerlerinin kodları (örn: ["turkiye", "izmir", "bornova"])',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  addressAttributeCodes?: string[]
 }

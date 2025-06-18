@@ -17,6 +17,8 @@ import { toast } from 'sonner'
 import { CompanyFormValues } from '../schemas/company-form.schema'
 import { GetCompaniesQuery } from '../gql/documents/get-companies-query-gql'
 import { useRouter } from 'next/navigation'
+import { mapFormValuesToInput } from '../mappers/map-company-form-values-to-input'
+import { handleGraphQLError } from '@gocrm/lib/errors/methods/handle-graphql-error'
 
 export const CreateCompanyDialog = ({
   pageInfo,
@@ -34,9 +36,11 @@ export const CreateCompanyDialog = ({
       router.refresh()
     },
     onError: (error) => {
-      toast.error(translations?.createCompanyDialog.errorToast, {
-        description: error.message,
-      })
+      handleGraphQLError(
+        error,
+        translations ?? undefined,
+        translations?.createCompanyDialog.errorToast,
+      )
     },
     refetchQueries: [
       {
@@ -49,19 +53,12 @@ export const CreateCompanyDialog = ({
     ],
   })
 
-  const handleSubmit = (values: CompanyFormValues) => {
-    createCompany({
+  const handleSubmit = async (values: CompanyFormValues) => {
+    const input = mapFormValuesToInput(values)
+
+    await createCompany({
       variables: {
-        input: {
-          name: values.name,
-          website: values.website || null,
-          description: values.description || null,
-          attributeIds: values.attributes
-            ? Object.values(values.attributes).flatMap((arr) =>
-                arr?.map((attribute) => attribute.id),
-              )
-            : [],
-        },
+        input,
       },
     })
   }
@@ -72,7 +69,7 @@ export const CreateCompanyDialog = ({
         <Button>{translations?.createCompanyDialog.triggerButton}</Button>
       </DialogTrigger>
       <DialogContent
-        className="sm:max-w-[750px] overflow-y-auto max-h-[calc(100vh-10rem)]"
+        className="sm:max-w-[750px] overflow-y-auto h-[calc(100vh-5rem)] lg:h-[calc(100vh-10rem)] flex flex-col gap-4"
         aria-describedby={translations?.createCompanyDialog.description}
       >
         <DialogHeader>

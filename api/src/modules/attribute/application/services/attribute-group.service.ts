@@ -4,8 +4,6 @@ import {
   InternalServerErrorException,
   Logger,
   UnauthorizedException,
-  ConflictException,
-  NotFoundException,
 } from '@nestjs/common'
 import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import { RequestContext } from 'src/common/request-context/request-context'
@@ -13,6 +11,12 @@ import { CreateAttributeGroupInput } from '../../api/graphql/dto/create-attribut
 import { UpdateAttributeGroupInput } from '../../api/graphql/dto/update-attribute-group.input'
 import { Prisma } from '@prisma/client'
 import slugify from 'slugify'
+import {
+  EntityNotFoundException,
+  UniqueConstraintViolationException,
+  CannotDeleteParentEntityException,
+  SystemDefinedEntityException,
+} from 'src/common/exceptions'
 
 @Injectable()
 export class AttributeGroupService {
@@ -30,7 +34,7 @@ export class AttributeGroupService {
       return await this.prisma.attributeGroup.create({
         data: {
           name: input.name,
-          code: slugify(input.name, { lower: true }),
+          code: slugify(input.name, { lower: true, strict: true }),
           channelToken: userChannelToken,
         },
       })
@@ -39,8 +43,8 @@ export class AttributeGroupService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new ConflictException(
-          `Group with name "${input.name}" already exists.`,
+        throw new UniqueConstraintViolationException(
+          error.meta?.target as string[],
         )
       }
       this.logger.error(
@@ -94,22 +98,29 @@ export class AttributeGroupService {
     const existingGroup = await this.prisma.attributeGroup.findFirst({
       where: { id, channelToken: userChannelToken, deletedAt: null },
     })
+
     if (!existingGroup) {
-      throw new NotFoundException(`Attribute group with ID "${id}" not found.`)
+      throw new EntityNotFoundException('AttributeGroup', id)
+    }
+
+    if (existingGroup.isSystemDefined) {
+      throw new SystemDefinedEntityException('group', 'modify')
     }
 
     try {
       return await this.prisma.attributeGroup.update({
         where: { id },
-        data: { name: input.name },
+        data: {
+          name: input.name,
+        },
       })
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new ConflictException(
-          `Another group with name "${input.name}" already exists.`,
+        throw new UniqueConstraintViolationException(
+          error.meta?.target as string[],
         )
       }
       this.logger.error(
@@ -134,17 +145,13 @@ export class AttributeGroupService {
     })
 
     if (!existingGroup) {
-      throw new NotFoundException(`Attribute group with ID "${id}" not found.`)
+      throw new EntityNotFoundException('AttributeGroup', id)
     }
     if (existingGroup.isSystemDefined) {
-      throw new ConflictException(
-        `System-defined group "${existingGroup.name}" cannot be deleted.`,
-      )
+      throw new SystemDefinedEntityException('group', 'delete')
     }
     if (existingGroup._count.attributeTypes > 0) {
-      throw new ConflictException(
-        `Cannot delete group "${existingGroup.name}" because it contains attribute types.`,
-      )
+      throw new CannotDeleteParentEntityException('group', 'attribute types')
     }
 
     await this.prisma.attributeGroup.update({

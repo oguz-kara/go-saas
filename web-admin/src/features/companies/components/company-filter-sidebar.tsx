@@ -5,6 +5,7 @@ import {
   AttributeType,
   useGetAttributeTypesQuery,
   AttributeTypeKind,
+  AttributeDataType,
 } from '@gocrm/graphql/generated/hooks'
 import {
   Accordion,
@@ -14,20 +15,23 @@ import {
 } from '@gocrm/components/ui/accordion'
 import { Skeleton } from '@gocrm/components/ui/skeleton'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useCallback } from 'react'
-import { AttributeValueCheckboxes } from './attributes-value-checkboxes'
+import { useCallback, useState, useEffect } from 'react'
 import { useTranslations } from '@gocrm/hooks/use-translations'
 import { Button } from '@gocrm/components/ui/button'
 import Link from 'next/link'
 import { useRoutes } from '@gocrm/hooks/use-routes'
-import { CascadingAttributeFilter } from './cascading-attribute-filter'
 import { XCircle } from 'lucide-react'
+import { Input } from '@gocrm/components/ui/input'
+import { AttributeField } from '../../attributes/components/attribute-fields'
 
 export const CompanyFilterSidebar = ({ address }: { address?: string[] }) => {
   const { routes } = useRoutes()
   const { data, loading } = useGetAttributeTypesQuery({
     variables: {
       includeSystemDefined: true,
+      args: {
+        take: 100,
+      },
     },
   })
   const router = useRouter()
@@ -35,29 +39,37 @@ export const CompanyFilterSidebar = ({ address }: { address?: string[] }) => {
   const searchParams = useSearchParams()
   const { translations } = useTranslations()
 
-  const handleFilterChange = useCallback(
-    (attributeTypeId: string, valueId: string, checked: boolean) => {
-      const params = new URLSearchParams(searchParams.toString())
-      const existingValues = params.get(attributeTypeId)?.split(',') || []
-
-      const newValues = checked
-        ? [...existingValues, valueId]
-        : existingValues.filter((v) => v !== valueId)
-
-      if (newValues.length > 0) {
-        params.set(attributeTypeId, newValues.join(','))
-      } else {
-        params.delete(attributeTypeId)
-      }
-
-      params.delete('skip')
-      router.push(`${pathname}?${params.toString()}`)
-    },
-    [searchParams, pathname, router],
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get('searchQuery') || '',
   )
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      const currentQuery = params.get('searchQuery') || ''
+
+      if (searchQuery !== currentQuery) {
+        if (searchQuery) {
+          params.set('searchQuery', searchQuery)
+        } else {
+          params.delete('searchQuery')
+        }
+        params.delete('skip')
+        router.push(`${pathname}?${params.toString()}`)
+      }
+    }, 500)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [searchQuery, pathname, router, searchParams])
+
+  useEffect(() => {
+    setSearchQuery(searchParams.get('searchQuery') || '')
+  }, [searchParams])
+
   const handleCascadingFilterChange = useCallback(
-    (attributeTypeId: string, values: string[]) => {
+    (_attributeTypeId: string, values: string[]) => {
       const addressSlug = values.join('-')
       const basePath = routes?.companies || ''
       const newPath =
@@ -70,7 +82,34 @@ export const CompanyFilterSidebar = ({ address }: { address?: string[] }) => {
     [router, searchParams, routes],
   )
 
-  // Handler to clear all filters
+  const handleQueryParamFilterChange = useCallback(
+    (
+      attributeCode: string,
+      value: string | string[] | boolean | number | null,
+    ) => {
+      const params = new URLSearchParams(searchParams.toString())
+
+      let shouldDelete = false
+      if (Array.isArray(value)) {
+        if (value.length === 0) shouldDelete = true
+      } else if (typeof value === 'boolean') {
+        if (value === false) shouldDelete = true
+      } else if (value === null || value === '' || value === 0) {
+        shouldDelete = true
+      }
+
+      if (shouldDelete) {
+        params.delete(attributeCode)
+      } else {
+        params.set(attributeCode, String(value))
+      }
+
+      params.delete('skip')
+      router.push(`${pathname}?${params.toString()}`)
+    },
+    [searchParams, pathname, router],
+  )
+
   const handleClearFilters = useCallback(() => {
     const basePath = routes?.companies || ''
     router.push(basePath)
@@ -80,7 +119,38 @@ export const CompanyFilterSidebar = ({ address }: { address?: string[] }) => {
   const filterParamKeys = data?.attributeTypes.items?.map((at) => at.code) || []
   const hasActiveFilters =
     filterParamKeys.some((key) => !!searchParams.get(key)) ||
-    (address && address.length > 0)
+    (address && address.length > 0) ||
+    !!searchParams.get('searchQuery')
+
+  const getValue = (
+    type: Pick<AttributeType, 'kind' | 'dataType' | 'code'>,
+  ) => {
+    if (type.kind === AttributeTypeKind.Hierarchical) {
+      return address || []
+    }
+
+    const valueFromParams = searchParams.get(type.code)
+
+    if (type.kind === AttributeTypeKind.MultiSelect) {
+      return valueFromParams ? valueFromParams.split(',') : []
+    }
+
+    if (
+      type.dataType === AttributeDataType.Boolean &&
+      type.kind === AttributeTypeKind.Text
+    ) {
+      return valueFromParams === 'true'
+    }
+
+    if (
+      type.dataType === AttributeDataType.Number &&
+      type.kind === AttributeTypeKind.Text
+    ) {
+      return valueFromParams ? Number(valueFromParams) : ''
+    }
+
+    return valueFromParams || ''
+  }
 
   if (loading) {
     return (
@@ -123,7 +193,7 @@ export const CompanyFilterSidebar = ({ address }: { address?: string[] }) => {
   }
 
   return (
-    <aside className="w-full pr-4 lg:w-64 overflow-y-auto max-h-[calc(100vh-10rem)]">
+    <aside className="w-full px-4 pr-4 lg:w-72 overflow-y-auto max-h-[calc(100vh-10rem)]">
       <div className="flex items-center mb-4">
         <h3 className="text-lg font-semibold flex-1">
           {translations?.companiesPage.title}
@@ -142,6 +212,16 @@ export const CompanyFilterSidebar = ({ address }: { address?: string[] }) => {
           </Button>
         )}
       </div>
+      <div className="mb-4">
+        <Input
+          placeholder={
+            translations?.companiesPage.searchPlaceholder ||
+            'Search companies...'
+          }
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
       <Accordion
         type="multiple"
         defaultValue={attributeTypes.map((at) => at.code)}
@@ -153,45 +233,36 @@ export const CompanyFilterSidebar = ({ address }: { address?: string[] }) => {
               {type.name}
             </AccordionTrigger>
             <AccordionContent>
-              {type.kind === AttributeTypeKind.Hierarchical ? (
-                (() => {
-                  return (
-                    <CascadingAttributeFilter
-                      attributeType={type as AttributeType}
-                      hierarchy={[
-                        {
-                          level: 0,
-                          label: translations?.address.country || 'Country',
-                        },
-                        {
-                          level: 1,
-                          label: translations?.address.city || 'City',
-                        },
-                        {
-                          level: 2,
-                          label: translations?.address.district || 'District',
-                        },
-                        {
-                          level: 3,
-                          label:
-                            translations?.address.neighborhood ||
-                            'Neighborhood',
-                        },
-                      ]}
-                      selectedValues={address || []}
-                      onChange={(values) =>
-                        handleCascadingFilterChange(type.code, values)
-                      }
-                    />
-                  )
-                })()
-              ) : (
-                <AttributeValueCheckboxes
-                  attributeType={type as AttributeType}
-                  selectedValues={searchParams.get(type.code)?.split(',') || []}
-                  onFilterChange={handleFilterChange}
-                />
-              )}
+              <AttributeField
+                attributeType={type as AttributeType}
+                name={type.code}
+                value={getValue(type)}
+                hierarchy={[
+                  {
+                    level: 0,
+                    label: translations?.address.countryText as string,
+                  },
+                  {
+                    level: 1,
+                    label: translations?.address.cityText as string,
+                  },
+                  {
+                    level: 2,
+                    label: translations?.address.districtText as string,
+                  },
+                  {
+                    level: 3,
+                    label: translations?.address.neighborhoodText as string,
+                  },
+                ]}
+                onChange={(newValue) => {
+                  if (type.kind === AttributeTypeKind.Hierarchical) {
+                    handleCascadingFilterChange(type.code, newValue as string[])
+                  } else {
+                    handleQueryParamFilterChange(type.code, newValue)
+                  }
+                }}
+              />
             </AccordionContent>
           </AccordionItem>
         ))}

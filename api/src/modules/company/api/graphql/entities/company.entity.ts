@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql'
 import GraphQLJSON from 'graphql-type-json'
 import { CompanyNoteEntity } from './company-note.entity'
+import { AttributeValueEntity } from 'src/modules/attribute/api/graphql/entities/attribute.entity'
 
 @ObjectType('Company')
 export class CompanyEntity {
@@ -39,6 +40,16 @@ export class CompanyEntity {
 
   @Field(() => [CompanyNoteEntity], { nullable: true })
   notes?: CompanyNoteEntity[]
+
+  @Field(() => [AttributeValueEntity], { nullable: true })
+  attributes?: AttributeValueEntity[]
+
+  @Field(() => [String], {
+    nullable: true,
+    description:
+      'Şirketin hiyerarşik adres kodları (örn: ["turkiye", "izmir"])',
+  })
+  addressAttributeCodes?: string[]
 
   @Field(() => Date)
   createdAt: Date

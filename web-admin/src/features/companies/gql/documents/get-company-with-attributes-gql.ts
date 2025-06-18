@@ -14,7 +14,6 @@ export const getCompanyWithAttributesQuery = gql`
       linkedinUrl
       attributes {
         id
-        name
         value
       }
     }

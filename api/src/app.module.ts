@@ -1,9 +1,10 @@
 // NestJS core
-import { Module } from '@nestjs/common'
+import { Module, HttpException } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { GraphQLModule } from '@nestjs/graphql'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { CacheModule } from '@nestjs/cache-manager'
+import { GraphQLFormattedError } from 'graphql'
 
 // Third party
 import { redisStore } from 'cache-manager-redis-yet'
@@ -18,6 +19,7 @@ import { SeederModule } from './seeder/seeder.module'
 
 // Application config
 import { appConfig } from './common/config/app.config'
+
 @Module({
   imports: [
     // Core modules
@@ -50,16 +52,50 @@ import { appConfig } from './common/config/app.config'
       autoSchemaFile: 'schema.graphql',
       sortSchema: true,
       include: [AuthModule, CompanyModule, ChannelModule, AttributeModule],
-      formatError: (formattedError, error: any) => {
-        const originalError = formattedError.extensions?.originalError as any
-        const defaultMessage =
-          originalError?.defaultMessage || formattedError.message
+      formatError: (
+        formattedError: GraphQLFormattedError,
+        error: any,
+      ): GraphQLFormattedError => {
+        const originalError = error?.originalError || error
 
+        // If it's one of our custom, controlled exceptions (duck-typing)
+        if (
+          originalError &&
+          typeof originalError === 'object' &&
+          'getResponse' in originalError &&
+          'getStatus' in originalError
+        ) {
+          const httpException = originalError as HttpException
+          const response = httpException.getResponse()
+          const status = httpException.getStatus()
+
+          if (typeof response === 'object' && response !== null) {
+            const responseObj = response as Record<string, any>
+            // The response object from our exceptions is what we want in extensions.
+            // It already contains 'message', 'code', 'entityName', etc.
+            return {
+              message: responseObj.message || formattedError.message,
+              locations: formattedError.locations,
+              path: formattedError.path,
+              extensions: {
+                ...formattedError.extensions, // Keep original extensions
+                ...responseObj, // Spread all our custom fields
+                statusCode: status,
+              },
+            }
+          }
+        }
+
+        // For other generic GraphQL errors or unexpected server errors
         return {
-          message: defaultMessage,
-          code: error?.originalError?.name || 'GENERIC_GRAPHQL_ERROR',
-          statusCode: originalError?.statusCode || 500,
+          message: formattedError.message,
+          locations: formattedError.locations,
           path: formattedError.path,
+          extensions: {
+            ...formattedError.extensions,
+            code: originalError?.name || 'INTERNAL_SERVER_ERROR',
+            statusCode: originalError?.statusCode || 500,
+          },
         }
       },
     }),

@@ -5,6 +5,7 @@ import { RequestContext } from 'src/common/request-context/request-context'
 import { DEFAULT_PAGE } from 'src/common/constants/default-pagination-values'
 import { UserEntity } from '../../api/graphql/entities/user.entity'
 import { DEFAULT_PAGE_SIZE } from 'src/common/constants/default-pagination-values'
+import { EntityNotFoundException } from 'src/common/exceptions'
 
 @Injectable()
 export class UserService {
@@ -35,7 +36,7 @@ export class UserService {
     return { totalCount, items: users as UserEntity[] }
   }
 
-  async getUser(ctx: RequestContext, id: string): Promise<UserEntity | null> {
+  async getUser(ctx: RequestContext, id: string): Promise<UserEntity> {
     const { channel } = ctx
     if (!channel.token) {
       throw new UnauthorizedException('User channel could not be identified.')
@@ -49,9 +50,7 @@ export class UserService {
     })
 
     if (!user) {
-      // İsteğe bağlı: Kullanıcı bulunamadığında hata fırlatmak daha iyi olabilir.
-      // throw new UserNotFoundError(id);
-      return null
+      throw new EntityNotFoundException('User', id)
     }
 
     return user as UserEntity

@@ -9,9 +9,6 @@ import {
   useDeleteAttributeTypeMutation,
   GetAttributeTypesDocument,
   AttributeType,
-  AttributeDataType,
-  AttributeTypeKind,
-  AttributableType,
   GetAttributeArchitectureQuery,
 } from '@gocrm/graphql/generated/hooks'
 import { useTranslations } from '@gocrm/hooks/use-translations'
@@ -33,23 +30,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@gocrm/components/ui/alert-dialog'
-import {
-  PlusCircle,
-  Loader2,
-  Search,
-  Pencil,
-  Trash2,
-  Check,
-  X,
-} from 'lucide-react'
+import { PlusCircle, Search, Pencil, Trash2 } from 'lucide-react'
 import { handleGraphQLError } from '@gocrm/lib/errors/methods/handle-graphql-error'
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from '@gocrm/components/ui/select'
+import { AttributeTypeDialog } from './attribute-type-dialog'
+import { AttributeTypeSchema } from '../schemas/attribute-type.schema'
 
 interface AttributeTypeListProps {
   selectedType: AttributeType | null
@@ -62,56 +46,79 @@ export const AttributeTypeList = ({
   onSelectType,
   initialData,
 }: AttributeTypeListProps) => {
+  console.log({ initialList: initialData })
   const { translations } = useTranslations()
   const t = translations?.attributeStudio
 
-  // State'ler
+  // State
   const [searchTerm, setSearchTerm] = useState('')
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
-  const [newTypeName, setNewTypeName] = useState('')
-  const [editingState, setEditingState] = useState<{
-    id: string
-    name: string
-  } | null>(null)
-  const [selectedGroupId, setSelectedGroupId] = useState(
-    initialData.attributeGroups.items[0]?.id || '',
-  )
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [editingType, setEditingType] = useState<AttributeType | null>(null)
 
   // Data Fetching
   const { data, loading, refetch } = useGetAttributeTypesQuery({
     variables: { args: { searchQuery: debouncedSearchTerm } },
+    fetchPolicy: 'cache-and-network',
   })
 
   // Mutations
   const [createType, { loading: creating }] = useCreateAttributeTypeMutation({
     onCompleted: (data) => {
       const newType = data.createAttributeType
-      setNewTypeName('')
       refetch()
       onSelectType(newType as AttributeType)
-      toast.success(`"${newType.name}" tipi başarıyla oluşturuldu.`)
+      setIsDialogOpen(false)
+      toast.success(
+        `"${newType.name}" ${
+          t?.toastTypeCreatedSuccess || 'type has been successfully created.'
+        }`,
+      )
     },
-    onError: (error) => toast.error(error.message),
+    onError: (error) =>
+      handleGraphQLError(
+        error,
+        translations ?? undefined,
+        translations?.attributeStudio.toastValueError,
+      ),
   })
 
   const [updateType, { loading: updating }] = useUpdateAttributeTypeMutation({
-    onCompleted: () => {
-      setEditingState(null) // Düzenleme modundan çık
-      toast.success('Tip başarıyla güncellendi.')
+    onCompleted: (data) => {
+      const updatedType = data.updateAttributeType
+      setIsDialogOpen(false)
+      setEditingType(null)
+      toast.success(
+        `"${updatedType.name}" ${
+          t?.toastTypeUpdatedSuccess || 'type has been successfully updated.'
+        }`,
+      )
     },
     onError: (error) =>
-      handleGraphQLError(error, translations?.exceptionMessages),
+      handleGraphQLError(
+        error,
+        translations ?? undefined,
+        translations?.attributeStudio.toastValueError,
+      ),
   })
 
   const [deleteType] = useDeleteAttributeTypeMutation({
-    onCompleted: () => {
-      toast.success('Tip başarıyla silindi.')
-      if (selectedType?.id === editingState?.id || selectedType) {
+    onCompleted: (data, clientOptions) => {
+      // Assuming the mutation returns a boolean. We can't get the name from the response.
+      // We will show a generic success message.
+      toast.success(
+        t?.toastTypeDeletedSuccess || 'The type has been successfully deleted.',
+      )
+      if (selectedType?.id === clientOptions?.variables?.id) {
         onSelectType(null)
       }
     },
     onError: (error) =>
-      handleGraphQLError(error, translations?.exceptionMessages),
+      handleGraphQLError(
+        error,
+        translations ?? undefined,
+        translations?.attributeStudio.toastValueError,
+      ),
     refetchQueries: [
       {
         query: GetAttributeTypesDocument,
@@ -121,47 +128,54 @@ export const AttributeTypeList = ({
   })
 
   // Handlers
-  const handleAddNewType = () => {
-    if (!newTypeName.trim() || creating) return
-    createType({
-      variables: {
-        createAttributeTypeInput: {
-          name: newTypeName.trim(),
-          availableFor: [AttributableType.Company],
-          dataType: AttributeDataType.Text,
-          kind: AttributeTypeKind.Text,
-        },
-      },
-    })
+  const handleOpenCreateDialog = () => {
+    setEditingType(null)
+    setIsDialogOpen(true)
   }
 
-  const handleUpdate = () => {
-    if (!editingState || !editingState.name.trim() || updating) return
-    updateType({
-      variables: {
-        id: editingState.id,
-        updateAttributeTypeInput: {
-          id: editingState.id,
-          name: editingState.name.trim(),
-          availableFor: [AttributableType.Company],
-          dataType: AttributeDataType.Text,
-          kind: AttributeTypeKind.Text,
+  const handleOpenEditDialog = (type: AttributeType) => {
+    console.log({ type })
+    setEditingType(type)
+    setIsDialogOpen(true)
+  }
+
+  const handleDialogSubmit = (values: AttributeTypeSchema) => {
+    if (editingType) {
+      // Update
+      updateType({
+        variables: {
+          id: editingType.id,
+          updateAttributeTypeInput: {
+            id: editingType.id,
+            ...values,
+            groupId: values.groupId || undefined,
+          },
         },
-      },
-    })
+      })
+    } else {
+      // Create
+      createType({
+        variables: {
+          createAttributeTypeInput: {
+            ...values,
+            groupId: values.groupId || undefined,
+          },
+        },
+      })
+    }
   }
 
   const attributeTypes = data?.attributeTypes.items || []
 
   return (
     <div className="flex flex-col h-full">
-      {/* Arama ve Başlık Alanı */}
+      {/* Search and Title */}
       <div className="border-b p-4 space-y-2">
         <h2 className="text-lg font-semibold">{t?.typesColumnTitle}</h2>
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Tip ara..."
+            placeholder={t?.searchTypePlaceholder || 'Search types...'}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
@@ -169,147 +183,93 @@ export const AttributeTypeList = ({
         </div>
       </div>
 
-      {/* Liste Alanı */}
+      {/* List Area */}
       <div className="flex-1 overflow-y-auto">
         {loading && (
           <div className="p-4 space-y-2">
             <Skeleton className="h-8 w-full" />
             <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
           </div>
         )}
         {!loading &&
-          attributeTypes.map((type) =>
-            editingState?.id === type.id ? (
-              // DÜZENLEME MODU
-              <div
-                key={type.id}
-                className="flex items-center gap-2 p-2 bg-muted"
-              >
-                <Input
-                  autoFocus
-                  value={editingState.name}
-                  onChange={(e) =>
-                    setEditingState({ ...editingState, name: e.target.value })
-                  }
-                  onKeyDown={(e) => e.key === 'Enter' && handleUpdate()}
-                  className="h-9"
-                />
+          attributeTypes.map((type) => (
+            <div
+              key={type.id}
+              className={cn(
+                'group w-full flex justify-between items-center text-left px-4 py-3 text-sm hover:bg-muted transition-colors cursor-pointer',
+                {
+                  'bg-accent text-accent-foreground':
+                    selectedType?.id === type.id,
+                },
+              )}
+              onClick={() => onSelectType(type as AttributeType)}
+            >
+              <span className="flex-1">{type.name}</span>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
                 <Button
                   size="icon"
                   variant="ghost"
-                  onClick={handleUpdate}
-                  disabled={updating}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleOpenEditDialog(type as AttributeType)
+                  }}
                 >
-                  <Check className="h-4 w-4 text-green-600" />
+                  <Pencil className="h-4 w-4" />
                 </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => setEditingState(null)}
-                >
-                  <X className="h-4 w-4 text-red-600" />
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {t?.deleteTypeConfirmTitle}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t?.deleteTypeConfirmDescription}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t?.cancel}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() =>
+                          deleteType({ variables: { id: type.id } })
+                        }
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        {t?.delete || 'Delete'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
-            ) : (
-              // GÖRÜNTÜLEME MODU
-              <div
-                key={type.id}
-                className={cn(
-                  'group w-full flex justify-between items-center text-left px-4 py-3 text-sm hover:bg-muted transition-colors',
-                  {
-                    'bg-accent text-accent-foreground':
-                      selectedType?.id === type.id,
-                  },
-                )}
-              >
-                <button
-                  className="flex-1 text-left"
-                  onClick={() => onSelectType(type as AttributeType)}
-                >
-                  {type.name}
-                </button>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() =>
-                      setEditingState({ id: type.id, name: type.name })
-                    }
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button size="icon" variant="ghost">
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t?.deleteTypeConfirmTitle}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {t?.deleteTypeConfirmDescription}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>İptal</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() =>
-                            deleteType({ variables: { id: type.id } })
-                          }
-                          className="bg-red-600 hover:bg-red-700"
-                        >
-                          Evet, Sil
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </div>
-            ),
-          )}
+            </div>
+          ))}
       </div>
 
-      {/* Yeni Ekleme Alanı */}
-      <div className="border-t p-4 space-y-2 bg-muted/50">
-        {/* Select box for attribute groups using shadcn/ui Select */}
-        <div className="mb-2">
-          <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Grup seçin" />
-            </SelectTrigger>
-            <SelectContent>
-              {initialData.attributeGroups.items.map((group) => (
-                <SelectItem key={group.id} value={group.id}>
-                  {group.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex gap-2">
-          <Input
-            placeholder={t?.addNewTypePlaceholder}
-            value={newTypeName}
-            onChange={(e) => setNewTypeName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAddNewType()}
-            disabled={creating}
-          />
-          <Button
-            onClick={handleAddNewType}
-            disabled={creating || !newTypeName.trim()}
-            size="icon"
-          >
-            {creating ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <PlusCircle className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
+      {/* Add New Area */}
+      <div className="border-t p-4">
+        <Button onClick={handleOpenCreateDialog} className="w-full">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          {t?.addNewTypeButton || 'Add New Type'}
+        </Button>
       </div>
+
+      <AttributeTypeDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSubmit={handleDialogSubmit}
+        isLoading={creating || updating}
+        initialData={editingType}
+        attributeGroups={initialData.attributeGroups.items}
+      />
     </div>
   )
 }

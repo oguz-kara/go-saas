@@ -47,6 +47,9 @@ importers:
       command-runner:
         specifier: ^0.2.2
         version: 0.2.2
+      graphql:
+        specifier: ^16.11.0
+        version: 16.11.0
       graphql-type-json:
         specifier: ^0.3.2
         version: 0.3.2(graphql@16.11.0)

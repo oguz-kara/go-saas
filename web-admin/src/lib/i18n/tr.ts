@@ -3,7 +3,10 @@ import { TwoLevelTranslations } from './types'
 export const tr: TwoLevelTranslations = {
   common: {
     select: 'Seç',
-    clearText: 'Temizle',
+  },
+  sidebar: {
+    description:
+      'Şirketlerinizi ve müşterilerinizi yönetmek için ana navigasyon menüsü',
   },
   companiesPage: {
     title: 'Şirketler',
@@ -165,38 +168,77 @@ export const tr: TwoLevelTranslations = {
     deleteTypeConfirmTitle: 'Özellik Tipini Sil?',
     deleteTypeConfirmDescription:
       'Bu işlem geri alınamaz. Bu tipe bağlı tüm değerler de silinecektir.',
+    toastTypeCreatedSuccess: 'Özellik tipi başarıyla oluşturuldu.',
+    toastTypeUpdatedSuccess: 'Özellik tipi başarıyla güncellendi.',
+    toastTypeDeletedSuccess: 'Özellik tipi başarıyla silindi.',
+    addNewTypeButton: 'Yeni Tip Ekle',
+    typeNameLabel: 'Tip Adı',
+    typeNamePlaceholder: 'Tip adını girin',
+    groupLabel: 'Grup',
+    groupPlaceholder: 'Bir grup seçin',
+    kindLabel: 'Tip Türü',
+    kindPlaceholder: 'Bir tür seçin',
+    dataTypeLabel: 'Veri Tipi',
+    dataTypePlaceholder: 'Bir veri tipi seçin',
+    availableForLabel: 'Kullanılabilir Olduğu Yerler',
+    cancel: 'İptal',
+    create: 'Oluştur',
+    update: 'Güncelle',
+    editTypeTitle: 'Tipi Düzenle',
+    editTypeDescription: 'Aşağıdan özellik tipinin detaylarını değiştirin.',
+    createTypeTitle: 'Yeni Tip Oluştur',
+    createTypeDescription:
+      'Yeni bir özellik tipi oluşturmak için aşağıdaki alanları doldurun.',
+    dataTypeLabels_BOOLEAN: 'Doğru/Yanlış',
+    dataTypeLabels_DATE: 'Tarih',
+    dataTypeLabels_NUMBER: 'Sayı',
+    dataTypeLabels_TEXT: 'Metin',
+    availableForLabels_COMPANY: 'Şirket',
+    kindLabels_HIERARCHICAL: 'Hiyerarşik',
+    kindLabels_MULTI_SELECT: 'Çoklu Seçim',
+    kindLabels_SELECT: 'Seçim',
+    kindLabels_TEXT: 'Metin',
+    toastValueCreatedSuccess: 'Değer başarıyla oluşturuldu.',
+    toastValueUpdatedSuccess: 'Değer başarıyla güncellendi.',
+    toastValueDeletedSuccess: 'Değer başarıyla silindi.',
+    toastValueError: 'Bir hata oluştu.',
   },
-  sidebar: {
-    description:
-      'Şirketlerinizi ve müşterilerinizi yönetmek için ana navigasyon menüsü',
-  },
-
   exceptionMessages: {
-    EMAIL_ALREADY_EXISTS_EXCEPTION: 'Bu e-posta adresi zaten kayıtlı.',
-    USER_NOT_FOUND_EXCEPTION: 'Kullanıcı bulunamadı.',
+    // Generic
+    ENTITY_NOT_FOUND_EXCEPTION: '{{entityName}} bulunamadı.',
+    UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION:
+      'Girdiğiniz {{fields}} zaten mevcut.',
+    CANNOT_DELETE_PARENT_ENTITY_EXCEPTION:
+      'İlişkili {{childEntity}} bulunduğu için {{parentEntity}} silinemez.',
+    SYSTEM_DEFINED_ENTITY_EXCEPTION:
+      'Sistem tarafından tanımlanmış {{entityName}} üzerinde {{operation}} işlemi yapılamaz.',
+
+    // Auth
     INVALID_CREDENTIALS_EXCEPTION: 'Girdiğiniz bilgiler geçersiz.',
-    COMPANY_NOT_FOUND_EXCEPTION: 'Belirtilen şirket bulunamadı.',
     MISSING_TOKEN_CLAIM_EXCEPTION:
       'Kimlik doğrulama belirteci gerekli bilgileri içermiyor.',
-    COMPANY_NOTE_NOT_FOUND_EXCEPTION: 'İstenen şirket notu bulunamadı.',
     ACCESS_DENIED_EXCEPTION: 'Bu işlemi gerçekleştirmek için yetkiniz yok.',
-    ATTRIBUTE_TYPE_NOT_FOUND_EXCEPTION: 'Belirtilen özellik tipi bulunamadı.',
-    ATTRIBUTE_TYPE_HAS_VALUES_EXCEPTION:
-      'Bu özellik tipi ilişkili değerlere sahip olduğu için silinemez.',
-    ATTRIBUTE_TYPE_ALREADY_EXISTS_EXCEPTION:
-      'Bu isimde bir özellik tipi zaten mevcut.',
   },
-  editNoteDialog: {
-    title: 'Notu Düzenle',
-    successToast: 'Not başarıyla güncellendi.',
-    submitButton: 'Güncelle',
+  entityNames: {
+    Company: 'Şirket',
+    CompanyNote: 'Şirket Notu',
+    AttributeType: 'Özellik Tipi',
+    AttributeValue: 'Özellik Değeri',
+    AttributeGroup: 'Özellik Grubu',
+    User: 'Kullanıcı',
+    'attribute type': 'özellik tipi',
+    values: 'değerler',
+    value: 'değer',
+    assignments: 'atanmış kayıtlar',
   },
-  noteCardDialog: {
-    title: 'Notu Silmek İstediğinizden Emin misiniz?',
-    description: 'Bu işlem geri alınamaz.',
-    cancelButton: 'İptal',
-    confirmButton: 'Evet, Sil',
-    successToast: 'Not başarıyla silindi.',
+  fieldNames: {
+    email: 'e-posta',
+    name: 'isim',
+    code: 'kod',
+  },
+  operationNames: {
+    modify: 'değiştirme',
+    delete: 'silme',
   },
   header: {
     openNavigation: 'Navigasyonu Aç',
@@ -204,18 +246,29 @@ export const tr: TwoLevelTranslations = {
     signOut: 'Çıkış Yap',
     signingOut: 'Çıkış Yapılıyor...',
   },
-
   address: {
-    country: 'Ülke',
-    city: 'İl',
-    district: 'İlçe',
-    neighborhood: 'Mahalle',
+    countryText: 'Ülke',
+    cityText: 'İl',
+    districtText: 'İlçe',
+    neighborhoodText: 'Mahalle',
   },
-
   socials: {
     facebookPlaceholder: 'Facebook profil linki',
     twitterPlaceholder: 'Twitter profil linki',
     linkedinPlaceholder: 'LinkedIn profil linki',
+  },
+  formErrors: {
+    required: 'Bu alan zorunludur.',
+    minLength: 'Bu alan en az {{min}} karakter olmalıdır.',
+    maxLength: 'Bu alan en fazla {{max}} karakter olmalıdır.',
+    invalid: 'Geçersiz format.',
+    atLeastOneTypeMustBeSelected: 'En az bir tip seçilmelidir.',
+  },
+  editNoteDialog: {
+    title: 'Notu Düzenle',
+    description: 'Bu notu düzenlemek için aşağıdaki formu doldurun.',
+    typeLabel: 'Not Tipi',
+    typePlaceholder: 'Bir tip seçin...',
   },
 }
 

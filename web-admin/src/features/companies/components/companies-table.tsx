@@ -23,6 +23,7 @@ import { MoreHorizontal } from 'lucide-react'
 import { EditCompanyDialog } from './edit-company-dialog'
 import { DeleteCompanyAlert } from './delete-company-alert'
 import Link from '@gocrm/components/common/link'
+import { useRoutes } from '@gocrm/hooks/use-routes'
 
 type CompanyItem = GetCompaniesWithAttributesQuery['companies']['items'][0]
 
@@ -33,6 +34,7 @@ interface CompaniesTableProps {
 
 export const CompaniesTable = ({ companies }: CompaniesTableProps) => {
   const { translations } = useTranslations()
+  const { routes } = useRoutes()
 
   return (
     <div className="rounded-md border">
@@ -58,7 +60,9 @@ export const CompaniesTable = ({ companies }: CompaniesTableProps) => {
                 <TableCell className="font-medium">
                   <Link
                     className="text-blue-600 hover:underline"
-                    href={`/companies/${company.id}`}
+                    href={
+                      routes?.companyDetails.replace(':id', company.id) || '/'
+                    }
                   >
                     {company.name}
                   </Link>

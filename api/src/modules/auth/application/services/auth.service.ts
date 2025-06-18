@@ -9,16 +9,18 @@ import { RegisterUserInput } from 'src/modules/auth/api/graphql/dto/register-use
 import { LoginUserInput } from 'src/modules/auth/api/graphql/dto/login-user.input'
 import { AuthenticationPayloadObject } from 'src/modules/auth/api/graphql/dto/authetication-payload.object-type'
 
-import { EmailAlreadyExistsError } from 'src/modules/auth/domain/exceptions/email-already-exists.exception'
 import { InvalidCredentialsError } from 'src/modules/auth/domain/exceptions/invalid-credentials.exception'
 import { RequestContext } from 'src/common/request-context/request-context'
 import { UserEntity } from '../../api/graphql/entities/user.entity'
-import { UserNotFoundError } from '../../domain/exceptions/user-not-found.exception'
 import { LogoutOutput } from '../../api/graphql/dto/logout.output'
 import { MissingTokenClaimException } from '../../domain/exceptions/missing-token-claim.exception'
 import { CacheService } from 'src/common/services/cache/cache.service'
 import { RegisterNewTenantInput } from '../../api/graphql/dto/register-new-tenant.input'
 import { ChannelService } from 'src/modules/channel/application/services/channel.service'
+import {
+  EntityNotFoundException,
+  UniqueConstraintViolationException,
+} from 'src/common/exceptions'
 
 @Injectable()
 export class AuthService {
@@ -45,7 +47,7 @@ export class AuthService {
     })
 
     if (existingUser) {
-      throw new EmailAlreadyExistsError(email)
+      throw new UniqueConstraintViolationException('email')
     }
 
     return this.prisma.$transaction(async (tx) => {
@@ -110,7 +112,7 @@ export class AuthService {
     })
 
     if (existingUser) {
-      throw new EmailAlreadyExistsError(email)
+      throw new UniqueConstraintViolationException('email')
     }
 
     const saltRounds = 10
@@ -159,7 +161,7 @@ export class AuthService {
       where: { email },
     })
 
-    if (!user) throw new UserNotFoundError(email)
+    if (!user) throw new EntityNotFoundException('User', email)
 
     const isPasswordMatching = await bcrypt.compare(password, user.password)
 
@@ -256,7 +258,7 @@ export class AuthService {
 
     if (!user) {
       this.logger.warn(`User not found for ID: ${userId} from token.`)
-      throw new UserNotFoundError(userId)
+      throw new EntityNotFoundException('User', userId)
     }
 
     const userObject: UserEntity = {

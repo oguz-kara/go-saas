@@ -9,19 +9,25 @@ export const GET_COMPANY_WITH_ATTRIBUTES_AND_NOTES_QUERY = gql`
   ) {
     company(id: $id) {
       id
-      address
-      channelToken
       name
+      email
       website
-      createdAt
-      updatedAt
-      deletedAt
-      linkedinUrl
+      taxId
+      description
+      phoneNumber
+      socialProfiles
+      address
+      addressAttributeCodes
       attributes {
         id
-        name
         value
+        type {
+          id
+        }
       }
+      createdAt
+      deletedAt
+      updatedAt
     }
     companyNotes(
       companyId: $id

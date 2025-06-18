@@ -67,7 +67,7 @@ export default function Header() {
   }
 
   return (
-    <header className="p-2 md:p-3 md:p-2 lg:p-4 sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:bg-transparent sm:px-6">
+    <header className="p-2 md:p-3 lg:px-8 md:p-2 lg:p-4 sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:bg-transparent sm:px-6">
       {/* Mobil Görünüm için Drawer Menü */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>

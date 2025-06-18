@@ -21,6 +21,11 @@ import { ListQueryArgs } from 'src/common'
 import { CompanyConnectionNotesObject } from '../dto/company-connection-notes.object-type'
 import { CompanyNoteService } from 'src/modules/company/application/services/company-note.service'
 import { AttributeWithTypeEntity } from '../dto/attribute-with-type.object-type'
+import {
+  AttributeAssignment,
+  AttributeType,
+  AttributeValue,
+} from '@prisma/client'
 
 @Resolver(() => CompanyEntity)
 @ProtectResource()
@@ -99,5 +104,27 @@ export class AttributeWithTypeResolver {
     @Ctx() ctx: RequestContext,
   ): Promise<AttributeWithTypeEntity[]> {
     return await this.companyService.getCompanyAttributes(ctx, company.id)
+  }
+
+  @ResolveField('addressAttributeCodes', () => [String], { nullable: true })
+  async getAddressAttributeCodes(
+    @Parent()
+    company: CompanyEntity & {
+      attributeAssignments: (AttributeAssignment & {
+        attributeValue: AttributeValue & { type: AttributeType }
+      })[]
+    },
+  ): Promise<string[]> {
+    const addressAssignments = company.attributeAssignments.filter(
+      (as) => as.attributeValue.type.code === 'adres-bilgileri',
+    )
+
+    const addressAttributeCodes = addressAssignments.map(
+      (as) => as.attributeValue.code,
+    )
+
+    console.log({ addressAttributeCodes })
+
+    return Promise.resolve(addressAttributeCodes)
   }
 }

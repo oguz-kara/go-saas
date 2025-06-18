@@ -8,11 +8,10 @@ import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import { RequestContext } from 'src/common/request-context/request-context'
 import { CompanyNoteEntity } from 'src/modules/company/api/graphql/entities/company-note.entity'
 
-import { CompanyNotFoundError } from 'src/modules/company/domain/exceptions/company-not-found.exception'
 import { CompanyNoteType, Prisma } from '@prisma/client'
 import { AddCompanyNoteInput } from '../../api/graphql/dto/add-company-note.input'
 import { UpdateCompanyNoteInput } from '../../api/graphql/dto/update-company-note.input'
-import { CompanyNoteNotFoundError } from '../../domain/exceptions/company-note-not-found.exception'
+import { EntityNotFoundException } from 'src/common/exceptions'
 
 @Injectable()
 export class CompanyNoteService {
@@ -53,7 +52,7 @@ export class CompanyNoteService {
         where: { id: companyId, deletedAt: null, channelToken: ct },
       })
       if (!company) {
-        throw new CompanyNotFoundError(companyId)
+        throw new EntityNotFoundException('Company', companyId)
       }
 
       const newNote = await this.prisma.companyNote.create({
@@ -67,7 +66,7 @@ export class CompanyNoteService {
       })
       return newNote as CompanyNoteEntity
     } catch (error) {
-      if (error instanceof CompanyNotFoundError) throw error
+      if (error instanceof EntityNotFoundException) throw error
       this.logger.error(
         `Failed to add note for company ${companyId} by user ${userId}: ${error.message}`,
         error.stack,
@@ -116,7 +115,7 @@ export class CompanyNoteService {
         where: { id: companyId, deletedAt: null, channelToken: ct },
       })
       if (!company) {
-        throw new CompanyNotFoundError(companyId)
+        throw new EntityNotFoundException('Company', companyId)
       }
 
       whereClause.companyId = companyId
@@ -137,7 +136,7 @@ export class CompanyNoteService {
 
       return { items: notes as CompanyNoteEntity[], totalCount }
     } catch (error) {
-      if (error instanceof CompanyNotFoundError) throw error
+      if (error instanceof EntityNotFoundException) throw error
       this.logger.error(
         `Failed to fetch notes for company ${companyId}: ${error.message}`,
         error.stack,
@@ -178,7 +177,7 @@ export class CompanyNoteService {
       })
 
       if (!note) {
-        throw new CompanyNoteNotFoundError(noteId)
+        throw new EntityNotFoundException('CompanyNote', noteId)
       }
 
       const updatedNote = await this.prisma.companyNote.update({
@@ -190,7 +189,7 @@ export class CompanyNoteService {
       })
       return updatedNote as CompanyNoteEntity
     } catch (error) {
-      if (error instanceof CompanyNoteNotFoundError) {
+      if (error instanceof EntityNotFoundException) {
         throw error
       }
       this.logger.error(
@@ -232,7 +231,7 @@ export class CompanyNoteService {
       })
 
       if (!note) {
-        throw new CompanyNoteNotFoundError(noteId)
+        throw new EntityNotFoundException('CompanyNote', noteId)
       }
 
       const deletedNote = await this.prisma.companyNote.delete({
@@ -240,14 +239,14 @@ export class CompanyNoteService {
       })
       return deletedNote as CompanyNoteEntity
     } catch (error) {
-      if (error instanceof CompanyNoteNotFoundError) {
+      if (error instanceof EntityNotFoundException) {
         throw error
       }
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2025'
       ) {
-        throw new CompanyNoteNotFoundError(noteId)
+        throw new EntityNotFoundException('CompanyNote', noteId)
       }
       this.logger.error(
         `Failed to delete note ${noteId} by user ${userId}: ${error.message}`,

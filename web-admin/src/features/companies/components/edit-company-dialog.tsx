@@ -21,6 +21,8 @@ import {
 } from '@gocrm/graphql/generated/hooks'
 import { toast } from 'sonner'
 import { CompanyFormValues } from '../schemas/company-form.schema'
+import { mapApiDataToFormValues } from '../mappers/map-api-data-to-form-values'
+import { mapFormValuesToInput } from '../mappers/map-company-form-values-to-input'
 
 type CompanyForEdit = GetCompaniesWithAttributesQuery['companies']['items'][0]
 
@@ -37,6 +39,8 @@ export const EditCompanyDialog = ({
   const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
 
+  console.log(company)
+
   const [updateCompany, { loading }] = useUpdateCompanyMutation({
     onCompleted: () => {
       toast.success(translations?.editCompanyDialog.successToast)
@@ -51,23 +55,19 @@ export const EditCompanyDialog = ({
   })
 
   const handleSubmit = (values: CompanyFormValues) => {
+    const input = mapFormValuesToInput(values)
+
     updateCompany({
       variables: {
         id: company.id,
-        input: {
-          name: values.name,
-          website: values.website,
-          industry: values.industry,
-          description: values.description,
-          attributeIds: values.attributes
-            ? Object.values(values.attributes).flatMap((arr) =>
-                arr?.map((attribute) => attribute.id),
-              )
-            : [],
-        },
+        input,
       },
     })
   }
+
+  const formInitialValues = mapApiDataToFormValues(company)
+
+  console.log(formInitialValues.addressAttributeCodes)
 
   const TriggerComponent = asMenuItem ? DropdownMenuItem : Button
 
@@ -83,7 +83,7 @@ export const EditCompanyDialog = ({
         </TriggerComponent>
       </DialogTrigger>
       <DialogContent
-        className="sm:max-w-[425px]"
+        className="sm:max-w-[750px] overflow-y-auto h-[calc(100vh-5rem)] lg:h-[calc(100vh-10rem)] flex flex-col gap-4"
         aria-describedby={translations?.editCompanyDialog.description}
       >
         <DialogHeader>
@@ -95,20 +95,7 @@ export const EditCompanyDialog = ({
         <CompanyForm
           onSubmit={handleSubmit}
           isSubmitting={loading}
-          initialValues={{
-            ...company,
-            attributes:
-              company.attributes?.reduce((acc, attribute) => {
-                if (!acc[attribute.attributeTypeId]) {
-                  acc[attribute.attributeTypeId] = []
-                }
-                acc[attribute.attributeTypeId].push({
-                  id: attribute.id,
-                  value: attribute.value,
-                })
-                return acc
-              }, {} as Record<string, { id: string; value: string }[]>) || {},
-          }}
+          initialValues={formInitialValues}
         />
       </DialogContent>
     </Dialog>

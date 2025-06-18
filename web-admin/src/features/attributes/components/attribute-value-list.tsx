@@ -16,6 +16,7 @@ import { Badge } from '@gocrm/components/ui/badge'
 import { Skeleton } from '@gocrm/components/ui/skeleton'
 import { Loader2, PlusCircle, X, Check, Pencil, Search } from 'lucide-react'
 import { toast } from 'sonner'
+import { handleGraphQLError } from '@gocrm/lib/errors/methods/handle-graphql-error'
 
 interface AttributeValueListProps {
   selectedTypeId: string | null
@@ -50,26 +51,29 @@ export const AttributeValueList = ({
     onCompleted: () => {
       setNewValue('')
       refetch()
-      toast.success('Değer eklendi.')
+      toast.success(t?.toastValueCreatedSuccess)
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) =>
+      handleGraphQLError(err, translations ?? undefined, t?.toastValueError),
   })
 
   const [deleteValue] = useDeleteAttributeValueMutation({
     onCompleted: () => {
       refetch()
-      toast.success('Değer silindi.')
+      toast.success(t?.toastValueDeletedSuccess)
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) =>
+      handleGraphQLError(err, translations ?? undefined, t?.toastValueError),
   })
 
   const [updateValue] = useUpdateAttributeValueMutation({
     onCompleted: () => {
       setEditingValue(null)
       refetch()
-      toast.success('Değer güncellendi.')
+      toast.success(t?.toastValueUpdatedSuccess)
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) =>
+      handleGraphQLError(err, translations ?? undefined, t?.toastValueError),
   })
 
   const handleCreate = () => {
