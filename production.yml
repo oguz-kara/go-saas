@@ -1,0 +1,71 @@
+version: "3.8"
+
+services:
+  # --- NEW GOCRM NESTJS API ---
+  gocrm-api:
+    build:
+      context: ./gocrm-api # Assumes your NestJS app is in a 'gocrm-api' directory
+      dockerfile: Dockerfile
+    container_name: gocrm-api
+    command: sh -c "npx prisma migrate deploy && pnpm start:prod" # From your previous setup
+    env_file:
+      - ./gocrm-api/.env
+    depends_on:
+      - gocrm-db
+      - redis
+    networks:
+      - gocrm-network # Internal network to connect to DB and Redis
+      - avara-network # External network for Traefik to connect to
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gocrm-api.rule=Host(`crm-api.dolugo.com`)"
+      - "traefik.http.routers.gocrm-api.entrypoints=websecure"
+      - "traefik.http.routers.gocrm-api.tls=true"
+      - "traefik.http.routers.gocrm-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.gocrm-api.loadbalancer.server.port=3000"
+
+  # --- NEW GOCRM NEXT.JS FRONTEND ---
+  gocrm-frontend:
+    build:
+      context: ./gocrm-frontend # Assumes your Next.js app is in a 'gocrm-frontend' directory
+      dockerfile: Dockerfile
+    container_name: gocrm-frontend
+    env_file:
+      - ./gocrm-frontend/.env
+    depends_on:
+      - gocrm-api
+    networks:
+      - avara-network # Only needs to connect to Traefik
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gocrm-frontend.rule=Host(`crm.dolugo.com`)"
+      - "traefik.http.routers.gocrm-frontend.entrypoints=websecure"
+      - "traefik.http.routers.gocrm-frontend.tls=true"
+      - "traefik.http.routers.gocrm-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.gocrm-frontend.loadbalancer.server.port=3000"
+
+  # --- DATABASE, REDIS, AND OTHER SERVICES ---
+  gocrm-db:
+    image: postgres:latest
+    container_name: gocrm-db
+    env_file:
+      - ./api/.env
+    volumes:
+      - gocrm-data:/var/lib/postgresql/data
+    networks:
+      - gocrm-network # Internal network only
+    restart: unless-stopped
+
+volumes:
+  gocrm-data:
+  redis_data:
+
+networks:
+  gocrm-network:
+    name: gocrm-network
+    driver: bridge
+  avara-network:
+    name: avara-network
+    external: true # This allows it to connect to the network created by Traefik

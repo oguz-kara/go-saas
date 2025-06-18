@@ -70,7 +70,11 @@ const requester = async <TData, TVariables extends OperationVariables>(
       const isAccessDenied = result.errors.some(
         (err: GraphQLError) =>
           err.code === 'ACCESS_DENIED_EXCEPTION' ||
-          err.code === 'UNAUTHENTICATED',
+          err.code === 'UNAUTHENTICATED' ||
+          (err as { extensions?: { code?: string } })?.extensions?.code ===
+            'ACCESS_DENIED_EXCEPTION' ||
+          (err as { extensions?: { code?: string } })?.extensions?.code ===
+            'UNAUTHENTICATED',
       )
       if (isAccessDenied) {
         throw new AuthError('Access denied by API.')

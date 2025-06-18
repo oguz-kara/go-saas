@@ -9,6 +9,7 @@ export async function withAuthProtection<T>(
   try {
     return await dataFetcher()
   } catch (error) {
+    console.log('errorFromWithAuthProtection', error)
     if (error instanceof AuthError) redirect('/session-expired')
 
     throw error

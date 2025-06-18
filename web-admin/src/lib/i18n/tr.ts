@@ -22,6 +22,7 @@ export const tr: TwoLevelTranslations = {
     openFiltersButton: 'Filtreleri Aç',
     filterDescription:
       'Şirketlerinizi gruplamak için kullanacağınız özel filtreleri ve etiketleri yönetin.',
+    searchPlaceholder: 'Şirket arama...',
   },
   companiesTable: {
     headerName: 'İsim',

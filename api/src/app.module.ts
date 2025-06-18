@@ -77,12 +77,13 @@ import { appConfig } from './common/config/app.config'
               message: responseObj.message || formattedError.message,
               locations: formattedError.locations,
               path: formattedError.path,
+              code: responseObj.code,
               extensions: {
                 ...formattedError.extensions, // Keep original extensions
                 ...responseObj, // Spread all our custom fields
                 statusCode: status,
               },
-            }
+            } as GraphQLFormattedError
           }
         }
 
