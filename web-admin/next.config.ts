@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
       process.env.NEXT_PUBLIC_ADMIN_GRAPHQL_API_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   },
+  output: 'standalone',
 }
 
 export default nextConfig
