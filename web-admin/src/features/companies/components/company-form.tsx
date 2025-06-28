@@ -100,7 +100,7 @@ export const CompanyForm = ({
       attributeTypes.find(
         (attr) =>
           attributeGroups.find((g) => g.id === attr.groupId)?.code ===
-          'adres-bilgileri',
+          'adresbilgileri',
       ) ?? undefined,
     [attributeTypes, attributeGroups],
   )
@@ -150,7 +150,7 @@ export const CompanyForm = ({
                 value={group.code}
                 className="space-y-4 border-b border-l border-r px-4 py-6"
               >
-                {group.code === 'genel-bilgiler' && (
+                {group.code === 'genelbilgiler' && (
                   <>
                     <FormField
                       control={form.control}
@@ -240,7 +240,7 @@ export const CompanyForm = ({
                   </>
                 )}
 
-                {group.code === 'iletisim-bilgileri' && (
+                {group.code === 'iletisimbilgileri' && (
                   <>
                     <FormField
                       control={form.control}
@@ -306,7 +306,7 @@ export const CompanyForm = ({
                   </>
                 )}
 
-                {group.code === 'adres-bilgileri' && (
+                {group.code === 'adresbilgileri' && (
                   <>
                     <FormField
                       control={form.control}
@@ -378,7 +378,7 @@ export const CompanyForm = ({
                   </>
                 )}
 
-                {group.code === 'adres-bilgileri' && addressAttributes && (
+                {group.code === 'adresbilgileri' && addressAttributes && (
                   <FormField
                     key={addressAttributes.id}
                     control={form.control}

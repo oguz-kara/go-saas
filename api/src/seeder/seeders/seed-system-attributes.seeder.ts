@@ -20,8 +20,7 @@ export class SeedSystemAttributesSeeder {
     this.logger.log('--- STARTING SYSTEM ATTRIBUTES SEEDER ---')
 
     for (const groupData of systemSeedData) {
-      // Her bir ana "Sistem Kanalı" için bu özellikleri oluşturabiliriz. Şimdilik tek kanal varsayalım.
-      const channelToken = 'ch_main_tenant_1' // Bu, varsayılan sistem özelliklerinin ekleneceği kanal
+      const channelToken = 'ch_main_tenant_1'
 
       // Grubu oluştur veya bul (upsert)
       const group = await this.prisma.attributeGroup.upsert({
@@ -31,7 +30,7 @@ export class SeedSystemAttributesSeeder {
         update: {},
         create: {
           name: groupData.group.name,
-          code: slugify(groupData.group.name, { lower: true }),
+          code: slugify(groupData.group.name, { lower: true, replacement: '' }),
           channelToken,
           isSystemDefined: true,
         },
@@ -46,7 +45,10 @@ export class SeedSystemAttributesSeeder {
           update: {},
           create: {
             name: typeData.typeData.name,
-            code: slugify(typeData.typeData.name, { lower: true }),
+            code: slugify(typeData.typeData.name, {
+              lower: true,
+              replacement: '',
+            }),
             dataType: typeData.typeData.dataType,
             kind: typeData.typeData.kind,
             channelToken,
@@ -107,47 +109,48 @@ export class SeedSystemAttributesSeeder {
     parentId: string | undefined,
   ) {
     for (const val of values) {
-      const valueRecord = await this.prisma.attributeValue.upsert({
-        where: {
-          ...(parentId
-            ? {
-                value_attributeTypeId_parentId: {
-                  value: val.value,
-                  attributeTypeId: typeId,
-                  parentId,
-                },
-              }
-            : {
-                value_attributeTypeId: {
-                  value: val.value,
-                  attributeTypeId: typeId,
-                },
-              }),
-        },
-        update: {
-          value: val.value,
-          code: slugify(val.value, { lower: true }),
-          attributeTypeId: typeId,
-          channelToken,
-          parentId: parentId as string,
-        },
-        create: {
-          value: val.value,
-          code: slugify(val.value, { lower: true }),
-          attributeTypeId: typeId,
-          channelToken,
-          parentId: parentId as string,
-        },
-      })
+      try {
+        const valueRecord = await this.prisma.attributeValue.create({
+          data: {
+            value: val.value,
+            code: slugify(val.value, { lower: true, replacement: '' }),
+            attributeTypeId: typeId,
+            channelToken,
+            parentId,
+          },
+        })
 
-      if (val.children && val.children.length > 0) {
-        await this.seedValuesRecursive(
-          val.children,
-          typeId,
-          channelToken,
-          valueRecord.id,
+        if (val.children && val.children.length > 0) {
+          await this.seedValuesRecursive(
+            val.children,
+            typeId,
+            channelToken,
+            valueRecord.id,
+          )
+        }
+      } catch (error) {
+        this.logger.error(
+          `Error upserting value: ${val.value} (typeId: ${typeId}, parentId: ${parentId ?? 'none'})\n${error}`,
         )
+        throw error
       }
     }
+  }
+
+  @Command({
+    command: 'delete:initial-system-attributes',
+    describe: 'Deletes the database with initial system attributes',
+  })
+  async deleteInitialSystemAttributes(): Promise<void> {
+    this.logger.log('Starting deletion of initial system attributes...')
+
+    await this.prisma.attributeType.deleteMany({
+      where: { isSystemDefined: true },
+    })
+    await this.prisma.attributeGroup.deleteMany({
+      where: { isSystemDefined: true },
+    })
+
+    this.logger.log('Successfully deleted initial system attributes')
   }
 }

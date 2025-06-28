@@ -107,10 +107,6 @@ model AttributeValue {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  // Constraints
-  @@unique([value, attributeTypeId, parentId]) // Değer, kendi tipi ve parent'ı içinde benzersizdir
-  @@unique([value, attributeTypeId])
-  @@unique([code, attributeTypeId])
   @@index([attributeTypeId])
 }
 

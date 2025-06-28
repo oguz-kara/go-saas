@@ -32,4 +32,18 @@ export class MainSeeder {
 
     this.logger.log('--- ALL SEEDERS COMPLETED ---')
   }
+
+  @Command({
+    command: 'delete:all',
+    describe: 'Deletes the database with initial all like users, companies, channels, etc.',
+  })
+  async deleteAll() {
+    this.logger.log('--- STARTING DELETE ALL SEEDERS ---')
+
+    await this.seedSystemAttributeSeeder.deleteInitialSystemAttributes()
+    await this.companiesSeeder.deleteInitialCompanies()
+    await this.usersSeeder.deleteInitialUsers()
+
+    this.logger.log('--- ALL SEEDERS COMPLETED ---')
+  }
 }

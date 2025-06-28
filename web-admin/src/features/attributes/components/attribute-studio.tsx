@@ -17,8 +17,6 @@ export const AttributeStudio = ({
 }) => {
   const [selectedType, setSelectedType] = useState<AttributeType | null>(null)
 
-  console.dir({ initialData }, { depth: null })
-
   return (
     <Card>
       <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-0 min-h-[70vh]">

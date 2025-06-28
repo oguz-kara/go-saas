@@ -46,7 +46,6 @@ export const AttributeTypeList = ({
   onSelectType,
   initialData,
 }: AttributeTypeListProps) => {
-  console.log({ initialList: initialData })
   const { translations } = useTranslations()
   const t = translations?.attributeStudio
 
@@ -58,9 +57,14 @@ export const AttributeTypeList = ({
 
   // Data Fetching
   const { data, loading, refetch } = useGetAttributeTypesQuery({
-    variables: { args: { searchQuery: debouncedSearchTerm } },
+    variables: {
+      args: { searchQuery: debouncedSearchTerm },
+      includeSystemDefined: true,
+    },
     fetchPolicy: 'cache-and-network',
   })
+
+  console.log({ data })
 
   // Mutations
   const [createType, { loading: creating }] = useCreateAttributeTypeMutation({
@@ -165,7 +169,11 @@ export const AttributeTypeList = ({
     }
   }
 
-  const attributeTypes = data?.attributeTypes.items || []
+  const attributeTypes =
+    data?.attributeTypes.items.filter((at) => at.code !== 'adresbilgileri') ||
+    []
+
+  console.log({ attributeTypes })
 
   return (
     <div className="flex flex-col h-full">
