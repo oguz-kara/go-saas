@@ -8,7 +8,7 @@ import {
 import { DeepMocked } from 'src/common/test/types/deep-mocked.type'
 import { InternalServerErrorException, Logger } from '@nestjs/common'
 
-import { Prisma, Company, CompanyNote } from '@prisma/client'
+import { Prisma, Company, CompanyNote, CompanyNoteType } from '@prisma/client'
 import { AddCompanyNoteInput } from '../api/graphql/dto/add-company-note.input'
 import { CompanyNotFoundError } from '../domain/exceptions/company-not-found.exception'
 import { ListQueryArgs } from 'src/common'
@@ -63,10 +63,13 @@ describe('CompanyNoteService', () => {
     updatedAt: new Date(),
     deletedAt: null,
     website: null,
-    industry: null,
     linkedinUrl: null,
     address: Prisma.JsonNull as any,
     description: null,
+    taxId: null,
+    phoneNumber: null,
+    email: null,
+    socialProfiles: Prisma.JsonNull as any,
   }
 
   beforeEach(async () => {
@@ -338,7 +341,6 @@ describe('CompanyNoteService', () => {
         mockRequestContext,
         mockCompanyId,
         mockPaginationArgs,
-        explicitChannelToken,
       )
 
       expect(prisma.company.findFirst).toHaveBeenCalledWith({
@@ -471,7 +473,7 @@ describe('CompanyNoteService', () => {
     const mockNoteId = 'note-to-update-uuid'
     const mockUpdateNoteInput: UpdateCompanyNoteInput = {
       content: 'Updated note content.',
-      type: 'TASK',
+      type: CompanyNoteType.GENERAL,
     }
     const mockExistingCompanyNote: CompanyNote = {
       id: mockNoteId,
@@ -479,14 +481,15 @@ describe('CompanyNoteService', () => {
       userId: mockUserId,
       channelToken: mockChannelToken,
       content: 'Original content',
-      type: 'GENERAL',
+      type: CompanyNoteType.GENERAL,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
     const mockUpdatedCompanyNote: CompanyNote = {
       ...mockExistingCompanyNote,
       ...mockUpdateNoteInput,
-      updatedAt: new Date(Date.now() + 5000), // Ensure updatedAt is different
+      type: mockUpdateNoteInput.type as CompanyNoteType,
+      updatedAt: new Date(Date.now() + 5000),
     }
 
     it('should update a note using context channelToken if arg not provided', async () => {
@@ -623,7 +626,7 @@ describe('CompanyNoteService', () => {
       userId: mockUserId,
       channelToken: mockChannelToken,
       content: 'Content to be deleted',
-      type: 'ARCHIVED',
+      type: CompanyNoteType.GENERAL,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
