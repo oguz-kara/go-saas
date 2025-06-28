@@ -43,6 +43,8 @@ export class CompanyService {
       addressAttributeCodes,
     } = createCompanyInput
 
+    console.log({ addressAttributeCodes })
+
     const ct = channelToken ? channelToken : channel.token
 
     if (!ct) {
@@ -60,14 +62,37 @@ export class CompanyService {
         let resolvedAttributeValueIds: string[] = []
 
         if (addressAttributeCodes && addressAttributeCodes.length > 0) {
-          const foundValues = await tx.attributeValue.findMany({
-            where: {
-              code: { in: addressAttributeCodes },
-              channelToken: ct,
-              deletedAt: null,
-            },
-            select: { id: true, code: true },
-          })
+          const foundValues = await Promise.all(
+            addressAttributeCodes.map(async (ac) => {
+              const codeIndex = addressAttributeCodes.indexOf(ac)
+              const parentCode =
+                codeIndex > 0 ? addressAttributeCodes[codeIndex - 1] : null
+
+              const foundValue = await tx.attributeValue.findFirst({
+                where: {
+                  code: ac,
+                  ...(parentCode && {
+                    parent: {
+                      code: parentCode,
+                    },
+                  }),
+                  channelToken: ct,
+                  deletedAt: null,
+                },
+                select: { id: true, code: true },
+              })
+
+              if (!foundValue) {
+                throw new ConflictException(
+                  `The following address codes are invalid: ${ac}`,
+                )
+              }
+
+              return foundValue
+            }),
+          )
+
+          console.dir({ foundValues }, { depth: null })
 
           if (foundValues.length !== addressAttributeCodes.length) {
             const notFoundCodes = addressAttributeCodes.filter(

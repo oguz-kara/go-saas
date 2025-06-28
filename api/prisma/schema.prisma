@@ -1,3 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum CompanyNoteType {
+  GENERAL
+  MEETING
+  CALL
+  FOLLOW_UP
+}
+
 // Enums
 enum AttributeTypeKind {
   TEXT
@@ -85,7 +102,7 @@ model AttributeValue {
   // Basic Fields
   value String
   code  String
-  order Int    @default(0)
+  order Int     @default(0)
   meta  Json?
 
   // Relations
@@ -141,4 +158,115 @@ model AttributeAssignment {
 
   @@unique([attributeValueId, attributableId, attributableType])
   @@index([attributableId, attributableType])
+}
+
+model User {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // Basic Fields
+  email    String  @unique
+  name     String?
+  password String
+
+  // Relations
+  channelToken String
+  channel      Channel @relation(fields: [channelToken], references: [token])
+
+  // Attribute System Relations
+  attributeAssignments AttributeAssignment[]
+
+  // Note Relations
+  companyNotes CompanyNote[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Channel {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // Basic Fields
+  name        String  @unique
+  token       String  @unique
+  description String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations - Core
+  companies    Company[]
+  users        User[]
+  companyNotes CompanyNote[]
+
+  // Relations - Attribute System
+  attributeTypes       AttributeType[]
+  attributeValues      AttributeValue[]
+  attributeGroups      AttributeGroup[]
+  attributeAssignments AttributeAssignment[]
+}
+
+// Models
+model Company {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // Basic Fields
+  name        String
+  website     String?
+  taxId       String?
+  description String?
+
+  // --- Contact & Location ---
+
+  address        Json?
+  phoneNumber    String?
+  email          String?
+  linkedinUrl    String?
+  socialProfiles Json?
+
+  // Relations
+  channelToken String?
+  channel      Channel? @relation(fields: [channelToken], references: [token], onDelete: Restrict)
+
+  // Attribute System Relations
+  attributeAssignments AttributeAssignment[]
+
+  // Note Relations
+  notes CompanyNote[]
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model CompanyNote {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // Basic Fields
+  content String
+  type    CompanyNoteType?
+
+  // Relations
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  channelToken String
+  channel      Channel @relation(fields: [channelToken], references: [token])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Indexes
+  @@index([companyId])
+  @@index([userId])
 }

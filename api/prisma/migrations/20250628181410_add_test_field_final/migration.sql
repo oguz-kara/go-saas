@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "CompanyNoteType" AS ENUM ('GENERAL', 'MEETING', 'CALL', 'FOLLOW_UP');
+
+-- CreateEnum
 CREATE TYPE "AttributeTypeKind" AS ENUM ('TEXT', 'SELECT', 'MULTI_SELECT', 'HIERARCHICAL');
 
 -- CreateEnum
@@ -6,9 +9,6 @@ CREATE TYPE "AttributeDataType" AS ENUM ('TEXT', 'NUMBER', 'DATE', 'BOOLEAN', 'C
 
 -- CreateEnum
 CREATE TYPE "AttributableType" AS ENUM ('COMPANY');
-
--- CreateEnum
-CREATE TYPE "CompanyNoteType" AS ENUM ('GENERAL', 'MEETING', 'CALL', 'FOLLOW_UP');
 
 -- CreateTable
 CREATE TABLE "AttributeGroup" (
@@ -51,6 +51,7 @@ CREATE TABLE "AttributeValue" (
     "code" TEXT NOT NULL,
     "order" INTEGER NOT NULL DEFAULT 0,
     "meta" JSONB,
+    "test" TEXT,
     "attributeTypeId" TEXT NOT NULL,
     "channelToken" TEXT NOT NULL,
     "parentId" TEXT,

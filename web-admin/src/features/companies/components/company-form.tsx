@@ -413,6 +413,7 @@ export const CompanyForm = ({
                             ]}
                             selectedValues={field.value || []}
                             onChange={(values) => {
+                              console.log({ values })
                               field.onChange(values)
                             }}
                           />
