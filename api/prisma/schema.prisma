@@ -89,6 +89,7 @@ model AttributeType {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+  test String?
 
   // Constraints
   @@unique([name, channelToken])
