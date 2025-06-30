@@ -11,10 +11,10 @@ import { redisStore } from 'cache-manager-redis-yet'
 import { CommandModule } from 'nestjs-command'
 
 // Application modules
-import { AuthModule } from './modules/auth'
-import { CompanyModule } from './modules/company'
-import { ChannelModule } from './modules/channel'
-import { AttributeModule } from './modules/attribute'
+import { AuthModule } from './modules/auth/auth.module'
+import { CompanyModule } from './modules/company/company.module'
+import { ChannelModule } from './modules/channel/channel.module'
+import { AttributeModule } from './modules/attribute/attribute.module'
 import { SeederModule } from './seeder/seeder.module'
 
 // Application config
