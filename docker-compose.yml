@@ -21,7 +21,7 @@ services:
       - "traefik.http.routers.dolucrm-web-admin.entrypoints=websecure"
       - "traefik.http.routers.dolucrm-web-admin.tls=true"
       - "traefik.http.routers.dolucrm-web-admin.tls.certresolver=letsencrypt"
-      - "traefik.http.services.dolucrm-web-admin.loadbalancer.server.port=3000"
+      - "traefik.http.services.dolucrm-web-admin.loadbalancer.server.port=5000"
 
   api:
     build:
@@ -38,14 +38,14 @@ services:
       - avara-network
     restart: always
     expose:
-      - "3000"
+      - "5000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dolucrm-api.rule=Host(`crm-api.restoreplusonline.com`)"
       - "traefik.http.routers.dolucrm-api.entrypoints=websecure"
       - "traefik.http.routers.dolucrm-api.tls=true"
       - "traefik.http.routers.dolucrm-api.tls.certresolver=letsencrypt"
-      - "traefik.http.services.dolucrm-api.loadbalancer.server.port=3000"
+      - "traefik.http.services.dolucrm-api.loadbalancer.server.port=5000"
 
   db:
     image: postgres:16-alpine
