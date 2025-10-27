@@ -1,60 +1,63 @@
-version: "3.8"
+version: "3.9"
 
 services:
-
-  gocrm-db:
-    image: postgres:latest
-    container_name: gocrm-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 4784961Edc!
-      POSTGRES_DB: gocrm_dev
-    ports:
-      - "5433:5432"
-    volumes:
-      - gocrm-test-data:/var/lib/postgresql/data
+  web-admin:
+    build:
+      context: ./web-admin
+      dockerfile: Dockerfile
+    container_name: dolucrm-web-admin
+    env_file:
+      - ./web-admin/.env
+    depends_on:
+      - api
     networks:
-      - gocrm-network
+      - dolucrm-network
     restart: unless-stopped
-
-  gocrm-test-db:
-    image: postgres:latest
-    container_name: gocrm-test-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 4784961Edc!
-      POSTGRES_DB: gocrm_test_dev
     ports:
-      - "5434:5432"
-    volumes:
-      - gocrm-test-data:/var/lib/postgresql/data
+      - "3000:3000"
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: dolucrm-api
+    command: >
+      sh -c "npx prisma migrate deploy && node dist/main"
+    env_file:
+      - ./api/.env
+    depends_on:
+      - db
     networks:
-      - gocrm-network
-    restart: unless-stopped
-
-
- 
-
-  redis:
-    image: redis:7.2-alpine 
-    container_name: crm_redis
-    restart: unless-stopped
+      - dolucrm-network
+    restart: always
     ports:
-      - "6379:6379" 
+      - "5000:3000"
+
+  db:
+    image: postgres:16-alpine
+    container_name: dolucrm-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dolucrm}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-dolucrm}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - redis_data:/data 
-    command: redis-server --requirepass my_strong_password 
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - dolucrm-network
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dolucrm}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
-  gocrm-test-data:
-  redis_data:
+  db-data:
+    driver: local
 
 networks:
-  gocrm-network:
-    name: gocrm-network
+  dolucrm-network:
+    name: dolucrm-network
     driver: bridge

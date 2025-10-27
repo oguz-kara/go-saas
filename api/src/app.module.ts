@@ -7,7 +7,6 @@ import { CacheModule } from '@nestjs/cache-manager'
 import { GraphQLFormattedError } from 'graphql'
 
 // Third party
-import { redisStore } from 'cache-manager-redis-yet'
 import { CommandModule } from 'nestjs-command'
 
 // Application modules
@@ -24,6 +23,7 @@ import { LeadModule } from './modules/lead/lead.module'
 import { NotificationModule } from './modules/notification/notification.module'
 import { EmailModule } from './modules/email/email.module'
 import { ApiKeyModule } from './modules/api-key/api-key.module'
+import { HealthModule } from './modules/health/health.module'
 // Removed separate Activity/Note modules; handled under Lead module
 
 @Module({
@@ -38,16 +38,13 @@ import { ApiKeyModule } from './modules/api-key/api-key.module'
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
-        const store = await redisStore({
-          socket: {
-            host: configService.get<string>('REDIS_HOST', 'localhost'),
-            port: configService.get<number>('REDIS_PORT', 6379),
-          },
-          password: configService.get<string>('REDIS_PASSWORD'),
-          ttl: configService.get<number>('CACHE_TTL_SECONDS', 60 * 60),
-        })
-        return { store }
+      useFactory: (configService: ConfigService) => {
+        // Use in-memory cache only
+        console.log('ℹ️ Using in-memory cache (Redis disabled)')
+        return {
+          ttl: configService.get<number>('CACHE_TTL_SECONDS', 60 * 60) * 1000,
+          max: configService.get<number>('CACHE_MAX_ITEMS', 500),
+        }
       },
       inject: [ConfigService],
     }),
@@ -56,7 +53,7 @@ import { ApiKeyModule } from './modules/api-key/api-key.module'
       driver: ApolloDriver,
       path: '/admin-api',
       playground: true,
-      autoSchemaFile: 'schema.graphql',
+      autoSchemaFile: true,
       sortSchema: true,
       include: [
         AuthModule,
@@ -125,6 +122,7 @@ import { ApiKeyModule } from './modules/api-key/api-key.module'
     NotificationModule,
     EmailModule,
     ApiKeyModule,
+    HealthModule,
 
     // Utility modules
     SeederModule,
