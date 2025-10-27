@@ -48,7 +48,7 @@ type NotificationItem = {
   message: string
   isRead: boolean
   leadId?: string | null
-  metadata?: any
+  metadata?: Record<string, string>
 }
 
 interface NotificationListProps {
@@ -171,7 +171,7 @@ export function NotificationList({
   const onMarkAll = async () => {
     try {
       await markAllAsRead({
-        optimisticResponse: { __typename: 'Mutation', markAllAsRead: 1 },
+        optimisticResponse: { markAllAsRead: 1 },
         update(cache) {
           notifications.forEach((item) => {
             cache.modify({
@@ -196,8 +196,12 @@ export function NotificationList({
         },
       })
       toast.success(t?.markAllSuccess || 'All notifications marked as read')
-    } catch (e: any) {
-      toast.error(e?.message || t?.markAllError || 'Failed to mark all as read')
+    } catch (e: unknown) {
+      const errorMessage =
+        e instanceof Error
+          ? e.message
+          : t?.markAllError || 'Failed to mark all as read'
+      toast.error(errorMessage)
     }
   }
 
@@ -206,7 +210,6 @@ export function NotificationList({
       await markAsRead({
         variables: { id: notification.id },
         optimisticResponse: {
-          __typename: 'Mutation',
           markAsRead: {
             __typename: 'Notification',
             id: notification.id,
@@ -239,8 +242,10 @@ export function NotificationList({
         },
       })
       toast.success(t?.markReadSuccess || 'Marked as read')
-    } catch (e: any) {
-      toast.error(e?.message || t?.markReadError || 'Failed')
+    } catch (e: unknown) {
+      const errorMessage =
+        e instanceof Error ? e.message : t?.markReadError || 'Failed'
+      toast.error(errorMessage)
     }
   }
 
@@ -350,7 +355,7 @@ export function NotificationList({
                 return (
                   <div key={groupKey} className="space-y-3">
                     {/* Group Header */}
-                    <div className="sticky top-0 z-10 bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                    <div className="sticky top-0 z-10 bg-background/95 py-2 backdrop-blur supports-backdrop-filter:bg-background/60">
                       <h3 className="text-sm font-semibold text-muted-foreground">
                         {groupLabels[groupKey]}
                       </h3>
@@ -375,7 +380,7 @@ export function NotificationList({
                           >
                             <CardContent className="flex gap-4 p-4">
                               {/* Icon */}
-                              <div className="flex-shrink-0">
+                              <div className="shrink-0">
                                 <div className="rounded-md bg-primary/10 p-2">
                                   <TypeIcon className="size-5 text-primary" />
                                 </div>
