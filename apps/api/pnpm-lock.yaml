@@ -51,8 +51,8 @@ importers:
         specifier: ^11.1.7
         version: 11.1.8(@nestjs/common@11.1.8(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.8)(@nestjs/platform-socket.io@11.1.8)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@prisma/client':
-        specifier: 6.8.2
-        version: 6.8.2(prisma@6.18.0(typescript@5.9.3))(typescript@5.9.3)
+        specifier: 6.18.0
+        version: 6.18.0(prisma@6.18.0(typescript@5.9.3))(typescript@5.9.3)
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.2
@@ -196,7 +196,7 @@ importers:
         specifier: ^3.4.2
         version: 3.6.2
       prisma:
-        specifier: ^6.8.2
+        specifier: 6.18.0
         version: 6.18.0(typescript@5.9.3)
       source-map-support:
         specifier: ^0.5.21
@@ -1321,8 +1321,8 @@ packages:
     deprecated: 'Prisma CLI package was renamed to ''prisma''. Check it out here: https://www.npmjs.com/package/prisma'
     hasBin: true
 
-  '@prisma/client@6.8.2':
-    resolution: {integrity: sha512-5II+vbyzv4si6Yunwgkj0qT/iY0zyspttoDrL3R4BYgLdp42/d2C8xdi9vqkrYtKt9H32oFIukvyw3Koz5JoDg==}
+  '@prisma/client@6.18.0':
+    resolution: {integrity: sha512-jnL2I9gDnPnw4A+4h5SuNn8Gc+1mL1Z79U/3I9eE2gbxJG1oSA+62ByPW4xkeDgwE0fqMzzpAZ7IHxYnLZ4iQA==}
     engines: {node: '>=18.18'}
     peerDependencies:
       prisma: '*'
@@ -6246,7 +6246,7 @@ snapshots:
     dependencies:
       '@prisma/engines': 2.20.0-26.60ba6551f29b17d7d6ce479e5733c70d9c00860e
 
-  '@prisma/client@6.8.2(prisma@6.18.0(typescript@5.9.3))(typescript@5.9.3)':
+  '@prisma/client@6.18.0(prisma@6.18.0(typescript@5.9.3))(typescript@5.9.3)':
     optionalDependencies:
       prisma: 6.18.0(typescript@5.9.3)
       typescript: 5.9.3
