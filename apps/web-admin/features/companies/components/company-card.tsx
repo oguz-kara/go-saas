@@ -1,0 +1,106 @@
+// src/features/companies/components/company-card.tsx
+'use client'
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Globe, MoreVertical } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { EditCompanyDialog } from './edit-company-dialog'
+import { DeleteCompanyAlert } from './delete-company-alert'
+import { GetCompaniesWithAttributesQuery } from '@/graphql/generated/sdk'
+import { useTranslations } from '@/hooks/use-translations'
+import Link from '@/components/common/link'
+import { routes } from '@/lib/routes'
+
+type CompanyItem = GetCompaniesWithAttributesQuery['companies']['items'][0]
+
+interface CompanyCardProps {
+  company: CompanyItem
+}
+
+export const CompanyCard = ({ company }: CompanyCardProps) => {
+  const { translations } = useTranslations()
+  const t = translations?.companiesTable
+
+  if (!t) return null
+
+  return (
+    <Card className="transition-colors hover:bg-muted/50">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-base font-medium">
+          <Link
+            href={routes.companies.detail(company.id)}
+            className="text-blue-600 hover:underline"
+          >
+            {company.name}
+          </Link>
+        </CardTitle>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">{t.actionToggleMenu}</span>
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>{t.actionsLabel}</DropdownMenuLabel>
+            <EditCompanyDialog company={company} asMenuItem={false} />
+            <DeleteCompanyAlert companyId={company.id}>
+              <DropdownMenuItem
+                onSelect={(e) => e.preventDefault()}
+                className="text-red-600"
+              >
+                {t.actionDelete}
+              </DropdownMenuItem>
+            </DeleteCompanyAlert>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </CardHeader>
+      <CardContent>
+        <div className="text-sm text-muted-foreground space-y-2">
+          {company.website && (
+            <div className="flex items-center">
+              <Globe className="mr-2 h-4 w-4" />
+              <a
+                href={company.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline truncate"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {company.website}
+              </a>
+            </div>
+          )}
+          {/* Address display */}
+          {(company.address?.line1 ||
+            company.address?.line2 ||
+            company.address?.postalCode) && (
+            <div className="flex flex-col items-start mt-2">
+              <span>
+                {[
+                  company.address?.line1,
+                  company.address?.line2,
+                  company.address?.postalCode,
+                ]
+                  .filter(Boolean)
+                  .join(', ') || 'Adres bilgisi girilmemiş.'}
+              </span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}

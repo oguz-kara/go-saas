@@ -1,61 +1,74 @@
+version: "3.9"
+
 services:
   web-admin:
     build:
-      context: ./web-admin
+      context: ./apps/web-admin
       dockerfile: Dockerfile
     container_name: dolucrm-web-admin
     env_file:
-      - ./web-admin/.env
+      - ./apps/web-admin/.env
     depends_on:
       - api
     networks:
-      - dolucrm-network
+      - avara-network
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dolucrm-web-admin.rule=Host(`crm.restoreplusonline.com`)"
+      - "traefik.http.routers.dolucrm-web-admin.entrypoints=websecure"
+      - "traefik.http.routers.dolucrm-web-admin.tls=true"
+      - "traefik.http.routers.dolucrm-web-admin.tls.certresolver=letsencrypt"
+      - "traefik.http.services.dolucrm-web-admin.loadbalancer.server.port=3000"
 
   api:
     build:
-      context: ./api
+      context: ./apps/api
       dockerfile: Dockerfile
     container_name: dolucrm-api
     command: >
       sh -c "npx prisma migrate deploy && node dist/main"
     env_file:
-      - ./api/.env
+      - ./apps/api/.env
     depends_on:
       - db
     networks:
-      - dolucrm-network
+      - avara-network
     restart: always
-    ports:
-      - "5000:3000"
+    expose:
+      - "3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dolucrm-api.rule=Host(`crm-api.restoreplusonline.com`)"
+      - "traefik.http.routers.dolucrm-api.entrypoints=websecure"
+      - "traefik.http.routers.dolucrm-api.tls=true"
+      - "traefik.http.routers.dolucrm-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.dolucrm-api.loadbalancer.server.port=3000"
 
   db:
     image: postgres:16-alpine
     container_name: dolucrm-db
+    env_file:
+      - ./apps/api/.env
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-dolucrm}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
-      POSTGRES_DB: ${POSTGRES_DB:-dolucrm}
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "4784961Edc!"
+      POSTGRES_DB: "dolucrm-db"
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "5433:5432"
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - dolucrm-db:/var/lib/postgresql/data
     networks:
-      - dolucrm-network
+      - avara-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dolucrm}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 volumes:
-  db-data:
-    driver: local
+  dolucrm-db:
 
 networks:
-  dolucrm-network:
-    name: dolucrm-network
+  avara-network:
+    name: avara-network
+    external: true
     driver: bridge
