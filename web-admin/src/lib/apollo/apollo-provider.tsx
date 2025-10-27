@@ -48,6 +48,9 @@ function makeClient() {
   return new ApolloClient({
     cache: new InMemoryCache(),
     link: ApolloLink.from([errorLink, httpLink]),
+    devtools: {
+      enabled: process.env.NODE_ENV === 'development',
+    },
   })
 }
 

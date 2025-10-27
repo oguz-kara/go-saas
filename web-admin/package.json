@@ -10,7 +10,7 @@
     "generate": "graphql-codegen"
   },
   "dependencies": {
-    "@apollo/client": "^3.13.8",
+    "@apollo/client": "3.13.8",
     "@apollo/client-integration-nextjs": "^0.12.2",
     "@apollo/experimental-nextjs-app-support": "^0.12.2",
     "@graphql-codegen/cli": "^5.0.7",
