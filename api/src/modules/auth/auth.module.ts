@@ -7,6 +7,8 @@ import { CacheModule } from 'src/common/services/cache/cache.module'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { JwtStrategy } from './strategies/jwt.strategy'
 import { ChannelModule } from '../channel'
+import { UserResolver } from './api/graphql/resolvers/user.resolver'
+import { UserService } from './application/services/user.service'
 
 @Module({
   imports: [
@@ -23,7 +25,14 @@ import { ChannelModule } from '../channel'
     }),
     CacheModule,
   ],
-  providers: [PrismaService, AuthService, AuthResolver, JwtStrategy],
-  exports: [AuthService],
+  providers: [
+    PrismaService,
+    UserService,
+    AuthService,
+    AuthResolver,
+    JwtStrategy,
+    UserResolver,
+  ],
+  exports: [AuthService, UserService],
 })
 export class AuthModule {}

@@ -4,6 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { GraphQLClient } from 'graphql-request'
 import { loginMutationGql } from '@gocrm/features/auth/gql/documents/login.mutation-gql'
 import { LoginUserMutation } from '@gocrm/graphql/generated/hooks'
+import { routes } from '@gocrm/lib/routes'
 
 type User = {
   id: string
@@ -27,7 +28,7 @@ const authOptions: NextAuthOptions = {
 
         const authApiClient = new GraphQLClient(
           process.env.NEXT_PUBLIC_ADMIN_GRAPHQL_API_URL ||
-            'http://localhost:3001/admin-api',
+            'http://localhost:5000/admin-api',
         )
 
         try {
@@ -79,6 +80,7 @@ const authOptions: NextAuthOptions = {
             id: token.id as string,
             email: token.email as string,
           },
+          accessToken: token.accessToken as string | undefined,
         }
         return newSession
       }
@@ -86,7 +88,7 @@ const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: '/login',
+    signIn: routes.login(),
   },
 }
 

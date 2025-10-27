@@ -5,6 +5,7 @@ import { SeedCompaniesSeeder } from './seed-companies.seeder'
 import { SeedChannelSeeder } from './seed-channel.seeder'
 import { Command } from 'nestjs-command'
 import { SeedSystemAttributesSeeder } from './seed-system-attributes.seeder'
+import { SeedLeadsSeeder } from './seed-leads.seeder'
 
 @Injectable()
 export class MainSeeder {
@@ -15,6 +16,7 @@ export class MainSeeder {
     private readonly companiesSeeder: SeedCompaniesSeeder,
     private readonly channelSeeder: SeedChannelSeeder,
     private readonly seedSystemAttributeSeeder: SeedSystemAttributesSeeder,
+    private readonly leadsSeeder: SeedLeadsSeeder,
   ) {}
 
   @Command({
@@ -29,6 +31,7 @@ export class MainSeeder {
     await this.usersSeeder.seedInitialUsers()
     await this.companiesSeeder.seedInitialCompanies()
     await this.seedSystemAttributeSeeder.run()
+    await this.leadsSeeder.seedInitialLeads()
 
     this.logger.log('--- ALL SEEDERS COMPLETED ---')
   }

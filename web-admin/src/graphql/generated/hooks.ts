@@ -111,6 +111,18 @@ export type AuthenticationPayload = {
   user: User;
 };
 
+export type ChangePasswordInput = {
+  confirmPassword: Scalars['String']['input'];
+  currentPassword: Scalars['String']['input'];
+  newPassword: Scalars['String']['input'];
+};
+
+export type ChangePasswordOutput = {
+  __typename?: 'ChangePasswordOutput';
+  message?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type Channel = {
   __typename?: 'Channel';
   createdAt: Scalars['DateTime']['output'];
@@ -186,6 +198,14 @@ export enum CompanyNoteType {
   Meeting = 'MEETING'
 }
 
+export type CreateActivityInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  leadId: Scalars['ID']['input'];
+  scheduledAt?: InputMaybe<Scalars['String']['input']>;
+  subject: Scalars['String']['input'];
+  type: Scalars['String']['input'];
+};
+
 export type CreateAttributeGroupInput = {
   name: Scalars['String']['input'];
 };
@@ -227,6 +247,27 @@ export type CreateCompanyInput = {
   website?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type CreateLeadInput = {
+  assignedToId?: InputMaybe<Scalars['ID']['input']>;
+  budget?: InputMaybe<Scalars['String']['input']>;
+  company?: InputMaybe<Scalars['String']['input']>;
+  companySize?: InputMaybe<Scalars['Float']['input']>;
+  currentSolution?: InputMaybe<Scalars['String']['input']>;
+  email: Scalars['String']['input'];
+  firstName: Scalars['String']['input'];
+  isDecisionMaker?: InputMaybe<Scalars['Boolean']['input']>;
+  jobTitle?: InputMaybe<Scalars['String']['input']>;
+  lastName: Scalars['String']['input'];
+  painPoints?: InputMaybe<Scalars['String']['input']>;
+  phone?: InputMaybe<Scalars['String']['input']>;
+  priority?: InputMaybe<Priority>;
+  productInterest?: InputMaybe<Array<ProductInterest>>;
+  source: LeadSource;
+  status?: InputMaybe<LeadStatus>;
+  timeline?: InputMaybe<Scalars['String']['input']>;
+  website?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type GetAttributeValuesByCodeArgs = {
   attributeTypeCode: Scalars['String']['input'];
   parentCode?: InputMaybe<Scalars['String']['input']>;
@@ -237,6 +278,106 @@ export type GetAttributeValuesByCodeArgs = {
   /** Number of items to take */
   take?: InputMaybe<Scalars['Int']['input']>;
 };
+
+export type Lead = {
+  __typename?: 'Lead';
+  activities: Array<LeadActivity>;
+  activitiesCount: Scalars['Float']['output'];
+  assignedTo?: Maybe<User>;
+  assignedToId?: Maybe<Scalars['String']['output']>;
+  budget?: Maybe<Scalars['String']['output']>;
+  company?: Maybe<Scalars['String']['output']>;
+  companySize?: Maybe<Scalars['Float']['output']>;
+  convertedAt?: Maybe<Scalars['DateTime']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  currentSolution?: Maybe<Scalars['String']['output']>;
+  email: Scalars['String']['output'];
+  firstName: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isDecisionMaker: Scalars['Boolean']['output'];
+  jobTitle?: Maybe<Scalars['String']['output']>;
+  lastContactedAt?: Maybe<Scalars['DateTime']['output']>;
+  lastName: Scalars['String']['output'];
+  lostReason?: Maybe<Scalars['String']['output']>;
+  notes: Array<LeadNote>;
+  notesCount: Scalars['Float']['output'];
+  painPoints?: Maybe<Scalars['String']['output']>;
+  phone?: Maybe<Scalars['String']['output']>;
+  priority: Priority;
+  productInterest: Array<ProductInterest>;
+  source: LeadSource;
+  status: LeadStatus;
+  tags: Array<Tag>;
+  tagsCount: Scalars['Float']['output'];
+  timeline?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  website?: Maybe<Scalars['String']['output']>;
+};
+
+
+export type LeadActivitiesArgs = {
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  take?: InputMaybe<Scalars['Float']['input']>;
+};
+
+
+export type LeadNotesArgs = {
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  take?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type LeadActivity = {
+  __typename?: 'LeadActivity';
+  completedAt?: Maybe<Scalars['DateTime']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  leadId: Scalars['String']['output'];
+  scheduledAt?: Maybe<Scalars['DateTime']['output']>;
+  subject: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+  userId: Scalars['String']['output'];
+};
+
+export type LeadConnection = {
+  __typename?: 'LeadConnection';
+  items: Array<Lead>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type LeadNote = {
+  __typename?: 'LeadNote';
+  content: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  leadId: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  userId: Scalars['String']['output'];
+};
+
+export enum LeadSource {
+  Admin = 'ADMIN',
+  ColdOutreach = 'COLD_OUTREACH',
+  EmailCampaign = 'EMAIL_CAMPAIGN',
+  Event = 'EVENT',
+  Other = 'OTHER',
+  PaidAds = 'PAID_ADS',
+  Partner = 'PARTNER',
+  Referral = 'REFERRAL',
+  SocialMedia = 'SOCIAL_MEDIA',
+  Website = 'WEBSITE'
+}
+
+export enum LeadStatus {
+  Contacted = 'CONTACTED',
+  Converted = 'CONVERTED',
+  Lost = 'LOST',
+  Negotiation = 'NEGOTIATION',
+  New = 'NEW',
+  ProposalSent = 'PROPOSAL_SENT',
+  Qualified = 'QUALIFIED',
+  Unqualified = 'UNQUALIFIED'
+}
 
 export type ListQueryArgs = {
   /** Search query */
@@ -260,31 +401,60 @@ export type LogoutOutput = {
 export type Mutation = {
   __typename?: 'Mutation';
   addNoteToCompany: CompanyNote;
+  changePassword: ChangePasswordOutput;
+  completeActivity: LeadActivity;
+  createActivity: LeadActivity;
   createAttributeGroup: AttributeGroup;
   createAttributeType: AttributeType;
   createAttributeValue: AttributeValue;
   createChannel: Channel;
   createCompany: Company;
+  createLead: Lead;
+  createNote: LeadNote;
+  deleteActivity: LeadActivity;
   deleteAttributeGroup: Scalars['Boolean']['output'];
   deleteAttributeType: Scalars['Boolean']['output'];
   deleteAttributeValue: Scalars['Boolean']['output'];
   deleteCompany: Company;
   deleteCompanyNote: CompanyNote;
+  deleteLead: Lead;
+  deleteNote: LeadNote;
   loginUser: AuthenticationPayload;
   logoutUser: LogoutOutput;
+  markAllAsRead: Scalars['Float']['output'];
+  markAsRead: Notification;
   registerNewTenant: AuthenticationPayload;
   registerUser: AuthenticationPayload;
+  updateActivity: LeadActivity;
   updateAttributeGroup: AttributeGroup;
   updateAttributeType: AttributeType;
   updateAttributeValue: AttributeValue;
   updateCompany: Company;
   updateCompanyNote: CompanyNote;
+  updateLead: Lead;
+  updateNote: LeadNote;
+  updateUserProfile: User;
 };
 
 
 export type MutationAddNoteToCompanyArgs = {
   addCompanyNoteInput: AddCompanyNoteInput;
   companyId: Scalars['ID']['input'];
+};
+
+
+export type MutationChangePasswordArgs = {
+  input: ChangePasswordInput;
+};
+
+
+export type MutationCompleteActivityArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationCreateActivityArgs = {
+  input: CreateActivityInput;
 };
 
 
@@ -313,6 +483,22 @@ export type MutationCreateCompanyArgs = {
 };
 
 
+export type MutationCreateLeadArgs = {
+  createLeadInput: CreateLeadInput;
+};
+
+
+export type MutationCreateNoteArgs = {
+  content: Scalars['String']['input'];
+  leadId: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteActivityArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteAttributeGroupArgs = {
   id: Scalars['ID']['input'];
 };
@@ -338,8 +524,23 @@ export type MutationDeleteCompanyNoteArgs = {
 };
 
 
+export type MutationDeleteLeadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteNoteArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationLoginUserArgs = {
   loginUserInput: LoginUserInput;
+};
+
+
+export type MutationMarkAsReadArgs = {
+  notificationId: Scalars['ID']['input'];
 };
 
 
@@ -351,6 +552,11 @@ export type MutationRegisterNewTenantArgs = {
 export type MutationRegisterUserArgs = {
   channelToken: Scalars['String']['input'];
   registerUserInput: RegisterUserInput;
+};
+
+
+export type MutationUpdateActivityArgs = {
+  input: UpdateActivityInput;
 };
 
 
@@ -383,8 +589,84 @@ export type MutationUpdateCompanyNoteArgs = {
   updateCompanyNoteInput: UpdateCompanyNoteInput;
 };
 
+
+export type MutationUpdateLeadArgs = {
+  updateLeadInput: UpdateLeadInput;
+};
+
+
+export type MutationUpdateNoteArgs = {
+  content?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationUpdateUserProfileArgs = {
+  input: UpdateUserProfileInput;
+};
+
+export type NoteConnection = {
+  __typename?: 'NoteConnection';
+  items: Array<LeadNote>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type Notification = {
+  __typename?: 'Notification';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  leadId?: Maybe<Scalars['String']['output']>;
+  message: Scalars['String']['output'];
+  metadata?: Maybe<Scalars['JSON']['output']>;
+  priority: NotificationPriority;
+  readAt?: Maybe<Scalars['DateTime']['output']>;
+  title: Scalars['String']['output'];
+  type: NotificationType;
+  userId?: Maybe<Scalars['String']['output']>;
+};
+
+export type NotificationConnection = {
+  __typename?: 'NotificationConnection';
+  items: Array<Notification>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export enum NotificationPriority {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM'
+}
+
+export enum NotificationType {
+  ActivityDue = 'ACTIVITY_DUE',
+  LeadAssigned = 'LEAD_ASSIGNED',
+  LeadStatusChanged = 'LEAD_STATUS_CHANGED',
+  NewLead = 'NEW_LEAD'
+}
+
+export enum Priority {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM',
+  Urgent = 'URGENT'
+}
+
+export enum ProductInterest {
+  ApiIntegration = 'API_INTEGRATION',
+  Consulting = 'CONSULTING',
+  CustomSoftware = 'CUSTOM_SOFTWARE',
+  MobileApp = 'MOBILE_APP',
+  Other = 'OTHER',
+  Saas = 'SAAS',
+  WebApp = 'WEB_APP'
+}
+
 export type Query = {
   __typename?: 'Query';
+  activities: Array<LeadActivity>;
+  activitiesCount: Scalars['Float']['output'];
+  activity?: Maybe<LeadActivity>;
   attributeGroups: AttributeGroupConnection;
   attributeTypes: AttributeTypeConnection;
   attributeValues: AttributeValueConnection;
@@ -394,7 +676,48 @@ export type Query = {
   companies: CompanyConnection;
   company?: Maybe<Company>;
   companyNotes?: Maybe<CompanyConnectionNotes>;
+  getUser: User;
+  getUserByEmail: User;
+  getUsers: UserConnection;
+  lead?: Maybe<Lead>;
+  leads: LeadConnection;
   me?: Maybe<User>;
+  note?: Maybe<LeadNote>;
+  notes: NoteConnection;
+  notesCount: Scalars['Float']['output'];
+  notifications: NotificationConnection;
+  unreadCount: Scalars['Float']['output'];
+};
+
+
+export type QueryActivitiesArgs = {
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  isCompleted?: InputMaybe<Scalars['Boolean']['input']>;
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryActivitiesCountArgs = {
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  isCompleted?: InputMaybe<Scalars['Boolean']['input']>;
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryActivityArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -459,6 +782,72 @@ export type QueryCompanyNotesArgs = {
   take?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
+export type QueryGetUserArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type QueryGetUserByEmailArgs = {
+  email: Scalars['String']['input'];
+};
+
+
+export type QueryGetUsersArgs = {
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryLeadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryLeadsArgs = {
+  assignedToId?: InputMaybe<Scalars['ID']['input']>;
+  channelToken?: InputMaybe<Scalars['ID']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  priority?: InputMaybe<Array<Priority>>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  sortOrder?: InputMaybe<Scalars['String']['input']>;
+  source?: InputMaybe<Array<LeadSource>>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Array<LeadStatus>>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryNoteArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryNotesArgs = {
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  take?: InputMaybe<Scalars['Float']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryNotesCountArgs = {
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryNotificationsArgs = {
+  onlyUnread?: InputMaybe<Scalars['Boolean']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type RegisterNewTenantInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -471,6 +860,21 @@ export type RegisterUserInput = {
   email: Scalars['String']['input'];
   name: Scalars['String']['input'];
   password: Scalars['String']['input'];
+};
+
+export type Tag = {
+  __typename?: 'Tag';
+  color?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type UpdateActivityInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+  scheduledAt?: InputMaybe<Scalars['String']['input']>;
+  subject?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateAttributeGroupInput = {
@@ -514,6 +918,32 @@ export type UpdateCompanyNoteInput = {
   type?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdateLeadInput = {
+  assignedToId?: InputMaybe<Scalars['ID']['input']>;
+  budget?: InputMaybe<Scalars['String']['input']>;
+  company?: InputMaybe<Scalars['String']['input']>;
+  companySize?: InputMaybe<Scalars['Float']['input']>;
+  currentSolution?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+  isDecisionMaker?: InputMaybe<Scalars['Boolean']['input']>;
+  jobTitle?: InputMaybe<Scalars['String']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  painPoints?: InputMaybe<Scalars['String']['input']>;
+  phone?: InputMaybe<Scalars['String']['input']>;
+  priority?: InputMaybe<Priority>;
+  productInterest?: InputMaybe<Array<ProductInterest>>;
+  source?: InputMaybe<LeadSource>;
+  status?: InputMaybe<LeadStatus>;
+  timeline?: InputMaybe<Scalars['String']['input']>;
+  website?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateUserProfileInput = {
+  name: Scalars['String']['input'];
+};
+
 export type User = {
   __typename?: 'User';
   createdAt?: Maybe<Scalars['DateTime']['output']>;
@@ -521,6 +951,12 @@ export type User = {
   id: Scalars['ID']['output'];
   name?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type UserConnection = {
+  __typename?: 'UserConnection';
+  items: Array<User>;
+  totalCount: Scalars['Int']['output'];
 };
 
 export type CreateAttributeGroupMutationVariables = Exact<{
@@ -635,6 +1071,21 @@ export type GetAttributeValuesByCodeQueryVariables = Exact<{
 
 export type GetAttributeValuesByCodeQuery = { __typename?: 'Query', attributeValuesByCode: { __typename?: 'AttributeValueConnection', totalCount: number, items: Array<{ __typename?: 'AttributeValue', id: string, value: string, code: string, attributeTypeId: string }> } };
 
+export type ChangePasswordMutationVariables = Exact<{
+  input: ChangePasswordInput;
+}>;
+
+
+export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'ChangePasswordOutput', success: boolean, message?: string | null } };
+
+export type UsersQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type UsersQuery = { __typename?: 'Query', getUsers: { __typename?: 'UserConnection', totalCount: number, items: Array<{ __typename?: 'User', id: string, name?: string | null, email: string }> } };
+
 export type LoginUserMutationVariables = Exact<{
   input: LoginUserInput;
 }>;
@@ -666,6 +1117,13 @@ export type RegisterUserMutationVariables = Exact<{
 
 
 export type RegisterUserMutation = { __typename?: 'Mutation', registerUser: { __typename?: 'AuthenticationPayload', token: string, user: { __typename?: 'User', email: string } } };
+
+export type UpdateUserProfileMutationVariables = Exact<{
+  input: UpdateUserProfileInput;
+}>;
+
+
+export type UpdateUserProfileMutation = { __typename?: 'Mutation', updateUserProfile: { __typename?: 'User', id: string, email: string, name?: string | null, updatedAt?: any | null } };
 
 export type CreateChannelMutationVariables = Exact<{
   input: CreateChannelInput;
@@ -800,6 +1258,185 @@ export type UpdateNoteMutationVariables = Exact<{
 
 
 export type UpdateNoteMutation = { __typename?: 'Mutation', updateCompanyNote: { __typename?: 'CompanyNote', id: string, content: string, type?: CompanyNoteType | null, updatedAt: any } };
+
+export type CompleteActivityMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type CompleteActivityMutation = { __typename?: 'Mutation', completeActivity: { __typename?: 'LeadActivity', id: string, completedAt?: any | null } };
+
+export type CreateActivityMutationVariables = Exact<{
+  input: CreateActivityInput;
+}>;
+
+
+export type CreateActivityMutation = { __typename?: 'Mutation', createActivity: { __typename?: 'LeadActivity', id: string, createdAt: any, type: string, subject: string, description?: string | null, scheduledAt?: any | null, completedAt?: any | null, leadId: string, userId: string } };
+
+export type CreateLeadMutationVariables = Exact<{
+  input: CreateLeadInput;
+}>;
+
+
+export type CreateLeadMutation = { __typename?: 'Mutation', createLead: { __typename?: 'Lead', id: string, firstName: string, lastName: string, email: string } };
+
+export type CreateNoteMutationVariables = Exact<{
+  leadId: Scalars['ID']['input'];
+  content: Scalars['String']['input'];
+}>;
+
+
+export type CreateNoteMutation = { __typename?: 'Mutation', createNote: { __typename?: 'LeadNote', id: string, content: string, leadId: string, userId: string, createdAt: any, updatedAt: any } };
+
+export type DeleteActivityMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteActivityMutation = { __typename?: 'Mutation', deleteActivity: { __typename?: 'LeadActivity', id: string } };
+
+export type DeleteLeadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteLeadMutation = { __typename?: 'Mutation', deleteLead: { __typename?: 'Lead', id: string } };
+
+export type DeleteLeadNoteMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteLeadNoteMutation = { __typename?: 'Mutation', deleteNote: { __typename?: 'LeadNote', id: string } };
+
+export type GetActivitiesCountQueryVariables = Exact<{
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  isCompleted?: InputMaybe<Scalars['Boolean']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetActivitiesCountQuery = { __typename?: 'Query', activitiesCount: number };
+
+export type GetActivitiesQueryVariables = Exact<{
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  isCompleted?: InputMaybe<Scalars['Boolean']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetActivitiesQuery = { __typename?: 'Query', activities: Array<{ __typename?: 'LeadActivity', id: string, createdAt: any, type: string, subject: string, description?: string | null, scheduledAt?: any | null, completedAt?: any | null, leadId: string, userId: string }> };
+
+export type GetActivityQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetActivityQuery = { __typename?: 'Query', activity?: { __typename?: 'LeadActivity', id: string, createdAt: any, type: string, subject: string, description?: string | null, scheduledAt?: any | null, completedAt?: any | null, leadId: string, userId: string } | null };
+
+export type GetLeadDetailQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetLeadDetailQuery = { __typename?: 'Query', lead?: { __typename?: 'Lead', id: string, createdAt: any, updatedAt: any, firstName: string, lastName: string, email: string, phone?: string | null, company?: string | null, jobTitle?: string | null, website?: string | null, status: LeadStatus, source: LeadSource, priority: Priority, productInterest: Array<ProductInterest>, budget?: string | null, timeline?: string | null, companySize?: number | null, isDecisionMaker: boolean, painPoints?: string | null, currentSolution?: string | null, lastContactedAt?: any | null, convertedAt?: any | null, lostReason?: string | null, assignedTo?: { __typename?: 'User', id: string, name?: string | null, email: string } | null } | null };
+
+export type GetLeadsQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Array<LeadStatus> | LeadStatus>;
+  source?: InputMaybe<Array<LeadSource> | LeadSource>;
+  priority?: InputMaybe<Array<Priority> | Priority>;
+  assignedToId?: InputMaybe<Scalars['ID']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  sortOrder?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetLeadsQuery = { __typename?: 'Query', leads: { __typename?: 'LeadConnection', totalCount: number, items: Array<{ __typename?: 'Lead', id: string, createdAt: any, firstName: string, lastName: string, email: string, company?: string | null, status: LeadStatus, source: LeadSource, productInterest: Array<ProductInterest>, priority: Priority, assignedTo?: { __typename?: 'User', id: string, name?: string | null, email: string } | null }> } };
+
+export type GetNotesCountQueryVariables = Exact<{
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetNotesCountQuery = { __typename?: 'Query', notesCount: number };
+
+export type GetNotesQueryVariables = Exact<{
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  take?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetNotesQuery = { __typename?: 'Query', notes: { __typename?: 'NoteConnection', totalCount: number, items: Array<{ __typename?: 'LeadNote', id: string, content: string, leadId: string, userId: string, createdAt: any, updatedAt: any }> } };
+
+export type UpdateActivityMutationVariables = Exact<{
+  input: UpdateActivityInput;
+}>;
+
+
+export type UpdateActivityMutation = { __typename?: 'Mutation', updateActivity: { __typename?: 'LeadActivity', id: string, createdAt: any, type: string, subject: string, description?: string | null, scheduledAt?: any | null, completedAt?: any | null, leadId: string, userId: string } };
+
+export type UpdateLeadMutationVariables = Exact<{
+  input: UpdateLeadInput;
+}>;
+
+
+export type UpdateLeadMutation = { __typename?: 'Mutation', updateLead: { __typename?: 'Lead', id: string, firstName: string, lastName: string, email: string, status: LeadStatus, priority: Priority } };
+
+export type UpdateLeadNoteMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  content?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type UpdateLeadNoteMutation = { __typename?: 'Mutation', updateNote: { __typename?: 'LeadNote', id: string, content: string, updatedAt: any } };
+
+export type GetNotificationsQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  onlyUnread?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type GetNotificationsQuery = { __typename?: 'Query', notifications: { __typename?: 'NotificationConnection', totalCount: number, items: Array<{ __typename?: 'Notification', id: string, createdAt: any, type: NotificationType, priority: NotificationPriority, title: string, message: string, isRead: boolean, leadId?: string | null, metadata?: any | null }> } };
+
+export type MarkAllAsReadMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MarkAllAsReadMutation = { __typename?: 'Mutation', markAllAsRead: number };
+
+export type MarkAsReadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type MarkAsReadMutation = { __typename?: 'Mutation', markAsRead: { __typename?: 'Notification', id: string, isRead: boolean, readAt?: any | null } };
+
+export type UnreadCountQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UnreadCountQuery = { __typename?: 'Query', unreadCount: number };
 
 
 export const CreateAttributeGroupDocument = gql`
@@ -1398,6 +2035,86 @@ export type GetAttributeValuesByCodeQueryHookResult = ReturnType<typeof useGetAt
 export type GetAttributeValuesByCodeLazyQueryHookResult = ReturnType<typeof useGetAttributeValuesByCodeLazyQuery>;
 export type GetAttributeValuesByCodeSuspenseQueryHookResult = ReturnType<typeof useGetAttributeValuesByCodeSuspenseQuery>;
 export type GetAttributeValuesByCodeQueryResult = Apollo.QueryResult<GetAttributeValuesByCodeQuery, GetAttributeValuesByCodeQueryVariables>;
+export const ChangePasswordDocument = gql`
+    mutation changePassword($input: ChangePasswordInput!) {
+  changePassword(input: $input) {
+    success
+    message
+  }
+}
+    `;
+export type ChangePasswordMutationFn = Apollo.MutationFunction<ChangePasswordMutation, ChangePasswordMutationVariables>;
+
+/**
+ * __useChangePasswordMutation__
+ *
+ * To run a mutation, you first call `useChangePasswordMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangePasswordMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changePasswordMutation, { data, loading, error }] = useChangePasswordMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useChangePasswordMutation(baseOptions?: Apollo.MutationHookOptions<ChangePasswordMutation, ChangePasswordMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument, options);
+      }
+export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
+export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
+export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
+export const UsersDocument = gql`
+    query Users($skip: Int, $take: Int) {
+  getUsers(skip: $skip, take: $take) {
+    items {
+      id
+      name
+      email
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useUsersQuery__
+ *
+ * To run a query within a React component, call `useUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUsersQuery({
+ *   variables: {
+ *      skip: // value for 'skip'
+ *      take: // value for 'take'
+ *   },
+ * });
+ */
+export function useUsersQuery(baseOptions?: Apollo.QueryHookOptions<UsersQuery, UsersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
+      }
+export function useUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UsersQuery, UsersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
+        }
+export function useUsersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<UsersQuery, UsersQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
+        }
+export type UsersQueryHookResult = ReturnType<typeof useUsersQuery>;
+export type UsersLazyQueryHookResult = ReturnType<typeof useUsersLazyQuery>;
+export type UsersSuspenseQueryHookResult = ReturnType<typeof useUsersSuspenseQuery>;
+export type UsersQueryResult = Apollo.QueryResult<UsersQuery, UsersQueryVariables>;
 export const LoginUserDocument = gql`
     mutation loginUser($input: LoginUserInput!) {
   loginUser(loginUserInput: $input) {
@@ -1584,6 +2301,42 @@ export function useRegisterUserMutation(baseOptions?: Apollo.MutationHookOptions
 export type RegisterUserMutationHookResult = ReturnType<typeof useRegisterUserMutation>;
 export type RegisterUserMutationResult = Apollo.MutationResult<RegisterUserMutation>;
 export type RegisterUserMutationOptions = Apollo.BaseMutationOptions<RegisterUserMutation, RegisterUserMutationVariables>;
+export const UpdateUserProfileDocument = gql`
+    mutation updateUserProfile($input: UpdateUserProfileInput!) {
+  updateUserProfile(input: $input) {
+    id
+    email
+    name
+    updatedAt
+  }
+}
+    `;
+export type UpdateUserProfileMutationFn = Apollo.MutationFunction<UpdateUserProfileMutation, UpdateUserProfileMutationVariables>;
+
+/**
+ * __useUpdateUserProfileMutation__
+ *
+ * To run a mutation, you first call `useUpdateUserProfileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateUserProfileMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateUserProfileMutation, { data, loading, error }] = useUpdateUserProfileMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateUserProfileMutation(baseOptions?: Apollo.MutationHookOptions<UpdateUserProfileMutation, UpdateUserProfileMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateUserProfileMutation, UpdateUserProfileMutationVariables>(UpdateUserProfileDocument, options);
+      }
+export type UpdateUserProfileMutationHookResult = ReturnType<typeof useUpdateUserProfileMutation>;
+export type UpdateUserProfileMutationResult = Apollo.MutationResult<UpdateUserProfileMutation>;
+export type UpdateUserProfileMutationOptions = Apollo.BaseMutationOptions<UpdateUserProfileMutation, UpdateUserProfileMutationVariables>;
 export const CreateChannelDocument = gql`
     mutation createChannel($input: CreateChannelInput!) {
   createChannel(createChannelInput: $input) {
@@ -2373,3 +3126,936 @@ export function useUpdateNoteMutation(baseOptions?: Apollo.MutationHookOptions<U
 export type UpdateNoteMutationHookResult = ReturnType<typeof useUpdateNoteMutation>;
 export type UpdateNoteMutationResult = Apollo.MutationResult<UpdateNoteMutation>;
 export type UpdateNoteMutationOptions = Apollo.BaseMutationOptions<UpdateNoteMutation, UpdateNoteMutationVariables>;
+export const CompleteActivityDocument = gql`
+    mutation CompleteActivity($id: ID!) {
+  completeActivity(id: $id) {
+    id
+    completedAt
+  }
+}
+    `;
+export type CompleteActivityMutationFn = Apollo.MutationFunction<CompleteActivityMutation, CompleteActivityMutationVariables>;
+
+/**
+ * __useCompleteActivityMutation__
+ *
+ * To run a mutation, you first call `useCompleteActivityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCompleteActivityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [completeActivityMutation, { data, loading, error }] = useCompleteActivityMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCompleteActivityMutation(baseOptions?: Apollo.MutationHookOptions<CompleteActivityMutation, CompleteActivityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CompleteActivityMutation, CompleteActivityMutationVariables>(CompleteActivityDocument, options);
+      }
+export type CompleteActivityMutationHookResult = ReturnType<typeof useCompleteActivityMutation>;
+export type CompleteActivityMutationResult = Apollo.MutationResult<CompleteActivityMutation>;
+export type CompleteActivityMutationOptions = Apollo.BaseMutationOptions<CompleteActivityMutation, CompleteActivityMutationVariables>;
+export const CreateActivityDocument = gql`
+    mutation CreateActivity($input: CreateActivityInput!) {
+  createActivity(input: $input) {
+    id
+    createdAt
+    type
+    subject
+    description
+    scheduledAt
+    completedAt
+    leadId
+    userId
+  }
+}
+    `;
+export type CreateActivityMutationFn = Apollo.MutationFunction<CreateActivityMutation, CreateActivityMutationVariables>;
+
+/**
+ * __useCreateActivityMutation__
+ *
+ * To run a mutation, you first call `useCreateActivityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateActivityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createActivityMutation, { data, loading, error }] = useCreateActivityMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateActivityMutation(baseOptions?: Apollo.MutationHookOptions<CreateActivityMutation, CreateActivityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateActivityMutation, CreateActivityMutationVariables>(CreateActivityDocument, options);
+      }
+export type CreateActivityMutationHookResult = ReturnType<typeof useCreateActivityMutation>;
+export type CreateActivityMutationResult = Apollo.MutationResult<CreateActivityMutation>;
+export type CreateActivityMutationOptions = Apollo.BaseMutationOptions<CreateActivityMutation, CreateActivityMutationVariables>;
+export const CreateLeadDocument = gql`
+    mutation CreateLead($input: CreateLeadInput!) {
+  createLead(createLeadInput: $input) {
+    id
+    firstName
+    lastName
+    email
+  }
+}
+    `;
+export type CreateLeadMutationFn = Apollo.MutationFunction<CreateLeadMutation, CreateLeadMutationVariables>;
+
+/**
+ * __useCreateLeadMutation__
+ *
+ * To run a mutation, you first call `useCreateLeadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateLeadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createLeadMutation, { data, loading, error }] = useCreateLeadMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateLeadMutation(baseOptions?: Apollo.MutationHookOptions<CreateLeadMutation, CreateLeadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateLeadMutation, CreateLeadMutationVariables>(CreateLeadDocument, options);
+      }
+export type CreateLeadMutationHookResult = ReturnType<typeof useCreateLeadMutation>;
+export type CreateLeadMutationResult = Apollo.MutationResult<CreateLeadMutation>;
+export type CreateLeadMutationOptions = Apollo.BaseMutationOptions<CreateLeadMutation, CreateLeadMutationVariables>;
+export const CreateNoteDocument = gql`
+    mutation CreateNote($leadId: ID!, $content: String!) {
+  createNote(leadId: $leadId, content: $content) {
+    id
+    content
+    leadId
+    userId
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type CreateNoteMutationFn = Apollo.MutationFunction<CreateNoteMutation, CreateNoteMutationVariables>;
+
+/**
+ * __useCreateNoteMutation__
+ *
+ * To run a mutation, you first call `useCreateNoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateNoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createNoteMutation, { data, loading, error }] = useCreateNoteMutation({
+ *   variables: {
+ *      leadId: // value for 'leadId'
+ *      content: // value for 'content'
+ *   },
+ * });
+ */
+export function useCreateNoteMutation(baseOptions?: Apollo.MutationHookOptions<CreateNoteMutation, CreateNoteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateNoteMutation, CreateNoteMutationVariables>(CreateNoteDocument, options);
+      }
+export type CreateNoteMutationHookResult = ReturnType<typeof useCreateNoteMutation>;
+export type CreateNoteMutationResult = Apollo.MutationResult<CreateNoteMutation>;
+export type CreateNoteMutationOptions = Apollo.BaseMutationOptions<CreateNoteMutation, CreateNoteMutationVariables>;
+export const DeleteActivityDocument = gql`
+    mutation DeleteActivity($id: ID!) {
+  deleteActivity(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteActivityMutationFn = Apollo.MutationFunction<DeleteActivityMutation, DeleteActivityMutationVariables>;
+
+/**
+ * __useDeleteActivityMutation__
+ *
+ * To run a mutation, you first call `useDeleteActivityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteActivityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteActivityMutation, { data, loading, error }] = useDeleteActivityMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteActivityMutation(baseOptions?: Apollo.MutationHookOptions<DeleteActivityMutation, DeleteActivityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteActivityMutation, DeleteActivityMutationVariables>(DeleteActivityDocument, options);
+      }
+export type DeleteActivityMutationHookResult = ReturnType<typeof useDeleteActivityMutation>;
+export type DeleteActivityMutationResult = Apollo.MutationResult<DeleteActivityMutation>;
+export type DeleteActivityMutationOptions = Apollo.BaseMutationOptions<DeleteActivityMutation, DeleteActivityMutationVariables>;
+export const DeleteLeadDocument = gql`
+    mutation DeleteLead($id: ID!) {
+  deleteLead(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteLeadMutationFn = Apollo.MutationFunction<DeleteLeadMutation, DeleteLeadMutationVariables>;
+
+/**
+ * __useDeleteLeadMutation__
+ *
+ * To run a mutation, you first call `useDeleteLeadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteLeadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteLeadMutation, { data, loading, error }] = useDeleteLeadMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteLeadMutation(baseOptions?: Apollo.MutationHookOptions<DeleteLeadMutation, DeleteLeadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteLeadMutation, DeleteLeadMutationVariables>(DeleteLeadDocument, options);
+      }
+export type DeleteLeadMutationHookResult = ReturnType<typeof useDeleteLeadMutation>;
+export type DeleteLeadMutationResult = Apollo.MutationResult<DeleteLeadMutation>;
+export type DeleteLeadMutationOptions = Apollo.BaseMutationOptions<DeleteLeadMutation, DeleteLeadMutationVariables>;
+export const DeleteLeadNoteDocument = gql`
+    mutation DeleteLeadNote($id: ID!) {
+  deleteNote(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteLeadNoteMutationFn = Apollo.MutationFunction<DeleteLeadNoteMutation, DeleteLeadNoteMutationVariables>;
+
+/**
+ * __useDeleteLeadNoteMutation__
+ *
+ * To run a mutation, you first call `useDeleteLeadNoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteLeadNoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteLeadNoteMutation, { data, loading, error }] = useDeleteLeadNoteMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteLeadNoteMutation(baseOptions?: Apollo.MutationHookOptions<DeleteLeadNoteMutation, DeleteLeadNoteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteLeadNoteMutation, DeleteLeadNoteMutationVariables>(DeleteLeadNoteDocument, options);
+      }
+export type DeleteLeadNoteMutationHookResult = ReturnType<typeof useDeleteLeadNoteMutation>;
+export type DeleteLeadNoteMutationResult = Apollo.MutationResult<DeleteLeadNoteMutation>;
+export type DeleteLeadNoteMutationOptions = Apollo.BaseMutationOptions<DeleteLeadNoteMutation, DeleteLeadNoteMutationVariables>;
+export const GetActivitiesCountDocument = gql`
+    query GetActivitiesCount($leadId: ID, $userId: ID, $type: String, $startDate: String, $endDate: String, $isCompleted: Boolean, $searchQuery: String, $skip: Int, $take: Int) {
+  activitiesCount(
+    leadId: $leadId
+    userId: $userId
+    type: $type
+    startDate: $startDate
+    endDate: $endDate
+    isCompleted: $isCompleted
+    searchQuery: $searchQuery
+    skip: $skip
+    take: $take
+  )
+}
+    `;
+
+/**
+ * __useGetActivitiesCountQuery__
+ *
+ * To run a query within a React component, call `useGetActivitiesCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetActivitiesCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetActivitiesCountQuery({
+ *   variables: {
+ *      leadId: // value for 'leadId'
+ *      userId: // value for 'userId'
+ *      type: // value for 'type'
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
+ *      isCompleted: // value for 'isCompleted'
+ *      searchQuery: // value for 'searchQuery'
+ *      skip: // value for 'skip'
+ *      take: // value for 'take'
+ *   },
+ * });
+ */
+export function useGetActivitiesCountQuery(baseOptions?: Apollo.QueryHookOptions<GetActivitiesCountQuery, GetActivitiesCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetActivitiesCountQuery, GetActivitiesCountQueryVariables>(GetActivitiesCountDocument, options);
+      }
+export function useGetActivitiesCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetActivitiesCountQuery, GetActivitiesCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetActivitiesCountQuery, GetActivitiesCountQueryVariables>(GetActivitiesCountDocument, options);
+        }
+export function useGetActivitiesCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetActivitiesCountQuery, GetActivitiesCountQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetActivitiesCountQuery, GetActivitiesCountQueryVariables>(GetActivitiesCountDocument, options);
+        }
+export type GetActivitiesCountQueryHookResult = ReturnType<typeof useGetActivitiesCountQuery>;
+export type GetActivitiesCountLazyQueryHookResult = ReturnType<typeof useGetActivitiesCountLazyQuery>;
+export type GetActivitiesCountSuspenseQueryHookResult = ReturnType<typeof useGetActivitiesCountSuspenseQuery>;
+export type GetActivitiesCountQueryResult = Apollo.QueryResult<GetActivitiesCountQuery, GetActivitiesCountQueryVariables>;
+export const GetActivitiesDocument = gql`
+    query GetActivities($leadId: ID, $userId: ID, $type: String, $startDate: String, $endDate: String, $isCompleted: Boolean, $searchQuery: String, $skip: Int, $take: Int) {
+  activities(
+    leadId: $leadId
+    userId: $userId
+    type: $type
+    startDate: $startDate
+    endDate: $endDate
+    isCompleted: $isCompleted
+    searchQuery: $searchQuery
+    skip: $skip
+    take: $take
+  ) {
+    id
+    createdAt
+    type
+    subject
+    description
+    scheduledAt
+    completedAt
+    leadId
+    userId
+  }
+}
+    `;
+
+/**
+ * __useGetActivitiesQuery__
+ *
+ * To run a query within a React component, call `useGetActivitiesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetActivitiesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetActivitiesQuery({
+ *   variables: {
+ *      leadId: // value for 'leadId'
+ *      userId: // value for 'userId'
+ *      type: // value for 'type'
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
+ *      isCompleted: // value for 'isCompleted'
+ *      searchQuery: // value for 'searchQuery'
+ *      skip: // value for 'skip'
+ *      take: // value for 'take'
+ *   },
+ * });
+ */
+export function useGetActivitiesQuery(baseOptions?: Apollo.QueryHookOptions<GetActivitiesQuery, GetActivitiesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetActivitiesQuery, GetActivitiesQueryVariables>(GetActivitiesDocument, options);
+      }
+export function useGetActivitiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetActivitiesQuery, GetActivitiesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetActivitiesQuery, GetActivitiesQueryVariables>(GetActivitiesDocument, options);
+        }
+export function useGetActivitiesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetActivitiesQuery, GetActivitiesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetActivitiesQuery, GetActivitiesQueryVariables>(GetActivitiesDocument, options);
+        }
+export type GetActivitiesQueryHookResult = ReturnType<typeof useGetActivitiesQuery>;
+export type GetActivitiesLazyQueryHookResult = ReturnType<typeof useGetActivitiesLazyQuery>;
+export type GetActivitiesSuspenseQueryHookResult = ReturnType<typeof useGetActivitiesSuspenseQuery>;
+export type GetActivitiesQueryResult = Apollo.QueryResult<GetActivitiesQuery, GetActivitiesQueryVariables>;
+export const GetActivityDocument = gql`
+    query GetActivity($id: ID!) {
+  activity(id: $id) {
+    id
+    createdAt
+    type
+    subject
+    description
+    scheduledAt
+    completedAt
+    leadId
+    userId
+  }
+}
+    `;
+
+/**
+ * __useGetActivityQuery__
+ *
+ * To run a query within a React component, call `useGetActivityQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetActivityQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetActivityQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetActivityQuery(baseOptions: Apollo.QueryHookOptions<GetActivityQuery, GetActivityQueryVariables> & ({ variables: GetActivityQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetActivityQuery, GetActivityQueryVariables>(GetActivityDocument, options);
+      }
+export function useGetActivityLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetActivityQuery, GetActivityQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetActivityQuery, GetActivityQueryVariables>(GetActivityDocument, options);
+        }
+export function useGetActivitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetActivityQuery, GetActivityQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetActivityQuery, GetActivityQueryVariables>(GetActivityDocument, options);
+        }
+export type GetActivityQueryHookResult = ReturnType<typeof useGetActivityQuery>;
+export type GetActivityLazyQueryHookResult = ReturnType<typeof useGetActivityLazyQuery>;
+export type GetActivitySuspenseQueryHookResult = ReturnType<typeof useGetActivitySuspenseQuery>;
+export type GetActivityQueryResult = Apollo.QueryResult<GetActivityQuery, GetActivityQueryVariables>;
+export const GetLeadDetailDocument = gql`
+    query GetLeadDetail($id: ID!) {
+  lead(id: $id) {
+    id
+    createdAt
+    updatedAt
+    firstName
+    lastName
+    email
+    phone
+    company
+    jobTitle
+    website
+    status
+    source
+    priority
+    productInterest
+    budget
+    timeline
+    companySize
+    isDecisionMaker
+    painPoints
+    currentSolution
+    lastContactedAt
+    convertedAt
+    lostReason
+    assignedTo {
+      id
+      name
+      email
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetLeadDetailQuery__
+ *
+ * To run a query within a React component, call `useGetLeadDetailQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLeadDetailQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLeadDetailQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetLeadDetailQuery(baseOptions: Apollo.QueryHookOptions<GetLeadDetailQuery, GetLeadDetailQueryVariables> & ({ variables: GetLeadDetailQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetLeadDetailQuery, GetLeadDetailQueryVariables>(GetLeadDetailDocument, options);
+      }
+export function useGetLeadDetailLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLeadDetailQuery, GetLeadDetailQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetLeadDetailQuery, GetLeadDetailQueryVariables>(GetLeadDetailDocument, options);
+        }
+export function useGetLeadDetailSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetLeadDetailQuery, GetLeadDetailQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetLeadDetailQuery, GetLeadDetailQueryVariables>(GetLeadDetailDocument, options);
+        }
+export type GetLeadDetailQueryHookResult = ReturnType<typeof useGetLeadDetailQuery>;
+export type GetLeadDetailLazyQueryHookResult = ReturnType<typeof useGetLeadDetailLazyQuery>;
+export type GetLeadDetailSuspenseQueryHookResult = ReturnType<typeof useGetLeadDetailSuspenseQuery>;
+export type GetLeadDetailQueryResult = Apollo.QueryResult<GetLeadDetailQuery, GetLeadDetailQueryVariables>;
+export const GetLeadsDocument = gql`
+    query GetLeads($skip: Int, $take: Int, $searchQuery: String, $status: [LeadStatus!], $source: [LeadSource!], $priority: [Priority!], $assignedToId: ID, $startDate: String, $endDate: String, $sortBy: String, $sortOrder: String) {
+  leads(
+    skip: $skip
+    take: $take
+    searchQuery: $searchQuery
+    status: $status
+    source: $source
+    priority: $priority
+    assignedToId: $assignedToId
+    startDate: $startDate
+    endDate: $endDate
+    sortBy: $sortBy
+    sortOrder: $sortOrder
+  ) {
+    items {
+      id
+      createdAt
+      firstName
+      lastName
+      email
+      company
+      status
+      source
+      productInterest
+      priority
+      assignedTo {
+        id
+        name
+        email
+      }
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetLeadsQuery__
+ *
+ * To run a query within a React component, call `useGetLeadsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLeadsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLeadsQuery({
+ *   variables: {
+ *      skip: // value for 'skip'
+ *      take: // value for 'take'
+ *      searchQuery: // value for 'searchQuery'
+ *      status: // value for 'status'
+ *      source: // value for 'source'
+ *      priority: // value for 'priority'
+ *      assignedToId: // value for 'assignedToId'
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
+ *      sortBy: // value for 'sortBy'
+ *      sortOrder: // value for 'sortOrder'
+ *   },
+ * });
+ */
+export function useGetLeadsQuery(baseOptions?: Apollo.QueryHookOptions<GetLeadsQuery, GetLeadsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetLeadsQuery, GetLeadsQueryVariables>(GetLeadsDocument, options);
+      }
+export function useGetLeadsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLeadsQuery, GetLeadsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetLeadsQuery, GetLeadsQueryVariables>(GetLeadsDocument, options);
+        }
+export function useGetLeadsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetLeadsQuery, GetLeadsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetLeadsQuery, GetLeadsQueryVariables>(GetLeadsDocument, options);
+        }
+export type GetLeadsQueryHookResult = ReturnType<typeof useGetLeadsQuery>;
+export type GetLeadsLazyQueryHookResult = ReturnType<typeof useGetLeadsLazyQuery>;
+export type GetLeadsSuspenseQueryHookResult = ReturnType<typeof useGetLeadsSuspenseQuery>;
+export type GetLeadsQueryResult = Apollo.QueryResult<GetLeadsQuery, GetLeadsQueryVariables>;
+export const GetNotesCountDocument = gql`
+    query GetNotesCount($leadId: ID, $userId: ID, $searchQuery: String) {
+  notesCount(leadId: $leadId, userId: $userId, searchQuery: $searchQuery)
+}
+    `;
+
+/**
+ * __useGetNotesCountQuery__
+ *
+ * To run a query within a React component, call `useGetNotesCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetNotesCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetNotesCountQuery({
+ *   variables: {
+ *      leadId: // value for 'leadId'
+ *      userId: // value for 'userId'
+ *      searchQuery: // value for 'searchQuery'
+ *   },
+ * });
+ */
+export function useGetNotesCountQuery(baseOptions?: Apollo.QueryHookOptions<GetNotesCountQuery, GetNotesCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetNotesCountQuery, GetNotesCountQueryVariables>(GetNotesCountDocument, options);
+      }
+export function useGetNotesCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetNotesCountQuery, GetNotesCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetNotesCountQuery, GetNotesCountQueryVariables>(GetNotesCountDocument, options);
+        }
+export function useGetNotesCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetNotesCountQuery, GetNotesCountQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetNotesCountQuery, GetNotesCountQueryVariables>(GetNotesCountDocument, options);
+        }
+export type GetNotesCountQueryHookResult = ReturnType<typeof useGetNotesCountQuery>;
+export type GetNotesCountLazyQueryHookResult = ReturnType<typeof useGetNotesCountLazyQuery>;
+export type GetNotesCountSuspenseQueryHookResult = ReturnType<typeof useGetNotesCountSuspenseQuery>;
+export type GetNotesCountQueryResult = Apollo.QueryResult<GetNotesCountQuery, GetNotesCountQueryVariables>;
+export const GetNotesDocument = gql`
+    query GetNotes($leadId: ID, $userId: ID, $searchQuery: String, $skip: Float, $take: Float) {
+  notes(
+    leadId: $leadId
+    userId: $userId
+    searchQuery: $searchQuery
+    skip: $skip
+    take: $take
+  ) {
+    items {
+      id
+      content
+      leadId
+      userId
+      createdAt
+      updatedAt
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetNotesQuery__
+ *
+ * To run a query within a React component, call `useGetNotesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetNotesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetNotesQuery({
+ *   variables: {
+ *      leadId: // value for 'leadId'
+ *      userId: // value for 'userId'
+ *      searchQuery: // value for 'searchQuery'
+ *      skip: // value for 'skip'
+ *      take: // value for 'take'
+ *   },
+ * });
+ */
+export function useGetNotesQuery(baseOptions?: Apollo.QueryHookOptions<GetNotesQuery, GetNotesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetNotesQuery, GetNotesQueryVariables>(GetNotesDocument, options);
+      }
+export function useGetNotesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetNotesQuery, GetNotesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetNotesQuery, GetNotesQueryVariables>(GetNotesDocument, options);
+        }
+export function useGetNotesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetNotesQuery, GetNotesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetNotesQuery, GetNotesQueryVariables>(GetNotesDocument, options);
+        }
+export type GetNotesQueryHookResult = ReturnType<typeof useGetNotesQuery>;
+export type GetNotesLazyQueryHookResult = ReturnType<typeof useGetNotesLazyQuery>;
+export type GetNotesSuspenseQueryHookResult = ReturnType<typeof useGetNotesSuspenseQuery>;
+export type GetNotesQueryResult = Apollo.QueryResult<GetNotesQuery, GetNotesQueryVariables>;
+export const UpdateActivityDocument = gql`
+    mutation UpdateActivity($input: UpdateActivityInput!) {
+  updateActivity(input: $input) {
+    id
+    createdAt
+    type
+    subject
+    description
+    scheduledAt
+    completedAt
+    leadId
+    userId
+  }
+}
+    `;
+export type UpdateActivityMutationFn = Apollo.MutationFunction<UpdateActivityMutation, UpdateActivityMutationVariables>;
+
+/**
+ * __useUpdateActivityMutation__
+ *
+ * To run a mutation, you first call `useUpdateActivityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateActivityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateActivityMutation, { data, loading, error }] = useUpdateActivityMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateActivityMutation(baseOptions?: Apollo.MutationHookOptions<UpdateActivityMutation, UpdateActivityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateActivityMutation, UpdateActivityMutationVariables>(UpdateActivityDocument, options);
+      }
+export type UpdateActivityMutationHookResult = ReturnType<typeof useUpdateActivityMutation>;
+export type UpdateActivityMutationResult = Apollo.MutationResult<UpdateActivityMutation>;
+export type UpdateActivityMutationOptions = Apollo.BaseMutationOptions<UpdateActivityMutation, UpdateActivityMutationVariables>;
+export const UpdateLeadDocument = gql`
+    mutation UpdateLead($input: UpdateLeadInput!) {
+  updateLead(updateLeadInput: $input) {
+    id
+    firstName
+    lastName
+    email
+    status
+    priority
+  }
+}
+    `;
+export type UpdateLeadMutationFn = Apollo.MutationFunction<UpdateLeadMutation, UpdateLeadMutationVariables>;
+
+/**
+ * __useUpdateLeadMutation__
+ *
+ * To run a mutation, you first call `useUpdateLeadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateLeadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateLeadMutation, { data, loading, error }] = useUpdateLeadMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateLeadMutation(baseOptions?: Apollo.MutationHookOptions<UpdateLeadMutation, UpdateLeadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateLeadMutation, UpdateLeadMutationVariables>(UpdateLeadDocument, options);
+      }
+export type UpdateLeadMutationHookResult = ReturnType<typeof useUpdateLeadMutation>;
+export type UpdateLeadMutationResult = Apollo.MutationResult<UpdateLeadMutation>;
+export type UpdateLeadMutationOptions = Apollo.BaseMutationOptions<UpdateLeadMutation, UpdateLeadMutationVariables>;
+export const UpdateLeadNoteDocument = gql`
+    mutation UpdateLeadNote($id: ID!, $content: String) {
+  updateNote(id: $id, content: $content) {
+    id
+    content
+    updatedAt
+  }
+}
+    `;
+export type UpdateLeadNoteMutationFn = Apollo.MutationFunction<UpdateLeadNoteMutation, UpdateLeadNoteMutationVariables>;
+
+/**
+ * __useUpdateLeadNoteMutation__
+ *
+ * To run a mutation, you first call `useUpdateLeadNoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateLeadNoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateLeadNoteMutation, { data, loading, error }] = useUpdateLeadNoteMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      content: // value for 'content'
+ *   },
+ * });
+ */
+export function useUpdateLeadNoteMutation(baseOptions?: Apollo.MutationHookOptions<UpdateLeadNoteMutation, UpdateLeadNoteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateLeadNoteMutation, UpdateLeadNoteMutationVariables>(UpdateLeadNoteDocument, options);
+      }
+export type UpdateLeadNoteMutationHookResult = ReturnType<typeof useUpdateLeadNoteMutation>;
+export type UpdateLeadNoteMutationResult = Apollo.MutationResult<UpdateLeadNoteMutation>;
+export type UpdateLeadNoteMutationOptions = Apollo.BaseMutationOptions<UpdateLeadNoteMutation, UpdateLeadNoteMutationVariables>;
+export const GetNotificationsDocument = gql`
+    query GetNotifications($skip: Int, $take: Int, $onlyUnread: Boolean) {
+  notifications(skip: $skip, take: $take, onlyUnread: $onlyUnread) {
+    items {
+      id
+      createdAt
+      type
+      priority
+      title
+      message
+      isRead
+      leadId
+      metadata
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetNotificationsQuery__
+ *
+ * To run a query within a React component, call `useGetNotificationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetNotificationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetNotificationsQuery({
+ *   variables: {
+ *      skip: // value for 'skip'
+ *      take: // value for 'take'
+ *      onlyUnread: // value for 'onlyUnread'
+ *   },
+ * });
+ */
+export function useGetNotificationsQuery(baseOptions?: Apollo.QueryHookOptions<GetNotificationsQuery, GetNotificationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetNotificationsQuery, GetNotificationsQueryVariables>(GetNotificationsDocument, options);
+      }
+export function useGetNotificationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetNotificationsQuery, GetNotificationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetNotificationsQuery, GetNotificationsQueryVariables>(GetNotificationsDocument, options);
+        }
+export function useGetNotificationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetNotificationsQuery, GetNotificationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetNotificationsQuery, GetNotificationsQueryVariables>(GetNotificationsDocument, options);
+        }
+export type GetNotificationsQueryHookResult = ReturnType<typeof useGetNotificationsQuery>;
+export type GetNotificationsLazyQueryHookResult = ReturnType<typeof useGetNotificationsLazyQuery>;
+export type GetNotificationsSuspenseQueryHookResult = ReturnType<typeof useGetNotificationsSuspenseQuery>;
+export type GetNotificationsQueryResult = Apollo.QueryResult<GetNotificationsQuery, GetNotificationsQueryVariables>;
+export const MarkAllAsReadDocument = gql`
+    mutation MarkAllAsRead {
+  markAllAsRead
+}
+    `;
+export type MarkAllAsReadMutationFn = Apollo.MutationFunction<MarkAllAsReadMutation, MarkAllAsReadMutationVariables>;
+
+/**
+ * __useMarkAllAsReadMutation__
+ *
+ * To run a mutation, you first call `useMarkAllAsReadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkAllAsReadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markAllAsReadMutation, { data, loading, error }] = useMarkAllAsReadMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMarkAllAsReadMutation(baseOptions?: Apollo.MutationHookOptions<MarkAllAsReadMutation, MarkAllAsReadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MarkAllAsReadMutation, MarkAllAsReadMutationVariables>(MarkAllAsReadDocument, options);
+      }
+export type MarkAllAsReadMutationHookResult = ReturnType<typeof useMarkAllAsReadMutation>;
+export type MarkAllAsReadMutationResult = Apollo.MutationResult<MarkAllAsReadMutation>;
+export type MarkAllAsReadMutationOptions = Apollo.BaseMutationOptions<MarkAllAsReadMutation, MarkAllAsReadMutationVariables>;
+export const MarkAsReadDocument = gql`
+    mutation MarkAsRead($id: ID!) {
+  markAsRead(notificationId: $id) {
+    id
+    isRead
+    readAt
+  }
+}
+    `;
+export type MarkAsReadMutationFn = Apollo.MutationFunction<MarkAsReadMutation, MarkAsReadMutationVariables>;
+
+/**
+ * __useMarkAsReadMutation__
+ *
+ * To run a mutation, you first call `useMarkAsReadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkAsReadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markAsReadMutation, { data, loading, error }] = useMarkAsReadMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useMarkAsReadMutation(baseOptions?: Apollo.MutationHookOptions<MarkAsReadMutation, MarkAsReadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MarkAsReadMutation, MarkAsReadMutationVariables>(MarkAsReadDocument, options);
+      }
+export type MarkAsReadMutationHookResult = ReturnType<typeof useMarkAsReadMutation>;
+export type MarkAsReadMutationResult = Apollo.MutationResult<MarkAsReadMutation>;
+export type MarkAsReadMutationOptions = Apollo.BaseMutationOptions<MarkAsReadMutation, MarkAsReadMutationVariables>;
+export const UnreadCountDocument = gql`
+    query UnreadCount {
+  unreadCount
+}
+    `;
+
+/**
+ * __useUnreadCountQuery__
+ *
+ * To run a query within a React component, call `useUnreadCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUnreadCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUnreadCountQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useUnreadCountQuery(baseOptions?: Apollo.QueryHookOptions<UnreadCountQuery, UnreadCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UnreadCountQuery, UnreadCountQueryVariables>(UnreadCountDocument, options);
+      }
+export function useUnreadCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UnreadCountQuery, UnreadCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UnreadCountQuery, UnreadCountQueryVariables>(UnreadCountDocument, options);
+        }
+export function useUnreadCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<UnreadCountQuery, UnreadCountQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<UnreadCountQuery, UnreadCountQueryVariables>(UnreadCountDocument, options);
+        }
+export type UnreadCountQueryHookResult = ReturnType<typeof useUnreadCountQuery>;
+export type UnreadCountLazyQueryHookResult = ReturnType<typeof useUnreadCountLazyQuery>;
+export type UnreadCountSuspenseQueryHookResult = ReturnType<typeof useUnreadCountSuspenseQuery>;
+export type UnreadCountQueryResult = Apollo.QueryResult<UnreadCountQuery, UnreadCountQueryVariables>;

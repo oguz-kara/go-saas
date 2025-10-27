@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { format } from 'date-fns'
+import { tr } from 'date-fns/locale'
 import { Calendar as CalendarIcon } from 'lucide-react'
 
 import { Button } from '@gocrm/components/ui/button'
@@ -11,12 +12,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@gocrm/components/ui/popover'
+import { useTranslations } from '@gocrm/hooks/use-translations'
 
 interface DatePickerProps {
   value: Date | undefined
   onChange: (date: Date | undefined) => void
   disabled?: boolean
   className?: string
+  placeholder?: string
 }
 
 export const DatePicker: React.FC<DatePickerProps> = ({
@@ -24,7 +27,12 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   onChange,
   disabled,
   className,
+  placeholder,
 }) => {
+  const { translations, locale } = useTranslations()
+  const dateLocale = locale === 'tr' ? tr : undefined
+  const defaultPlaceholder = translations?.addActivity?.pickDatePlaceholder || 'Pick a date'
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -38,7 +46,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           type="button"
         >
           <CalendarIcon />
-          {value ? format(value, 'PPP') : <span>Pick a date</span>}
+          {value ? (
+            format(value, 'PPP', { locale: dateLocale })
+          ) : (
+            <span>{placeholder || defaultPlaceholder}</span>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
@@ -47,6 +59,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           selected={value}
           onSelect={onChange}
           disabled={disabled}
+          locale={dateLocale}
         />
       </PopoverContent>
     </Popover>

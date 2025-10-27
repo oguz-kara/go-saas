@@ -102,7 +102,7 @@ model AttributeValue {
   // Basic Fields
   value String
   code  String
-  order Int     @default(0)
+  order Int    @default(0)
   meta  Json?
 
   // Relations
@@ -179,9 +179,16 @@ model User {
   // Note Relations
   companyNotes CompanyNote[]
 
+  // API Keys created by this user
+  apiKeys ApiKey[]
+
   // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  leads         Lead[]
+  activities    Activity[]
+  notes         Note[]
+  notifications Notification[]
 }
 
 model Channel {
@@ -192,6 +199,9 @@ model Channel {
   name        String  @unique
   token       String  @unique
   description String?
+
+  // Email Configuration
+  marketingEmails String[]
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -207,6 +217,9 @@ model Channel {
   attributeValues      AttributeValue[]
   attributeGroups      AttributeGroup[]
   attributeAssignments AttributeAssignment[]
+
+  // API Keys
+  apiKeys ApiKey[]
 }
 
 // Models
@@ -269,4 +282,222 @@ model CompanyNote {
   // Indexes
   @@index([companyId])
   @@index([userId])
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL_SENT
+  NEGOTIATION
+  CONVERTED
+  LOST
+  UNQUALIFIED
+}
+
+enum LeadSource {
+  WEBSITE
+  REFERRAL
+  SOCIAL_MEDIA
+  EMAIL_CAMPAIGN
+  PAID_ADS
+  COLD_OUTREACH
+  EVENT
+  PARTNER
+  ADMIN
+  OTHER
+  GOOGLE_ADS
+  FACEBOOK_ADS
+  LINKEDIN_ADS
+  ORGANIC_SEARCH
+  DIRECT_TRAFFIC
+}
+
+enum ProductInterest {
+  SAAS
+  MOBILE_APP
+  WEB_APP
+  CUSTOM_SOFTWARE
+  API_INTEGRATION
+  CONSULTING
+  OTHER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Contact Information
+  firstName String
+  lastName  String
+  email     String  @unique
+  phone     String?
+  company   String?
+  jobTitle  String?
+  website   String?
+
+  // Lead Details
+  status   LeadStatus @default(NEW)
+  source   LeadSource
+  priority Priority   @default(MEDIUM)
+
+  // Product Interest
+  productInterest ProductInterest[]
+  budget          Decimal?          @db.Decimal(12, 2)
+  timeline        String? // e.g., "Q1 2025", "3-6 months"
+
+  // Qualification
+  companySize     Int?
+  isDecisionMaker Boolean @default(false)
+  painPoints      String? @db.Text
+  currentSolution String?
+
+  // Tracking
+  lastContactedAt DateTime?
+  convertedAt     DateTime?
+  lostReason      String?
+
+  // Relationships
+  assignedToId  String?
+  assignedTo    User?          @relation(fields: [assignedToId], references: [id])
+  activities    Activity[]
+  notes         Note[]
+  tags          Tag[]
+  notifications Notification[]
+
+  @@index([status])
+  @@index([assignedToId])
+  @@index([createdAt])
+  @@index([email])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  type        String // call, email, meeting, demo, follow_up
+  subject     String
+  description String?   @db.Text
+  scheduledAt DateTime?
+  completedAt DateTime?
+
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([leadId])
+  @@index([userId])
+  @@index([scheduledAt])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  content String @db.Text
+
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([leadId])
+}
+
+model Tag {
+  id    String  @id @default(cuid())
+  name  String  @unique
+  color String? // hex color for UI
+
+  leads Lead[]
+
+  @@index([name])
+}
+
+enum NotificationType {
+  NEW_LEAD
+  LEAD_STATUS_CHANGED
+  ACTIVITY_DUE
+  LEAD_ASSIGNED
+  // room for future notification types
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  type     NotificationType
+  priority NotificationPriority @default(MEDIUM)
+  title    String
+  message  String               @db.Text
+
+  // Notification state
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
+  // Reference to the lead (optional, for lead-related notifications)
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  // Who should see this notification
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Optional: metadata as JSON for flexibility
+  metadata Json? // can store additional data like { source: "WEBSITE", email: "..." }
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@index([leadId])
+}
+
+model ApiKey {
+  id       String  @id @default(cuid())
+  name     String // Descriptive name (e.g., "Marketing Website - Production")
+  keyHash  String  @unique // Hashed version of the API key
+  prefix   String // First 8 characters for display (e.g., "mk_live_")
+  isActive Boolean @default(true)
+
+  // Expiration & Usage Tracking
+  expiresAt   DateTime?
+  usageCount  Int      @default(0)
+  lastUsedAt  DateTime?
+  lastUsedIp  String?
+
+  // Metadata for tracking and configuration
+  metadata Json? // Can store allowed sources, rate limits, etc.
+
+  // Relations
+  channelToken String
+  channel      Channel @relation(fields: [channelToken], references: [token])
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Indexes for performance
+  @@index([keyHash])
+  @@index([channelToken])
+  @@index([isActive])
 }

@@ -110,6 +110,18 @@ export type AuthenticationPayload = {
   user: User;
 };
 
+export type ChangePasswordInput = {
+  confirmPassword: Scalars['String']['input'];
+  currentPassword: Scalars['String']['input'];
+  newPassword: Scalars['String']['input'];
+};
+
+export type ChangePasswordOutput = {
+  __typename?: 'ChangePasswordOutput';
+  message?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type Channel = {
   __typename?: 'Channel';
   createdAt: Scalars['DateTime']['output'];
@@ -185,6 +197,14 @@ export enum CompanyNoteType {
   Meeting = 'MEETING'
 }
 
+export type CreateActivityInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  leadId: Scalars['ID']['input'];
+  scheduledAt?: InputMaybe<Scalars['String']['input']>;
+  subject: Scalars['String']['input'];
+  type: Scalars['String']['input'];
+};
+
 export type CreateAttributeGroupInput = {
   name: Scalars['String']['input'];
 };
@@ -226,6 +246,27 @@ export type CreateCompanyInput = {
   website?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type CreateLeadInput = {
+  assignedToId?: InputMaybe<Scalars['ID']['input']>;
+  budget?: InputMaybe<Scalars['String']['input']>;
+  company?: InputMaybe<Scalars['String']['input']>;
+  companySize?: InputMaybe<Scalars['Float']['input']>;
+  currentSolution?: InputMaybe<Scalars['String']['input']>;
+  email: Scalars['String']['input'];
+  firstName: Scalars['String']['input'];
+  isDecisionMaker?: InputMaybe<Scalars['Boolean']['input']>;
+  jobTitle?: InputMaybe<Scalars['String']['input']>;
+  lastName: Scalars['String']['input'];
+  painPoints?: InputMaybe<Scalars['String']['input']>;
+  phone?: InputMaybe<Scalars['String']['input']>;
+  priority?: InputMaybe<Priority>;
+  productInterest?: InputMaybe<Array<ProductInterest>>;
+  source: LeadSource;
+  status?: InputMaybe<LeadStatus>;
+  timeline?: InputMaybe<Scalars['String']['input']>;
+  website?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type GetAttributeValuesByCodeArgs = {
   attributeTypeCode: Scalars['String']['input'];
   parentCode?: InputMaybe<Scalars['String']['input']>;
@@ -236,6 +277,106 @@ export type GetAttributeValuesByCodeArgs = {
   /** Number of items to take */
   take?: InputMaybe<Scalars['Int']['input']>;
 };
+
+export type Lead = {
+  __typename?: 'Lead';
+  activities: Array<LeadActivity>;
+  activitiesCount: Scalars['Float']['output'];
+  assignedTo?: Maybe<User>;
+  assignedToId?: Maybe<Scalars['String']['output']>;
+  budget?: Maybe<Scalars['String']['output']>;
+  company?: Maybe<Scalars['String']['output']>;
+  companySize?: Maybe<Scalars['Float']['output']>;
+  convertedAt?: Maybe<Scalars['DateTime']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  currentSolution?: Maybe<Scalars['String']['output']>;
+  email: Scalars['String']['output'];
+  firstName: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isDecisionMaker: Scalars['Boolean']['output'];
+  jobTitle?: Maybe<Scalars['String']['output']>;
+  lastContactedAt?: Maybe<Scalars['DateTime']['output']>;
+  lastName: Scalars['String']['output'];
+  lostReason?: Maybe<Scalars['String']['output']>;
+  notes: Array<LeadNote>;
+  notesCount: Scalars['Float']['output'];
+  painPoints?: Maybe<Scalars['String']['output']>;
+  phone?: Maybe<Scalars['String']['output']>;
+  priority: Priority;
+  productInterest: Array<ProductInterest>;
+  source: LeadSource;
+  status: LeadStatus;
+  tags: Array<Tag>;
+  tagsCount: Scalars['Float']['output'];
+  timeline?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  website?: Maybe<Scalars['String']['output']>;
+};
+
+
+export type LeadActivitiesArgs = {
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  take?: InputMaybe<Scalars['Float']['input']>;
+};
+
+
+export type LeadNotesArgs = {
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  take?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type LeadActivity = {
+  __typename?: 'LeadActivity';
+  completedAt?: Maybe<Scalars['DateTime']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  leadId: Scalars['String']['output'];
+  scheduledAt?: Maybe<Scalars['DateTime']['output']>;
+  subject: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+  userId: Scalars['String']['output'];
+};
+
+export type LeadConnection = {
+  __typename?: 'LeadConnection';
+  items: Array<Lead>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type LeadNote = {
+  __typename?: 'LeadNote';
+  content: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  leadId: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  userId: Scalars['String']['output'];
+};
+
+export enum LeadSource {
+  Admin = 'ADMIN',
+  ColdOutreach = 'COLD_OUTREACH',
+  EmailCampaign = 'EMAIL_CAMPAIGN',
+  Event = 'EVENT',
+  Other = 'OTHER',
+  PaidAds = 'PAID_ADS',
+  Partner = 'PARTNER',
+  Referral = 'REFERRAL',
+  SocialMedia = 'SOCIAL_MEDIA',
+  Website = 'WEBSITE'
+}
+
+export enum LeadStatus {
+  Contacted = 'CONTACTED',
+  Converted = 'CONVERTED',
+  Lost = 'LOST',
+  Negotiation = 'NEGOTIATION',
+  New = 'NEW',
+  ProposalSent = 'PROPOSAL_SENT',
+  Qualified = 'QUALIFIED',
+  Unqualified = 'UNQUALIFIED'
+}
 
 export type ListQueryArgs = {
   /** Search query */
@@ -259,31 +400,60 @@ export type LogoutOutput = {
 export type Mutation = {
   __typename?: 'Mutation';
   addNoteToCompany: CompanyNote;
+  changePassword: ChangePasswordOutput;
+  completeActivity: LeadActivity;
+  createActivity: LeadActivity;
   createAttributeGroup: AttributeGroup;
   createAttributeType: AttributeType;
   createAttributeValue: AttributeValue;
   createChannel: Channel;
   createCompany: Company;
+  createLead: Lead;
+  createNote: LeadNote;
+  deleteActivity: LeadActivity;
   deleteAttributeGroup: Scalars['Boolean']['output'];
   deleteAttributeType: Scalars['Boolean']['output'];
   deleteAttributeValue: Scalars['Boolean']['output'];
   deleteCompany: Company;
   deleteCompanyNote: CompanyNote;
+  deleteLead: Lead;
+  deleteNote: LeadNote;
   loginUser: AuthenticationPayload;
   logoutUser: LogoutOutput;
+  markAllAsRead: Scalars['Float']['output'];
+  markAsRead: Notification;
   registerNewTenant: AuthenticationPayload;
   registerUser: AuthenticationPayload;
+  updateActivity: LeadActivity;
   updateAttributeGroup: AttributeGroup;
   updateAttributeType: AttributeType;
   updateAttributeValue: AttributeValue;
   updateCompany: Company;
   updateCompanyNote: CompanyNote;
+  updateLead: Lead;
+  updateNote: LeadNote;
+  updateUserProfile: User;
 };
 
 
 export type MutationAddNoteToCompanyArgs = {
   addCompanyNoteInput: AddCompanyNoteInput;
   companyId: Scalars['ID']['input'];
+};
+
+
+export type MutationChangePasswordArgs = {
+  input: ChangePasswordInput;
+};
+
+
+export type MutationCompleteActivityArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationCreateActivityArgs = {
+  input: CreateActivityInput;
 };
 
 
@@ -312,6 +482,22 @@ export type MutationCreateCompanyArgs = {
 };
 
 
+export type MutationCreateLeadArgs = {
+  createLeadInput: CreateLeadInput;
+};
+
+
+export type MutationCreateNoteArgs = {
+  content: Scalars['String']['input'];
+  leadId: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteActivityArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteAttributeGroupArgs = {
   id: Scalars['ID']['input'];
 };
@@ -337,8 +523,23 @@ export type MutationDeleteCompanyNoteArgs = {
 };
 
 
+export type MutationDeleteLeadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteNoteArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationLoginUserArgs = {
   loginUserInput: LoginUserInput;
+};
+
+
+export type MutationMarkAsReadArgs = {
+  notificationId: Scalars['ID']['input'];
 };
 
 
@@ -350,6 +551,11 @@ export type MutationRegisterNewTenantArgs = {
 export type MutationRegisterUserArgs = {
   channelToken: Scalars['String']['input'];
   registerUserInput: RegisterUserInput;
+};
+
+
+export type MutationUpdateActivityArgs = {
+  input: UpdateActivityInput;
 };
 
 
@@ -382,8 +588,84 @@ export type MutationUpdateCompanyNoteArgs = {
   updateCompanyNoteInput: UpdateCompanyNoteInput;
 };
 
+
+export type MutationUpdateLeadArgs = {
+  updateLeadInput: UpdateLeadInput;
+};
+
+
+export type MutationUpdateNoteArgs = {
+  content?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationUpdateUserProfileArgs = {
+  input: UpdateUserProfileInput;
+};
+
+export type NoteConnection = {
+  __typename?: 'NoteConnection';
+  items: Array<LeadNote>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type Notification = {
+  __typename?: 'Notification';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  leadId?: Maybe<Scalars['String']['output']>;
+  message: Scalars['String']['output'];
+  metadata?: Maybe<Scalars['JSON']['output']>;
+  priority: NotificationPriority;
+  readAt?: Maybe<Scalars['DateTime']['output']>;
+  title: Scalars['String']['output'];
+  type: NotificationType;
+  userId?: Maybe<Scalars['String']['output']>;
+};
+
+export type NotificationConnection = {
+  __typename?: 'NotificationConnection';
+  items: Array<Notification>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export enum NotificationPriority {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM'
+}
+
+export enum NotificationType {
+  ActivityDue = 'ACTIVITY_DUE',
+  LeadAssigned = 'LEAD_ASSIGNED',
+  LeadStatusChanged = 'LEAD_STATUS_CHANGED',
+  NewLead = 'NEW_LEAD'
+}
+
+export enum Priority {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM',
+  Urgent = 'URGENT'
+}
+
+export enum ProductInterest {
+  ApiIntegration = 'API_INTEGRATION',
+  Consulting = 'CONSULTING',
+  CustomSoftware = 'CUSTOM_SOFTWARE',
+  MobileApp = 'MOBILE_APP',
+  Other = 'OTHER',
+  Saas = 'SAAS',
+  WebApp = 'WEB_APP'
+}
+
 export type Query = {
   __typename?: 'Query';
+  activities: Array<LeadActivity>;
+  activitiesCount: Scalars['Float']['output'];
+  activity?: Maybe<LeadActivity>;
   attributeGroups: AttributeGroupConnection;
   attributeTypes: AttributeTypeConnection;
   attributeValues: AttributeValueConnection;
@@ -393,7 +675,48 @@ export type Query = {
   companies: CompanyConnection;
   company?: Maybe<Company>;
   companyNotes?: Maybe<CompanyConnectionNotes>;
+  getUser: User;
+  getUserByEmail: User;
+  getUsers: UserConnection;
+  lead?: Maybe<Lead>;
+  leads: LeadConnection;
   me?: Maybe<User>;
+  note?: Maybe<LeadNote>;
+  notes: NoteConnection;
+  notesCount: Scalars['Float']['output'];
+  notifications: NotificationConnection;
+  unreadCount: Scalars['Float']['output'];
+};
+
+
+export type QueryActivitiesArgs = {
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  isCompleted?: InputMaybe<Scalars['Boolean']['input']>;
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryActivitiesCountArgs = {
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  isCompleted?: InputMaybe<Scalars['Boolean']['input']>;
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryActivityArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -458,6 +781,72 @@ export type QueryCompanyNotesArgs = {
   take?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
+export type QueryGetUserArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type QueryGetUserByEmailArgs = {
+  email: Scalars['String']['input'];
+};
+
+
+export type QueryGetUsersArgs = {
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryLeadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryLeadsArgs = {
+  assignedToId?: InputMaybe<Scalars['ID']['input']>;
+  channelToken?: InputMaybe<Scalars['ID']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  priority?: InputMaybe<Array<Priority>>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  sortOrder?: InputMaybe<Scalars['String']['input']>;
+  source?: InputMaybe<Array<LeadSource>>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Array<LeadStatus>>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryNoteArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryNotesArgs = {
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  take?: InputMaybe<Scalars['Float']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryNotesCountArgs = {
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryNotificationsArgs = {
+  onlyUnread?: InputMaybe<Scalars['Boolean']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type RegisterNewTenantInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -470,6 +859,21 @@ export type RegisterUserInput = {
   email: Scalars['String']['input'];
   name: Scalars['String']['input'];
   password: Scalars['String']['input'];
+};
+
+export type Tag = {
+  __typename?: 'Tag';
+  color?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type UpdateActivityInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+  scheduledAt?: InputMaybe<Scalars['String']['input']>;
+  subject?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateAttributeGroupInput = {
@@ -513,6 +917,32 @@ export type UpdateCompanyNoteInput = {
   type?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdateLeadInput = {
+  assignedToId?: InputMaybe<Scalars['ID']['input']>;
+  budget?: InputMaybe<Scalars['String']['input']>;
+  company?: InputMaybe<Scalars['String']['input']>;
+  companySize?: InputMaybe<Scalars['Float']['input']>;
+  currentSolution?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+  isDecisionMaker?: InputMaybe<Scalars['Boolean']['input']>;
+  jobTitle?: InputMaybe<Scalars['String']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  painPoints?: InputMaybe<Scalars['String']['input']>;
+  phone?: InputMaybe<Scalars['String']['input']>;
+  priority?: InputMaybe<Priority>;
+  productInterest?: InputMaybe<Array<ProductInterest>>;
+  source?: InputMaybe<LeadSource>;
+  status?: InputMaybe<LeadStatus>;
+  timeline?: InputMaybe<Scalars['String']['input']>;
+  website?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateUserProfileInput = {
+  name: Scalars['String']['input'];
+};
+
 export type User = {
   __typename?: 'User';
   createdAt?: Maybe<Scalars['DateTime']['output']>;
@@ -520,6 +950,12 @@ export type User = {
   id: Scalars['ID']['output'];
   name?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type UserConnection = {
+  __typename?: 'UserConnection';
+  items: Array<User>;
+  totalCount: Scalars['Int']['output'];
 };
 
 export type CreateAttributeGroupMutationVariables = Exact<{
@@ -634,6 +1070,21 @@ export type GetAttributeValuesByCodeQueryVariables = Exact<{
 
 export type GetAttributeValuesByCodeQuery = { __typename?: 'Query', attributeValuesByCode: { __typename?: 'AttributeValueConnection', totalCount: number, items: Array<{ __typename?: 'AttributeValue', id: string, value: string, code: string, attributeTypeId: string }> } };
 
+export type ChangePasswordMutationVariables = Exact<{
+  input: ChangePasswordInput;
+}>;
+
+
+export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'ChangePasswordOutput', success: boolean, message?: string | null } };
+
+export type UsersQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type UsersQuery = { __typename?: 'Query', getUsers: { __typename?: 'UserConnection', totalCount: number, items: Array<{ __typename?: 'User', id: string, name?: string | null, email: string }> } };
+
 export type LoginUserMutationVariables = Exact<{
   input: LoginUserInput;
 }>;
@@ -665,6 +1116,13 @@ export type RegisterUserMutationVariables = Exact<{
 
 
 export type RegisterUserMutation = { __typename?: 'Mutation', registerUser: { __typename?: 'AuthenticationPayload', token: string, user: { __typename?: 'User', email: string } } };
+
+export type UpdateUserProfileMutationVariables = Exact<{
+  input: UpdateUserProfileInput;
+}>;
+
+
+export type UpdateUserProfileMutation = { __typename?: 'Mutation', updateUserProfile: { __typename?: 'User', id: string, email: string, name?: string | null, updatedAt?: any | null } };
 
 export type CreateChannelMutationVariables = Exact<{
   input: CreateChannelInput;
@@ -799,6 +1257,185 @@ export type UpdateNoteMutationVariables = Exact<{
 
 
 export type UpdateNoteMutation = { __typename?: 'Mutation', updateCompanyNote: { __typename?: 'CompanyNote', id: string, content: string, type?: CompanyNoteType | null, updatedAt: any } };
+
+export type CompleteActivityMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type CompleteActivityMutation = { __typename?: 'Mutation', completeActivity: { __typename?: 'LeadActivity', id: string, completedAt?: any | null } };
+
+export type CreateActivityMutationVariables = Exact<{
+  input: CreateActivityInput;
+}>;
+
+
+export type CreateActivityMutation = { __typename?: 'Mutation', createActivity: { __typename?: 'LeadActivity', id: string, createdAt: any, type: string, subject: string, description?: string | null, scheduledAt?: any | null, completedAt?: any | null, leadId: string, userId: string } };
+
+export type CreateLeadMutationVariables = Exact<{
+  input: CreateLeadInput;
+}>;
+
+
+export type CreateLeadMutation = { __typename?: 'Mutation', createLead: { __typename?: 'Lead', id: string, firstName: string, lastName: string, email: string } };
+
+export type CreateNoteMutationVariables = Exact<{
+  leadId: Scalars['ID']['input'];
+  content: Scalars['String']['input'];
+}>;
+
+
+export type CreateNoteMutation = { __typename?: 'Mutation', createNote: { __typename?: 'LeadNote', id: string, content: string, leadId: string, userId: string, createdAt: any, updatedAt: any } };
+
+export type DeleteActivityMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteActivityMutation = { __typename?: 'Mutation', deleteActivity: { __typename?: 'LeadActivity', id: string } };
+
+export type DeleteLeadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteLeadMutation = { __typename?: 'Mutation', deleteLead: { __typename?: 'Lead', id: string } };
+
+export type DeleteLeadNoteMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteLeadNoteMutation = { __typename?: 'Mutation', deleteNote: { __typename?: 'LeadNote', id: string } };
+
+export type GetActivitiesCountQueryVariables = Exact<{
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  isCompleted?: InputMaybe<Scalars['Boolean']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetActivitiesCountQuery = { __typename?: 'Query', activitiesCount: number };
+
+export type GetActivitiesQueryVariables = Exact<{
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  isCompleted?: InputMaybe<Scalars['Boolean']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetActivitiesQuery = { __typename?: 'Query', activities: Array<{ __typename?: 'LeadActivity', id: string, createdAt: any, type: string, subject: string, description?: string | null, scheduledAt?: any | null, completedAt?: any | null, leadId: string, userId: string }> };
+
+export type GetActivityQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetActivityQuery = { __typename?: 'Query', activity?: { __typename?: 'LeadActivity', id: string, createdAt: any, type: string, subject: string, description?: string | null, scheduledAt?: any | null, completedAt?: any | null, leadId: string, userId: string } | null };
+
+export type GetLeadDetailQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetLeadDetailQuery = { __typename?: 'Query', lead?: { __typename?: 'Lead', id: string, createdAt: any, updatedAt: any, firstName: string, lastName: string, email: string, phone?: string | null, company?: string | null, jobTitle?: string | null, website?: string | null, status: LeadStatus, source: LeadSource, priority: Priority, productInterest: Array<ProductInterest>, budget?: string | null, timeline?: string | null, companySize?: number | null, isDecisionMaker: boolean, painPoints?: string | null, currentSolution?: string | null, lastContactedAt?: any | null, convertedAt?: any | null, lostReason?: string | null, assignedTo?: { __typename?: 'User', id: string, name?: string | null, email: string } | null } | null };
+
+export type GetLeadsQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Array<LeadStatus> | LeadStatus>;
+  source?: InputMaybe<Array<LeadSource> | LeadSource>;
+  priority?: InputMaybe<Array<Priority> | Priority>;
+  assignedToId?: InputMaybe<Scalars['ID']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  sortOrder?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetLeadsQuery = { __typename?: 'Query', leads: { __typename?: 'LeadConnection', totalCount: number, items: Array<{ __typename?: 'Lead', id: string, createdAt: any, firstName: string, lastName: string, email: string, company?: string | null, status: LeadStatus, source: LeadSource, productInterest: Array<ProductInterest>, priority: Priority, assignedTo?: { __typename?: 'User', id: string, name?: string | null, email: string } | null }> } };
+
+export type GetNotesCountQueryVariables = Exact<{
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetNotesCountQuery = { __typename?: 'Query', notesCount: number };
+
+export type GetNotesQueryVariables = Exact<{
+  leadId?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  take?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetNotesQuery = { __typename?: 'Query', notes: { __typename?: 'NoteConnection', totalCount: number, items: Array<{ __typename?: 'LeadNote', id: string, content: string, leadId: string, userId: string, createdAt: any, updatedAt: any }> } };
+
+export type UpdateActivityMutationVariables = Exact<{
+  input: UpdateActivityInput;
+}>;
+
+
+export type UpdateActivityMutation = { __typename?: 'Mutation', updateActivity: { __typename?: 'LeadActivity', id: string, createdAt: any, type: string, subject: string, description?: string | null, scheduledAt?: any | null, completedAt?: any | null, leadId: string, userId: string } };
+
+export type UpdateLeadMutationVariables = Exact<{
+  input: UpdateLeadInput;
+}>;
+
+
+export type UpdateLeadMutation = { __typename?: 'Mutation', updateLead: { __typename?: 'Lead', id: string, firstName: string, lastName: string, email: string, status: LeadStatus, priority: Priority } };
+
+export type UpdateLeadNoteMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  content?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type UpdateLeadNoteMutation = { __typename?: 'Mutation', updateNote: { __typename?: 'LeadNote', id: string, content: string, updatedAt: any } };
+
+export type GetNotificationsQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  onlyUnread?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type GetNotificationsQuery = { __typename?: 'Query', notifications: { __typename?: 'NotificationConnection', totalCount: number, items: Array<{ __typename?: 'Notification', id: string, createdAt: any, type: NotificationType, priority: NotificationPriority, title: string, message: string, isRead: boolean, leadId?: string | null, metadata?: any | null }> } };
+
+export type MarkAllAsReadMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MarkAllAsReadMutation = { __typename?: 'Mutation', markAllAsRead: number };
+
+export type MarkAsReadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type MarkAsReadMutation = { __typename?: 'Mutation', markAsRead: { __typename?: 'Notification', id: string, isRead: boolean, readAt?: any | null } };
+
+export type UnreadCountQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UnreadCountQuery = { __typename?: 'Query', unreadCount: number };
 
 
 export const CreateAttributeGroupDocument = gql`
@@ -984,6 +1621,26 @@ export const GetAttributeValuesByCodeDocument = gql`
   }
 }
     `;
+export const ChangePasswordDocument = gql`
+    mutation changePassword($input: ChangePasswordInput!) {
+  changePassword(input: $input) {
+    success
+    message
+  }
+}
+    `;
+export const UsersDocument = gql`
+    query Users($skip: Int, $take: Int) {
+  getUsers(skip: $skip, take: $take) {
+    items {
+      id
+      name
+      email
+    }
+    totalCount
+  }
+}
+    `;
 export const LoginUserDocument = gql`
     mutation loginUser($input: LoginUserInput!) {
   loginUser(loginUserInput: $input) {
@@ -1031,6 +1688,16 @@ export const RegisterUserDocument = gql`
     user {
       email
     }
+  }
+}
+    `;
+export const UpdateUserProfileDocument = gql`
+    mutation updateUserProfile($input: UpdateUserProfileInput!) {
+  updateUserProfile(input: $input) {
+    id
+    email
+    name
+    updatedAt
   }
 }
     `;
@@ -1295,6 +1962,296 @@ export const UpdateNoteDocument = gql`
   }
 }
     `;
+export const CompleteActivityDocument = gql`
+    mutation CompleteActivity($id: ID!) {
+  completeActivity(id: $id) {
+    id
+    completedAt
+  }
+}
+    `;
+export const CreateActivityDocument = gql`
+    mutation CreateActivity($input: CreateActivityInput!) {
+  createActivity(input: $input) {
+    id
+    createdAt
+    type
+    subject
+    description
+    scheduledAt
+    completedAt
+    leadId
+    userId
+  }
+}
+    `;
+export const CreateLeadDocument = gql`
+    mutation CreateLead($input: CreateLeadInput!) {
+  createLead(createLeadInput: $input) {
+    id
+    firstName
+    lastName
+    email
+  }
+}
+    `;
+export const CreateNoteDocument = gql`
+    mutation CreateNote($leadId: ID!, $content: String!) {
+  createNote(leadId: $leadId, content: $content) {
+    id
+    content
+    leadId
+    userId
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export const DeleteActivityDocument = gql`
+    mutation DeleteActivity($id: ID!) {
+  deleteActivity(id: $id) {
+    id
+  }
+}
+    `;
+export const DeleteLeadDocument = gql`
+    mutation DeleteLead($id: ID!) {
+  deleteLead(id: $id) {
+    id
+  }
+}
+    `;
+export const DeleteLeadNoteDocument = gql`
+    mutation DeleteLeadNote($id: ID!) {
+  deleteNote(id: $id) {
+    id
+  }
+}
+    `;
+export const GetActivitiesCountDocument = gql`
+    query GetActivitiesCount($leadId: ID, $userId: ID, $type: String, $startDate: String, $endDate: String, $isCompleted: Boolean, $searchQuery: String, $skip: Int, $take: Int) {
+  activitiesCount(
+    leadId: $leadId
+    userId: $userId
+    type: $type
+    startDate: $startDate
+    endDate: $endDate
+    isCompleted: $isCompleted
+    searchQuery: $searchQuery
+    skip: $skip
+    take: $take
+  )
+}
+    `;
+export const GetActivitiesDocument = gql`
+    query GetActivities($leadId: ID, $userId: ID, $type: String, $startDate: String, $endDate: String, $isCompleted: Boolean, $searchQuery: String, $skip: Int, $take: Int) {
+  activities(
+    leadId: $leadId
+    userId: $userId
+    type: $type
+    startDate: $startDate
+    endDate: $endDate
+    isCompleted: $isCompleted
+    searchQuery: $searchQuery
+    skip: $skip
+    take: $take
+  ) {
+    id
+    createdAt
+    type
+    subject
+    description
+    scheduledAt
+    completedAt
+    leadId
+    userId
+  }
+}
+    `;
+export const GetActivityDocument = gql`
+    query GetActivity($id: ID!) {
+  activity(id: $id) {
+    id
+    createdAt
+    type
+    subject
+    description
+    scheduledAt
+    completedAt
+    leadId
+    userId
+  }
+}
+    `;
+export const GetLeadDetailDocument = gql`
+    query GetLeadDetail($id: ID!) {
+  lead(id: $id) {
+    id
+    createdAt
+    updatedAt
+    firstName
+    lastName
+    email
+    phone
+    company
+    jobTitle
+    website
+    status
+    source
+    priority
+    productInterest
+    budget
+    timeline
+    companySize
+    isDecisionMaker
+    painPoints
+    currentSolution
+    lastContactedAt
+    convertedAt
+    lostReason
+    assignedTo {
+      id
+      name
+      email
+    }
+  }
+}
+    `;
+export const GetLeadsDocument = gql`
+    query GetLeads($skip: Int, $take: Int, $searchQuery: String, $status: [LeadStatus!], $source: [LeadSource!], $priority: [Priority!], $assignedToId: ID, $startDate: String, $endDate: String, $sortBy: String, $sortOrder: String) {
+  leads(
+    skip: $skip
+    take: $take
+    searchQuery: $searchQuery
+    status: $status
+    source: $source
+    priority: $priority
+    assignedToId: $assignedToId
+    startDate: $startDate
+    endDate: $endDate
+    sortBy: $sortBy
+    sortOrder: $sortOrder
+  ) {
+    items {
+      id
+      createdAt
+      firstName
+      lastName
+      email
+      company
+      status
+      source
+      productInterest
+      priority
+      assignedTo {
+        id
+        name
+        email
+      }
+    }
+    totalCount
+  }
+}
+    `;
+export const GetNotesCountDocument = gql`
+    query GetNotesCount($leadId: ID, $userId: ID, $searchQuery: String) {
+  notesCount(leadId: $leadId, userId: $userId, searchQuery: $searchQuery)
+}
+    `;
+export const GetNotesDocument = gql`
+    query GetNotes($leadId: ID, $userId: ID, $searchQuery: String, $skip: Float, $take: Float) {
+  notes(
+    leadId: $leadId
+    userId: $userId
+    searchQuery: $searchQuery
+    skip: $skip
+    take: $take
+  ) {
+    items {
+      id
+      content
+      leadId
+      userId
+      createdAt
+      updatedAt
+    }
+    totalCount
+  }
+}
+    `;
+export const UpdateActivityDocument = gql`
+    mutation UpdateActivity($input: UpdateActivityInput!) {
+  updateActivity(input: $input) {
+    id
+    createdAt
+    type
+    subject
+    description
+    scheduledAt
+    completedAt
+    leadId
+    userId
+  }
+}
+    `;
+export const UpdateLeadDocument = gql`
+    mutation UpdateLead($input: UpdateLeadInput!) {
+  updateLead(updateLeadInput: $input) {
+    id
+    firstName
+    lastName
+    email
+    status
+    priority
+  }
+}
+    `;
+export const UpdateLeadNoteDocument = gql`
+    mutation UpdateLeadNote($id: ID!, $content: String) {
+  updateNote(id: $id, content: $content) {
+    id
+    content
+    updatedAt
+  }
+}
+    `;
+export const GetNotificationsDocument = gql`
+    query GetNotifications($skip: Int, $take: Int, $onlyUnread: Boolean) {
+  notifications(skip: $skip, take: $take, onlyUnread: $onlyUnread) {
+    items {
+      id
+      createdAt
+      type
+      priority
+      title
+      message
+      isRead
+      leadId
+      metadata
+    }
+    totalCount
+  }
+}
+    `;
+export const MarkAllAsReadDocument = gql`
+    mutation MarkAllAsRead {
+  markAllAsRead
+}
+    `;
+export const MarkAsReadDocument = gql`
+    mutation MarkAsRead($id: ID!) {
+  markAsRead(notificationId: $id) {
+    id
+    isRead
+    readAt
+  }
+}
+    `;
+export const UnreadCountDocument = gql`
+    query UnreadCount {
+  unreadCount
+}
+    `;
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>
 export function getSdk<C>(requester: Requester<C>) {
   return {
@@ -1340,6 +2297,12 @@ export function getSdk<C>(requester: Requester<C>) {
     getAttributeValuesByCode(variables: GetAttributeValuesByCodeQueryVariables, options?: C): Promise<GetAttributeValuesByCodeQuery> {
       return requester<GetAttributeValuesByCodeQuery, GetAttributeValuesByCodeQueryVariables>(GetAttributeValuesByCodeDocument, variables, options) as Promise<GetAttributeValuesByCodeQuery>;
     },
+    changePassword(variables: ChangePasswordMutationVariables, options?: C): Promise<ChangePasswordMutation> {
+      return requester<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument, variables, options) as Promise<ChangePasswordMutation>;
+    },
+    Users(variables?: UsersQueryVariables, options?: C): Promise<UsersQuery> {
+      return requester<UsersQuery, UsersQueryVariables>(UsersDocument, variables, options) as Promise<UsersQuery>;
+    },
     loginUser(variables: LoginUserMutationVariables, options?: C): Promise<LoginUserMutation> {
       return requester<LoginUserMutation, LoginUserMutationVariables>(LoginUserDocument, variables, options) as Promise<LoginUserMutation>;
     },
@@ -1354,6 +2317,9 @@ export function getSdk<C>(requester: Requester<C>) {
     },
     registerUser(variables: RegisterUserMutationVariables, options?: C): Promise<RegisterUserMutation> {
       return requester<RegisterUserMutation, RegisterUserMutationVariables>(RegisterUserDocument, variables, options) as Promise<RegisterUserMutation>;
+    },
+    updateUserProfile(variables: UpdateUserProfileMutationVariables, options?: C): Promise<UpdateUserProfileMutation> {
+      return requester<UpdateUserProfileMutation, UpdateUserProfileMutationVariables>(UpdateUserProfileDocument, variables, options) as Promise<UpdateUserProfileMutation>;
     },
     createChannel(variables: CreateChannelMutationVariables, options?: C): Promise<CreateChannelMutation> {
       return requester<CreateChannelMutation, CreateChannelMutationVariables>(CreateChannelDocument, variables, options) as Promise<CreateChannelMutation>;
@@ -1405,6 +2371,69 @@ export function getSdk<C>(requester: Requester<C>) {
     },
     updateNote(variables: UpdateNoteMutationVariables, options?: C): Promise<UpdateNoteMutation> {
       return requester<UpdateNoteMutation, UpdateNoteMutationVariables>(UpdateNoteDocument, variables, options) as Promise<UpdateNoteMutation>;
+    },
+    CompleteActivity(variables: CompleteActivityMutationVariables, options?: C): Promise<CompleteActivityMutation> {
+      return requester<CompleteActivityMutation, CompleteActivityMutationVariables>(CompleteActivityDocument, variables, options) as Promise<CompleteActivityMutation>;
+    },
+    CreateActivity(variables: CreateActivityMutationVariables, options?: C): Promise<CreateActivityMutation> {
+      return requester<CreateActivityMutation, CreateActivityMutationVariables>(CreateActivityDocument, variables, options) as Promise<CreateActivityMutation>;
+    },
+    CreateLead(variables: CreateLeadMutationVariables, options?: C): Promise<CreateLeadMutation> {
+      return requester<CreateLeadMutation, CreateLeadMutationVariables>(CreateLeadDocument, variables, options) as Promise<CreateLeadMutation>;
+    },
+    CreateNote(variables: CreateNoteMutationVariables, options?: C): Promise<CreateNoteMutation> {
+      return requester<CreateNoteMutation, CreateNoteMutationVariables>(CreateNoteDocument, variables, options) as Promise<CreateNoteMutation>;
+    },
+    DeleteActivity(variables: DeleteActivityMutationVariables, options?: C): Promise<DeleteActivityMutation> {
+      return requester<DeleteActivityMutation, DeleteActivityMutationVariables>(DeleteActivityDocument, variables, options) as Promise<DeleteActivityMutation>;
+    },
+    DeleteLead(variables: DeleteLeadMutationVariables, options?: C): Promise<DeleteLeadMutation> {
+      return requester<DeleteLeadMutation, DeleteLeadMutationVariables>(DeleteLeadDocument, variables, options) as Promise<DeleteLeadMutation>;
+    },
+    DeleteLeadNote(variables: DeleteLeadNoteMutationVariables, options?: C): Promise<DeleteLeadNoteMutation> {
+      return requester<DeleteLeadNoteMutation, DeleteLeadNoteMutationVariables>(DeleteLeadNoteDocument, variables, options) as Promise<DeleteLeadNoteMutation>;
+    },
+    GetActivitiesCount(variables?: GetActivitiesCountQueryVariables, options?: C): Promise<GetActivitiesCountQuery> {
+      return requester<GetActivitiesCountQuery, GetActivitiesCountQueryVariables>(GetActivitiesCountDocument, variables, options) as Promise<GetActivitiesCountQuery>;
+    },
+    GetActivities(variables?: GetActivitiesQueryVariables, options?: C): Promise<GetActivitiesQuery> {
+      return requester<GetActivitiesQuery, GetActivitiesQueryVariables>(GetActivitiesDocument, variables, options) as Promise<GetActivitiesQuery>;
+    },
+    GetActivity(variables: GetActivityQueryVariables, options?: C): Promise<GetActivityQuery> {
+      return requester<GetActivityQuery, GetActivityQueryVariables>(GetActivityDocument, variables, options) as Promise<GetActivityQuery>;
+    },
+    GetLeadDetail(variables: GetLeadDetailQueryVariables, options?: C): Promise<GetLeadDetailQuery> {
+      return requester<GetLeadDetailQuery, GetLeadDetailQueryVariables>(GetLeadDetailDocument, variables, options) as Promise<GetLeadDetailQuery>;
+    },
+    GetLeads(variables?: GetLeadsQueryVariables, options?: C): Promise<GetLeadsQuery> {
+      return requester<GetLeadsQuery, GetLeadsQueryVariables>(GetLeadsDocument, variables, options) as Promise<GetLeadsQuery>;
+    },
+    GetNotesCount(variables?: GetNotesCountQueryVariables, options?: C): Promise<GetNotesCountQuery> {
+      return requester<GetNotesCountQuery, GetNotesCountQueryVariables>(GetNotesCountDocument, variables, options) as Promise<GetNotesCountQuery>;
+    },
+    GetNotes(variables?: GetNotesQueryVariables, options?: C): Promise<GetNotesQuery> {
+      return requester<GetNotesQuery, GetNotesQueryVariables>(GetNotesDocument, variables, options) as Promise<GetNotesQuery>;
+    },
+    UpdateActivity(variables: UpdateActivityMutationVariables, options?: C): Promise<UpdateActivityMutation> {
+      return requester<UpdateActivityMutation, UpdateActivityMutationVariables>(UpdateActivityDocument, variables, options) as Promise<UpdateActivityMutation>;
+    },
+    UpdateLead(variables: UpdateLeadMutationVariables, options?: C): Promise<UpdateLeadMutation> {
+      return requester<UpdateLeadMutation, UpdateLeadMutationVariables>(UpdateLeadDocument, variables, options) as Promise<UpdateLeadMutation>;
+    },
+    UpdateLeadNote(variables: UpdateLeadNoteMutationVariables, options?: C): Promise<UpdateLeadNoteMutation> {
+      return requester<UpdateLeadNoteMutation, UpdateLeadNoteMutationVariables>(UpdateLeadNoteDocument, variables, options) as Promise<UpdateLeadNoteMutation>;
+    },
+    GetNotifications(variables?: GetNotificationsQueryVariables, options?: C): Promise<GetNotificationsQuery> {
+      return requester<GetNotificationsQuery, GetNotificationsQueryVariables>(GetNotificationsDocument, variables, options) as Promise<GetNotificationsQuery>;
+    },
+    MarkAllAsRead(variables?: MarkAllAsReadMutationVariables, options?: C): Promise<MarkAllAsReadMutation> {
+      return requester<MarkAllAsReadMutation, MarkAllAsReadMutationVariables>(MarkAllAsReadDocument, variables, options) as Promise<MarkAllAsReadMutation>;
+    },
+    MarkAsRead(variables: MarkAsReadMutationVariables, options?: C): Promise<MarkAsReadMutation> {
+      return requester<MarkAsReadMutation, MarkAsReadMutationVariables>(MarkAsReadDocument, variables, options) as Promise<MarkAsReadMutation>;
+    },
+    UnreadCount(variables?: UnreadCountQueryVariables, options?: C): Promise<UnreadCountQuery> {
+      return requester<UnreadCountQuery, UnreadCountQueryVariables>(UnreadCountDocument, variables, options) as Promise<UnreadCountQuery>;
     }
   };
 }

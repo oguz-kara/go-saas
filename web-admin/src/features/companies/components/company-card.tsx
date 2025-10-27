@@ -21,7 +21,7 @@ import { DeleteCompanyAlert } from './delete-company-alert'
 import { GetCompaniesWithAttributesQuery } from '@gocrm/graphql/generated/sdk'
 import { useTranslations } from '@gocrm/hooks/use-translations'
 import Link from '@gocrm/components/common/link'
-import { useRoutes } from '@gocrm/hooks/use-routes'
+import { routes } from '@gocrm/lib/routes'
 
 type CompanyItem = GetCompaniesWithAttributesQuery['companies']['items'][0]
 
@@ -30,7 +30,6 @@ interface CompanyCardProps {
 }
 
 export const CompanyCard = ({ company }: CompanyCardProps) => {
-  const { routes } = useRoutes()
   const { translations } = useTranslations()
   const t = translations?.companiesTable
 
@@ -41,10 +40,7 @@ export const CompanyCard = ({ company }: CompanyCardProps) => {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-base font-medium">
           <Link
-            href={
-              routes?.companyDetails.replace(':id', company.id) ||
-              `/companies/${company.id}/details`
-            }
+            href={routes.companies.detail(company.id)}
             className="text-blue-600 hover:underline"
           >
             {company.name}

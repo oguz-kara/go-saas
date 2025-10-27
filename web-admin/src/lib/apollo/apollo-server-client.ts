@@ -13,7 +13,7 @@ export const { getClient } = registerApolloClient(async () => {
   const httpLink = new HttpLink({
     uri:
       process.env.NEXT_PUBLIC_ADMIN_GRAPHQL_API_URL ||
-      'http://localhost:3001/api/graphql',
+      'http://localhost:3000/api/graphql',
   })
 
   const middlewareLink = new ApolloLink((operation, forward) => {

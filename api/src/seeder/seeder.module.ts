@@ -6,6 +6,8 @@ import { SeedCompaniesSeeder } from './seeders/seed-companies.seeder'
 import { SeedChannelSeeder } from './seeders/seed-channel.seeder'
 import { SeedSystemAttributesSeeder } from './seeders/seed-system-attributes.seeder'
 import { BuildAddressJsonSeeder } from './seeders/build-address.seeder'
+import { SeedLeadsSeeder } from './seeders/seed-leads.seeder'
+import { UpdateMarketingEmailsCommand } from './commands/update-marketing-emails.command'
 
 @Module({
   imports: [],
@@ -17,6 +19,8 @@ import { BuildAddressJsonSeeder } from './seeders/build-address.seeder'
     SeedChannelSeeder,
     SeedSystemAttributesSeeder,
     BuildAddressJsonSeeder,
+    SeedLeadsSeeder,
+    UpdateMarketingEmailsCommand,
   ],
 })
 export class SeederModule {}

@@ -19,6 +19,7 @@ import {
 } from '@gocrm/components/ui/form'
 import { Loader2 } from 'lucide-react'
 import { useTranslations } from '@gocrm/hooks/use-translations'
+import { routes } from '@gocrm/lib/routes'
 
 export const LoginForm = () => {
   const router = useRouter()
@@ -48,7 +49,7 @@ export const LoginForm = () => {
         toast.success(t?.successToastTitle, {
           description: t?.successToastDescription,
         })
-        router.push('/companies')
+        router.push(routes.leads.list())
       }
     } catch (error) {
       console.error('Sign in error:', error)

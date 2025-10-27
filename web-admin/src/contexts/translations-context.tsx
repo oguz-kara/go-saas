@@ -13,6 +13,7 @@ import { tr, Translations } from '../lib/i18n/tr'
 interface ITranslationsContext {
   translations: Translations | null
   isLoading: boolean
+  locale: string
 }
 
 const TranslationsContext = createContext<ITranslationsContext | undefined>(
@@ -22,6 +23,7 @@ const TranslationsContext = createContext<ITranslationsContext | undefined>(
 export const TranslationsProvider = ({ children }: { children: ReactNode }) => {
   const [translations, setTranslations] = useState<Translations | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [locale] = useState<string>('tr') // Turkish locale
 
   useEffect(() => {
     const loadTranslations = async () => {
@@ -40,7 +42,7 @@ export const TranslationsProvider = ({ children }: { children: ReactNode }) => {
     loadTranslations()
   }, [])
 
-  const value = { translations, isLoading }
+  const value = { translations, isLoading, locale }
 
   if (isLoading) {
     return null

@@ -19,13 +19,12 @@ import { useCallback, useState, useEffect } from 'react'
 import { useTranslations } from '@gocrm/hooks/use-translations'
 import { Button } from '@gocrm/components/ui/button'
 import Link from 'next/link'
-import { useRoutes } from '@gocrm/hooks/use-routes'
+import { routes } from '@gocrm/lib/routes'
 import { XCircle } from 'lucide-react'
 import { Input } from '@gocrm/components/ui/input'
 import { AttributeField } from '../../attributes/components/attribute-fields'
 
 export const CompanyFilterSidebar = ({ address }: { address?: string[] }) => {
-  const { routes } = useRoutes()
   const { data, loading } = useGetAttributeTypesQuery({
     variables: {
       includeSystemDefined: true,
@@ -71,7 +70,7 @@ export const CompanyFilterSidebar = ({ address }: { address?: string[] }) => {
   const handleCascadingFilterChange = useCallback(
     (_attributeTypeId: string, values: string[]) => {
       const addressSlug = values.join('-')
-      const basePath = routes?.companies || ''
+      const basePath = routes.companies.list()
       const newPath =
         addressSlug.length > 0 ? `${basePath}/${addressSlug}` : basePath
       // Preserve current search params
@@ -79,7 +78,7 @@ export const CompanyFilterSidebar = ({ address }: { address?: string[] }) => {
       const url = params ? `${newPath}?${params}` : newPath
       router.push(url)
     },
-    [router, searchParams, routes],
+    [router, searchParams],
   )
 
   const handleQueryParamFilterChange = useCallback(
@@ -111,9 +110,8 @@ export const CompanyFilterSidebar = ({ address }: { address?: string[] }) => {
   )
 
   const handleClearFilters = useCallback(() => {
-    const basePath = routes?.companies || ''
-    router.push(basePath)
-  }, [router, routes])
+    router.push(routes.companies.list())
+  }, [router])
 
   // Determine if any filters are applied
   const filterParamKeys = data?.attributeTypes.items?.map((at) => at.code) || []
@@ -183,7 +181,7 @@ export const CompanyFilterSidebar = ({ address }: { address?: string[] }) => {
         </div>
         <div className="text-muted-foreground text-sm">
           <Button variant="outline" size="sm" asChild>
-            <Link href={routes?.attributes || ''}>
+            <Link href={routes.settings.attributes()}>
               {translations?.companiesPage.createFilterButton}
             </Link>
           </Button>

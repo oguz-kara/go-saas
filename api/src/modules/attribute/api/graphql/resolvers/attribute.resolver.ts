@@ -1,20 +1,33 @@
 // src/modules/attribute-value/api/graphql/resolvers/attribute-value.resolver.ts
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql'
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ID,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql'
 import { AttributeValueConnection } from '../dto/attribute-value-connection.object-type'
 import { RequestContext } from 'src/common/request-context/request-context'
 import { Ctx } from 'src/common/request-context/request-context.decorator'
 import { AttributeValueEntity } from '../entities/attribute.entity'
+import { AttributeTypeEntity } from '../entities/attribute-type.entity'
 import { ProtectResource } from 'src/common/decorators/protect-resource.decorator'
 import { AttributeService } from 'src/modules/attribute/application/services/attribute.service'
 import { GetAttributeValuesArgs } from '../args/get-attribute-values.args'
 import { CreateAttributeInput } from '../dto/create-attribute.input'
 import { UpdateAttributeInput } from '../dto/update-attribute.input'
 import { GetAttributeValuesByCodeArgs } from '../args/get-attribute-values-by-code.args'
+import { PrismaService } from 'src/common'
 
 @Resolver(() => AttributeValueEntity)
 @ProtectResource()
 export class AttributeResolver {
-  constructor(private readonly attributeValueService: AttributeService) {}
+  constructor(
+    private readonly attributeValueService: AttributeService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Query(() => AttributeValueConnection, { name: 'attributeValuesByCode' })
   async getAttributeValuesByCode(
@@ -62,5 +75,21 @@ export class AttributeResolver {
   ): Promise<boolean> {
     const result = await this.attributeValueService.delete(ctx, id)
     return result.success
+  }
+
+  @ResolveField('type', () => AttributeTypeEntity, { nullable: true })
+  async resolveType(
+    @Parent() attributeValue: AttributeValueEntity,
+  ): Promise<AttributeTypeEntity | null> {
+    // If type is already loaded (from mutations or includes), return it
+    if (attributeValue.type) {
+      return attributeValue.type
+    }
+
+    // Otherwise, fetch it on demand
+    const type = await this.prisma.attributeType.findUnique({
+      where: { id: attributeValue.attributeTypeId },
+    })
+    return type as unknown as AttributeTypeEntity
   }
 }

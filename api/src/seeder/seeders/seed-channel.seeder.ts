@@ -8,6 +8,7 @@ const channelsToSeed = [
     token: 'ch_main_tenant_1',
     name: 'Main Tenant',
     description: 'Main Tenant',
+    marketingEmails: ['marketing@example.com', 'sales@example.com'],
   },
 ]
 

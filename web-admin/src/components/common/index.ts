@@ -1,2 +1,5 @@
 export * from './link'
 export * from './app-pagination'
+export * from './confirm-dialog'
+export * from './coming-soon'
+export * from './page-header'

@@ -3,6 +3,6 @@
 import { useTranslationsContext } from '../contexts/translations-context'
 
 export const useTranslations = () => {
-  const { translations, isLoading } = useTranslationsContext()
-  return { translations, isLoading }
+  const { translations, isLoading, locale } = useTranslationsContext()
+  return { translations, isLoading, locale }
 }

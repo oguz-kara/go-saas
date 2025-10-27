@@ -19,6 +19,12 @@ import { SeederModule } from './seeder/seeder.module'
 
 // Application config
 import { appConfig } from './common/config/app.config'
+import { EventEmitterModule } from '@nestjs/event-emitter'
+import { LeadModule } from './modules/lead/lead.module'
+import { NotificationModule } from './modules/notification/notification.module'
+import { EmailModule } from './modules/email/email.module'
+import { ApiKeyModule } from './modules/api-key/api-key.module'
+// Removed separate Activity/Note modules; handled under Lead module
 
 @Module({
   imports: [
@@ -28,6 +34,7 @@ import { appConfig } from './common/config/app.config'
       load: [appConfig],
       envFilePath: '.env',
     }),
+    EventEmitterModule.forRoot(),
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
@@ -51,7 +58,15 @@ import { appConfig } from './common/config/app.config'
       playground: true,
       autoSchemaFile: 'schema.graphql',
       sortSchema: true,
-      include: [AuthModule, CompanyModule, ChannelModule, AttributeModule],
+      include: [
+        AuthModule,
+        CompanyModule,
+        ChannelModule,
+        AttributeModule,
+        LeadModule,
+        NotificationModule,
+        ApiKeyModule,
+      ],
       formatError: (
         formattedError: GraphQLFormattedError,
         error: any,
@@ -106,6 +121,10 @@ import { appConfig } from './common/config/app.config'
     CompanyModule,
     ChannelModule,
     AttributeModule,
+    LeadModule,
+    NotificationModule,
+    EmailModule,
+    ApiKeyModule,
 
     // Utility modules
     SeederModule,

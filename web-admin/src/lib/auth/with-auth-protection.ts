@@ -2,6 +2,7 @@
 import 'server-only'
 import { redirect } from 'next/navigation'
 import { AuthError } from '@gocrm/lib/errors/errors/auth-error'
+import { routes } from '@gocrm/lib/routes'
 
 export async function withAuthProtection<T>(
   dataFetcher: () => Promise<T>,
@@ -10,7 +11,7 @@ export async function withAuthProtection<T>(
     return await dataFetcher()
   } catch (error) {
     console.log('errorFromWithAuthProtection', error)
-    if (error instanceof AuthError) redirect('/session-expired')
+    if (error instanceof AuthError) redirect(routes.sessionExpired())
 
     throw error
   }

@@ -3,6 +3,7 @@ import { AttributeStudio } from '@gocrm/features/attributes/components/attribute
 import { withAuthProtection } from '@gocrm/lib/auth/with-auth-protection'
 import { sdk } from '@gocrm/graphql'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@gocrm/constants'
+import { PageHeader } from '@gocrm/components/common/page-header'
 
 export default async function AttributeStudioPage({
   searchParams,
@@ -41,14 +42,11 @@ export default async function AttributeStudioPage({
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">
-          {translations.attributeStudio.pageTitle}
-        </h1>
-        <p className="text-muted-foreground">
-          {translations.attributeStudio.pageDescription}
-        </p>
-      </div>
+      <PageHeader
+        title={translations.attributeStudio.pageTitle}
+        description={translations.attributeStudio.pageDescription}
+        titleSize="sm"
+      />
       <AttributeStudio initialData={initialData} />
     </div>
   )

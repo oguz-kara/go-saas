@@ -1,0 +1,107 @@
+{{> header subject="İlginiz İçin Teşekkür Ederiz"}}
+
+<!-- Welcome Message -->
+<div style="text-align: center; margin-bottom: 32px;">
+  <div style="display: inline-block; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); width: 64px; height: 64px; border-radius: 50%; margin-bottom: 16px; line-height: 64px; text-align: center;">
+    <span style="font-size: 32px;">✓</span>
+  </div>
+  <h1 style="color: #1a1a1a; margin: 0 0 12px 0; font-size: 28px;">Teşekkür Ederiz, {{lead.firstName}}!</h1>
+  <p style="color: #666666; font-size: 16px; margin: 0;">Talebiniz başarıyla alındı</p>
+</div>
+
+<!-- Main Content -->
+<p style="color: #555555; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">
+  Başvurunuzu aldık ve size yardımcı olmak için sabırsızlanıyoruz. Ekibimiz bilgilerinizi inceleyecek ve en kısa sürede sizinle iletişime geçecektir.
+</p>
+
+<p style="color: #555555; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+  Bizimle paylaştığınız bilgilerin özeti aşağıdadır:
+</p>
+
+<!-- Customer Info Card -->
+<div style="background: linear-gradient(to right, #f8f9fa 0%, #f0f2f5 100%); border-left: 4px solid #007bff; border-radius: 8px; padding: 20px 24px; margin-bottom: 24px;">
+  <table style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td style="padding: 8px 0; font-weight: 600; width: 35%; color: #666666; font-size: 14px;">
+        Ad Soyad:
+      </td>
+      <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 500;">
+        {{lead.firstName}} {{lead.lastName}}
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 0; font-weight: 600; width: 35%; color: #666666; font-size: 14px;">
+        E-posta:
+      </td>
+      <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px;">
+        <a href="mailto:{{lead.email}}" style="color: #007bff; text-decoration: none;">{{lead.email}}</a>
+      </td>
+    </tr>
+    {{#if lead.company}}
+    <tr>
+      <td style="padding: 8px 0; font-weight: 600; width: 35%; color: #666666; font-size: 14px;">
+        Şirket:
+      </td>
+      <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 500;">
+        {{lead.company}}
+      </td>
+    </tr>
+    {{/if}}
+    {{#if lead.phone}}
+    <tr>
+      <td style="padding: 8px 0; font-weight: 600; width: 35%; color: #666666; font-size: 14px;">
+        Telefon:
+      </td>
+      <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px;">
+        {{lead.phone}}
+      </td>
+    </tr>
+    {{/if}}
+  </table>
+</div>
+
+<!-- Product Interest Section -->
+{{#if lead.productInterest}}
+<div style="margin-bottom: 24px;">
+  <h3 style="color: #333333; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">
+    İlgilendiğiniz Ürünler:
+  </h3>
+  <div style="padding-left: 0;">
+    {{#each lead.productInterest}}
+    <div style="display: inline-block; background-color: #e7f3ff; color: #0066cc; padding: 8px 14px; border-radius: 8px; font-size: 14px; margin: 4px 6px 4px 0; font-weight: 500;">
+      ✓ {{this}}
+    </div>
+    {{/each}}
+  </div>
+</div>
+{{/if}}
+
+<!-- Budget Section -->
+{{#if lead.budget}}
+<div style="background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px;">
+  <p style="margin: 0; color: #15803d; font-size: 15px;">
+    <strong style="font-weight: 600;">Tahmini Bütçe:</strong> 
+    <span style="font-size: 18px; font-weight: 700;">{{lead.budget}} ₺</span>
+  </p>
+</div>
+{{/if}}
+
+<!-- Next Steps -->
+<div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 20px 24px; margin: 28px 0;">
+  <p style="margin: 0 0 8px 0; color: #92400e; font-size: 15px; font-weight: 600;">
+    📌 Sonraki Adımlar
+  </p>
+  <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 1.6;">
+    Ekibimiz en kısa sürede sizinle iletişime geçecek ve hedeflerinize nasıl ulaşabileceğinizi görüşeceğiz.
+  </p>
+</div>
+
+<!-- Closing -->
+<p style="color: #555555; font-size: 15px; line-height: 1.6; margin-top: 32px; margin-bottom: 8px;">
+  En iyi dileklerimizle,
+</p>
+<p style="color: #1a1a1a; font-size: 15px; font-weight: 600; margin: 0;">
+  {{channel.name}} Ekibi
+</p>
+
+{{> footer}}

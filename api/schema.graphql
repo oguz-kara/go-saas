@@ -7,6 +7,21 @@ input AddCompanyNoteInput {
   type: String
 }
 
+type ApiKey {
+  channelToken: String!
+  createdAt: DateTime!
+  createdBy: User
+  expiresAt: DateTime
+  id: ID!
+  isActive: Boolean!
+  lastUsedAt: DateTime
+  lastUsedIp: String
+  name: String!
+  prefix: String!
+  updatedAt: DateTime!
+  usageCount: Float!
+}
+
 """The type of attributable entity"""
 enum AttributableType {
   COMPANY
@@ -87,6 +102,17 @@ type AuthenticationPayload {
   user: User!
 }
 
+input ChangePasswordInput {
+  confirmPassword: String!
+  currentPassword: String!
+  newPassword: String!
+}
+
+type ChangePasswordOutput {
+  message: String
+  success: Boolean!
+}
+
 type Channel {
   createdAt: DateTime!
   description: String
@@ -158,6 +184,18 @@ enum CompanyNoteType {
   MEETING
 }
 
+input CreateActivityInput {
+  description: String
+  leadId: ID!
+  scheduledAt: String
+  subject: String!
+  type: String!
+}
+
+input CreateApiKeyInput {
+  name: String!
+}
+
 input CreateAttributeGroupInput {
   name: String!
 }
@@ -202,10 +240,47 @@ input CreateCompanyInput {
   website: String
 }
 
+input CreateLeadInput {
+  assignedToId: ID
+  budget: String
+  company: String
+  companySize: Float
+  currentSolution: String
+  email: String!
+  firstName: String!
+  isDecisionMaker: Boolean
+  jobTitle: String
+  lastName: String!
+  painPoints: String
+  phone: String
+  priority: Priority
+  productInterest: [ProductInterest!]
+  source: LeadSource!
+  status: LeadStatus
+  timeline: String
+  website: String
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type GeneratedApiKey {
+  channelToken: String!
+  createdAt: DateTime!
+  createdBy: User
+  expiresAt: DateTime
+  id: ID!
+  isActive: Boolean!
+  lastUsedAt: DateTime
+  lastUsedIp: String
+  name: String!
+  plainKey: String!
+  prefix: String!
+  updatedAt: DateTime!
+  usageCount: Float!
+}
 
 input GetAttributeValuesByCodeArgs {
   attributeTypeCode: String!
@@ -225,6 +300,95 @@ input GetAttributeValuesByCodeArgs {
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
+
+type Lead {
+  activities(skip: Float, take: Float): [LeadActivity!]!
+  activitiesCount: Float!
+  assignedTo: User
+  assignedToId: String
+  budget: String
+  company: String
+  companySize: Float
+  convertedAt: DateTime
+  createdAt: DateTime!
+  currentSolution: String
+  email: String!
+  firstName: String!
+  id: ID!
+  isDecisionMaker: Boolean!
+  jobTitle: String
+  lastContactedAt: DateTime
+  lastName: String!
+  lostReason: String
+  notes(skip: Float, take: Float): [LeadNote!]!
+  notesCount: Float!
+  painPoints: String
+  phone: String
+  priority: Priority!
+  productInterest: [ProductInterest!]!
+  source: LeadSource!
+  status: LeadStatus!
+  tags: [Tag!]!
+  tagsCount: Float!
+  timeline: String
+  updatedAt: DateTime!
+  website: String
+}
+
+type LeadActivity {
+  completedAt: DateTime
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  leadId: String!
+  scheduledAt: DateTime
+  subject: String!
+  type: String!
+  userId: String!
+}
+
+type LeadConnection {
+  items: [Lead!]!
+  totalCount: Int!
+}
+
+type LeadNote {
+  content: String!
+  createdAt: DateTime!
+  id: ID!
+  leadId: String!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+enum LeadSource {
+  ADMIN
+  COLD_OUTREACH
+  DIRECT_TRAFFIC
+  EMAIL_CAMPAIGN
+  EVENT
+  FACEBOOK_ADS
+  GOOGLE_ADS
+  LINKEDIN_ADS
+  ORGANIC_SEARCH
+  OTHER
+  PAID_ADS
+  PARTNER
+  REFERRAL
+  SOCIAL_MEDIA
+  WEBSITE
+}
+
+enum LeadStatus {
+  CONTACTED
+  CONVERTED
+  LOST
+  NEGOTIATION
+  NEW
+  PROPOSAL_SENT
+  QUALIFIED
+  UNQUALIFIED
+}
 
 input ListQueryArgs {
   """Search query"""
@@ -248,28 +412,134 @@ type LogoutOutput {
 
 type Mutation {
   addNoteToCompany(addCompanyNoteInput: AddCompanyNoteInput!, companyId: ID!): CompanyNote!
+  changePassword(input: ChangePasswordInput!): ChangePasswordOutput!
+  completeActivity(id: ID!): LeadActivity!
+  createActivity(input: CreateActivityInput!): LeadActivity!
+  createApiKey(input: CreateApiKeyInput!): GeneratedApiKey!
   createAttributeGroup(createAttributeGroupInput: CreateAttributeGroupInput!): AttributeGroup!
   createAttributeType(createAttributeTypeInput: CreateAttributeTypeInput!): AttributeType!
   createAttributeValue(createAttributeValueInput: CreateAttributeInput!): AttributeValue!
   createChannel(createChannelInput: CreateChannelInput!): Channel!
   createCompany(createCompanyInput: CreateCompanyInput!): Company!
+  createLead(createLeadInput: CreateLeadInput!): Lead!
+  createNote(content: String!, leadId: ID!): LeadNote!
+  deleteActivity(id: ID!): LeadActivity!
   deleteAttributeGroup(id: ID!): Boolean!
   deleteAttributeType(id: ID!): Boolean!
   deleteAttributeValue(id: ID!): Boolean!
   deleteCompany(id: ID!): Company!
   deleteCompanyNote(noteId: ID!): CompanyNote!
+  deleteLead(id: ID!): Lead!
+  deleteNote(id: ID!): LeadNote!
   loginUser(loginUserInput: LoginUserInput!): AuthenticationPayload!
   logoutUser: LogoutOutput!
+  markAllAsRead: Float!
+  markAsRead(notificationId: ID!): Notification!
   registerNewTenant(registerNewTenantInput: RegisterNewTenantInput!): AuthenticationPayload!
   registerUser(channelToken: String!, registerUserInput: RegisterUserInput!): AuthenticationPayload!
+  revokeApiKey(id: ID!): ApiKey!
+  updateActivity(input: UpdateActivityInput!): LeadActivity!
   updateAttributeGroup(id: ID!, updateAttributeGroupInput: UpdateAttributeGroupInput!): AttributeGroup!
   updateAttributeType(id: ID!, updateAttributeTypeInput: UpdateAttributeTypeInput!): AttributeType!
   updateAttributeValue(id: ID!, updateAttributeValueInput: UpdateAttributeInput!): AttributeValue!
   updateCompany(id: ID!, updateCompanyInput: UpdateCompanyInput!): Company!
   updateCompanyNote(noteId: ID!, updateCompanyNoteInput: UpdateCompanyNoteInput!): CompanyNote!
+  updateLead(updateLeadInput: UpdateLeadInput!): Lead!
+  updateNote(content: String, id: ID!): LeadNote!
+  updateUserProfile(input: UpdateUserProfileInput!): User!
+}
+
+type NoteConnection {
+  items: [LeadNote!]!
+  totalCount: Int!
+}
+
+type Notification {
+  createdAt: DateTime!
+  id: ID!
+  isRead: Boolean!
+  leadId: String
+  message: String!
+  metadata: JSON
+  priority: NotificationPriority!
+  readAt: DateTime
+  title: String!
+  type: NotificationType!
+  userId: String
+}
+
+type NotificationConnection {
+  items: [Notification!]!
+  totalCount: Int!
+}
+
+enum NotificationPriority {
+  HIGH
+  LOW
+  MEDIUM
+}
+
+enum NotificationType {
+  ACTIVITY_DUE
+  LEAD_ASSIGNED
+  LEAD_STATUS_CHANGED
+  NEW_LEAD
+}
+
+enum Priority {
+  HIGH
+  LOW
+  MEDIUM
+  URGENT
+}
+
+enum ProductInterest {
+  API_INTEGRATION
+  CONSULTING
+  CUSTOM_SOFTWARE
+  MOBILE_APP
+  OTHER
+  SAAS
+  WEB_APP
 }
 
 type Query {
+  activities(
+    endDate: String
+    isCompleted: Boolean
+    leadId: ID
+
+    """Search query"""
+    searchQuery: String
+
+    """Number of items to skip"""
+    skip: Int = 0
+    startDate: String
+
+    """Number of items to take"""
+    take: Int = 10
+    type: String
+    userId: ID
+  ): [LeadActivity!]!
+  activitiesCount(
+    endDate: String
+    isCompleted: Boolean
+    leadId: ID
+
+    """Search query"""
+    searchQuery: String
+
+    """Number of items to skip"""
+    skip: Int = 0
+    startDate: String
+
+    """Number of items to take"""
+    take: Int = 10
+    type: String
+    userId: ID
+  ): Float!
+  activity(id: ID!): LeadActivity
+  apiKey(id: ID!): ApiKey
   attributeGroups(
     """Search query"""
     searchQuery: String
@@ -333,7 +603,48 @@ type Query {
     """Number of items to take"""
     take: Int = 10
   ): CompanyConnectionNotes
+  getUser(id: String!): User!
+  getUserByEmail(email: String!): User!
+  getUsers(skip: Int, take: Int): UserConnection!
+  lead(id: ID!): Lead
+  leads(
+    assignedToId: ID
+    channelToken: ID
+    endDate: String
+    priority: [Priority!]
+
+    """Search query"""
+    searchQuery: String
+
+    """Number of items to skip"""
+    skip: Int = 0
+    sortBy: String
+    sortOrder: String
+    source: [LeadSource!]
+    startDate: String
+    status: [LeadStatus!]
+
+    """Number of items to take"""
+    take: Int = 10
+  ): LeadConnection!
+  listApiKeys: [ApiKey!]!
   me: User
+  note(id: ID!): LeadNote
+  notes(leadId: ID, searchQuery: String, skip: Float, take: Float, userId: ID): NoteConnection!
+  notesCount(leadId: ID, searchQuery: String, userId: ID): Float!
+  notifications(
+    onlyUnread: Boolean
+
+    """Search query"""
+    searchQuery: String
+
+    """Number of items to skip"""
+    skip: Int = 0
+
+    """Number of items to take"""
+    take: Int = 10
+  ): NotificationConnection!
+  unreadCount: Float!
 }
 
 input RegisterNewTenantInput {
@@ -348,6 +659,20 @@ input RegisterUserInput {
   email: String!
   name: String!
   password: String!
+}
+
+type Tag {
+  color: String
+  id: ID!
+  name: String!
+}
+
+input UpdateActivityInput {
+  description: String
+  id: ID!
+  scheduledAt: String
+  subject: String
+  type: String
 }
 
 input UpdateAttributeGroupInput {
@@ -394,10 +719,41 @@ input UpdateCompanyNoteInput {
   type: String
 }
 
+input UpdateLeadInput {
+  assignedToId: ID
+  budget: String
+  company: String
+  companySize: Float
+  currentSolution: String
+  email: String
+  firstName: String
+  id: ID!
+  isDecisionMaker: Boolean
+  jobTitle: String
+  lastName: String
+  painPoints: String
+  phone: String
+  priority: Priority
+  productInterest: [ProductInterest!]
+  source: LeadSource
+  status: LeadStatus
+  timeline: String
+  website: String
+}
+
+input UpdateUserProfileInput {
+  name: String!
+}
+
 type User {
   createdAt: DateTime
   email: String!
   id: ID!
   name: String
   updatedAt: DateTime
+}
+
+type UserConnection {
+  items: [User!]!
+  totalCount: Int!
 }

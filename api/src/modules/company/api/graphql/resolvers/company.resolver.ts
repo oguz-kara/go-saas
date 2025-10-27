@@ -17,15 +17,10 @@ import { CompanyConnectionObject as CompanyConnection } from 'src/modules/compan
 import { RequestContext } from 'src/common/request-context/request-context'
 import { ProtectResource } from 'src/common/decorators/protect-resource.decorator'
 import { Ctx } from 'src/common/request-context/request-context.decorator'
-import { ListQueryArgs } from 'src/common'
+import { ListQueryArgs, PrismaService } from 'src/common'
 import { CompanyConnectionNotesObject } from '../dto/company-connection-notes.object-type'
 import { CompanyNoteService } from 'src/modules/company/application/services/company-note.service'
 import { AttributeWithTypeEntity } from '../dto/attribute-with-type.object-type'
-import {
-  AttributeAssignment,
-  AttributeType,
-  AttributeValue,
-} from '@prisma/client'
 
 @Resolver(() => CompanyEntity)
 @ProtectResource()
@@ -96,7 +91,10 @@ export class CompanyResolver {
 @Resolver(() => CompanyEntity)
 @ProtectResource()
 export class AttributeWithTypeResolver {
-  constructor(private readonly companyService: CompanyService) {}
+  constructor(
+    private readonly companyService: CompanyService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @ResolveField(() => [AttributeWithTypeEntity], { name: 'attributes' })
   async attributes(
@@ -108,23 +106,31 @@ export class AttributeWithTypeResolver {
 
   @ResolveField('addressAttributeCodes', () => [String], { nullable: true })
   async getAddressAttributeCodes(
-    @Parent()
-    company: CompanyEntity & {
-      attributeAssignments: (AttributeAssignment & {
-        attributeValue: AttributeValue & { type: AttributeType }
-      })[]
-    },
+    @Parent() company: CompanyEntity,
+    @Ctx() ctx: RequestContext,
   ): Promise<string[]> {
-    const addressAssignments = company.attributeAssignments.filter(
-      (as) => as.attributeValue.type.code === 'adres-bilgileri',
-    )
+    const { channel } = ctx
+    
+    // Load attributeAssignments with nested data on-demand
+    const addressAssignments = await this.prisma.attributeAssignment.findMany({
+      where: {
+        attributableId: company.id,
+        attributableType: 'COMPANY',
+        channelToken: channel.token,
+      },
+      include: {
+        attributeValue: {
+          include: {
+            type: true,
+          },
+        },
+      },
+    })
 
-    const addressAttributeCodes = addressAssignments.map(
-      (as) => as.attributeValue.code,
-    )
+    const addressAttributeCodes = addressAssignments
+      .filter((as) => as.attributeValue.type.code === 'adres-bilgileri')
+      .map((as) => as.attributeValue.code)
 
-    console.log({ addressAttributeCodes })
-
-    return Promise.resolve(addressAttributeCodes)
+    return addressAttributeCodes
   }
 }

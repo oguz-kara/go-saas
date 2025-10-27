@@ -169,18 +169,12 @@ export class AttributeTypeService {
           skip,
           take,
           orderBy: { name: 'asc' },
-          include: { group: true, availableFor: true },
         }),
       ])
 
-      const items = types.map((type) => ({
-        ...type,
-        availableFor: type.availableFor.map((item) => item.entityType),
-      }))
+      console.dir(types, { depth: null })
 
-      console.dir(items, { depth: null })
-
-      return { items: items as unknown as AttributeTypeEntity[], totalCount }
+      return { items: types as unknown as AttributeTypeEntity[], totalCount }
     } catch (error) {
       this.logger.error(
         `Failed to fetch attribute types: ${error.message}`,

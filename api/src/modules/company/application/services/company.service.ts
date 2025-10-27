@@ -318,17 +318,6 @@ export class CompanyService {
     try {
       const company = await this.prisma.company.findFirst({
         where: { id, channelToken: ct, deletedAt: null },
-        include: {
-          attributeAssignments: {
-            include: {
-              attributeValue: {
-                include: {
-                  type: true,
-                },
-              },
-            },
-          },
-        },
       })
 
       if (!company) {

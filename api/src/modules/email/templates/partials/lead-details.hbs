@@ -1,0 +1,131 @@
+<!-- Lead Details Card -->
+<div style="background: linear-gradient(to bottom, #fafafa 0%, #f5f5f5 100%); border: 1px solid #e5e5e5; border-radius: 10px; padding: 24px; margin: 24px 0;">
+  <h3 style="margin: 0 0 16px 0; color: #1a1a1a; font-size: 17px; font-weight: 600; padding-bottom: 12px; border-bottom: 2px solid #e0e0e0;">
+    📋 Potansiyel Müşteri Detayları
+  </h3>
+  
+  <table style="width: 100%; border-collapse: collapse;">
+    {{#if lead.company}}
+    <tr>
+      <td style="padding: 10px 0; font-weight: 600; width: 38%; color: #666666; font-size: 14px; vertical-align: top;">
+        Şirket:
+      </td>
+      <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px;">
+        {{lead.company}}
+      </td>
+    </tr>
+    {{/if}}
+    
+    {{#if lead.jobTitle}}
+    <tr>
+      <td style="padding: 10px 0; font-weight: 600; width: 38%; color: #666666; font-size: 14px; vertical-align: top;">
+        Ünvan:
+      </td>
+      <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px;">
+        {{lead.jobTitle}}
+      </td>
+    </tr>
+    {{/if}}
+    
+    {{#if lead.phone}}
+    <tr>
+      <td style="padding: 10px 0; font-weight: 600; width: 38%; color: #666666; font-size: 14px; vertical-align: top;">
+        Telefon:
+      </td>
+      <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px;">
+        <a href="tel:{{lead.phone}}" style="color: #007bff; text-decoration: none;">{{lead.phone}}</a>
+      </td>
+    </tr>
+    {{/if}}
+    
+    {{#if lead.website}}
+    <tr>
+      <td style="padding: 10px 0; font-weight: 600; width: 38%; color: #666666; font-size: 14px; vertical-align: top;">
+        Web Sitesi:
+      </td>
+      <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px;">
+        <a href="{{lead.website}}" style="color: #007bff; text-decoration: none;">{{lead.website}}</a>
+      </td>
+    </tr>
+    {{/if}}
+    
+    {{#if lead.productInterest}}
+    <tr>
+      <td style="padding: 10px 0; font-weight: 600; width: 38%; color: #666666; font-size: 14px; vertical-align: top;">
+        İlgilendiği Ürünler:
+      </td>
+      <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px;">
+        {{#each lead.productInterest}}
+          <span style="display: inline-block; background-color: #e7f3ff; color: #0066cc; padding: 4px 10px; border-radius: 6px; font-size: 13px; margin: 2px 4px 2px 0; font-weight: 500;">{{this}}</span>
+        {{/each}}
+      </td>
+    </tr>
+    {{/if}}
+    
+    {{#if lead.budget}}
+    <tr>
+      <td style="padding: 10px 0; font-weight: 600; width: 38%; color: #666666; font-size: 14px; vertical-align: top;">
+        Bütçe:
+      </td>
+      <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px;">
+        <span style="font-weight: 600; color: #16a34a;">{{lead.budget}} ₺</span>
+      </td>
+    </tr>
+    {{/if}}
+    
+    {{#if lead.timeline}}
+    <tr>
+      <td style="padding: 10px 0; font-weight: 600; width: 38%; color: #666666; font-size: 14px; vertical-align: top;">
+        Zaman Planı:
+      </td>
+      <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px;">
+        {{lead.timeline}}
+      </td>
+    </tr>
+    {{/if}}
+    
+    {{#if lead.companySize}}
+    <tr>
+      <td style="padding: 10px 0; font-weight: 600; width: 38%; color: #666666; font-size: 14px; vertical-align: top;">
+        Şirket Büyüklüğü:
+      </td>
+      <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px;">
+        {{lead.companySize}} çalışan
+      </td>
+    </tr>
+    {{/if}}
+    
+    {{#if lead.isDecisionMaker}}
+    <tr>
+      <td style="padding: 10px 0; font-weight: 600; width: 38%; color: #666666; font-size: 14px; vertical-align: top;">
+        Karar Verici:
+      </td>
+      <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px;">
+        <span style="display: inline-block; background-color: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;">✓ Evet</span>
+      </td>
+    </tr>
+    {{/if}}
+    
+    {{#if lead.painPoints}}
+    <tr>
+      <td style="padding: 10px 0; font-weight: 600; width: 38%; color: #666666; font-size: 14px; vertical-align: top;">
+        Sorun Noktaları:
+      </td>
+      <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px; line-height: 1.6;">
+        {{lead.painPoints}}
+      </td>
+    </tr>
+    {{/if}}
+    
+    {{#if lead.currentSolution}}
+    <tr>
+      <td style="padding: 10px 0; font-weight: 600; width: 38%; color: #666666; font-size: 14px; vertical-align: top;">
+        Mevcut Çözüm:
+      </td>
+      <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px; line-height: 1.6;">
+        {{lead.currentSolution}}
+      </td>
+    </tr>
+    {{/if}}
+  </table>
+</div>

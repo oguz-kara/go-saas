@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@gocrm/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@gocrm/components/ui/alert'
 import { Terminal, RefreshCw } from 'lucide-react'
+import { routes } from '@gocrm/lib/routes'
 
 export default function GlobalError({
   error,
@@ -21,7 +22,7 @@ export default function GlobalError({
       console.error(
         'AuthError caught by error boundary, redirecting to login...',
       )
-      router.push('/login?session_expired=true')
+      router.push(`${routes.login()}?session_expired=true`)
     } else {
       console.error('Unhandled error caught by boundary:', error)
     }
