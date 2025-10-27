@@ -33,7 +33,9 @@ const link = from([channelMiddleware, httpLink])
 export const client = new ApolloClient({
   link,
   cache: new InMemoryCache(),
-  connectToDevTools: process.env.NODE_ENV === 'development',
+  devtools: {
+    enabled: process.env.NODE_ENV === 'development',
+  },
   defaultOptions: {
     query: {
       fetchPolicy: 'no-cache',

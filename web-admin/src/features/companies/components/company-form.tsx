@@ -295,7 +295,7 @@ export const CompanyForm = ({
                           </FormLabel>
                           <FormControl>
                             <SocialProfilesInput
-                              value={field.value ?? {}}
+                              value={field.value as Record<string, string> | undefined}
                               onChange={field.onChange}
                             />
                           </FormControl>

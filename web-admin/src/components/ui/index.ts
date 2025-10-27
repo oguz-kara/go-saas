@@ -11,7 +11,7 @@ export * from './avatar'
 export * from './alert'
 export * from './alert-dialog'
 export * from './skeleton'
-export * from './page-header'
+// Skip page-header - it's exported from common
 export * from './progress'
 export * from './whatsapp-icon'
 export * from './date-picker'

@@ -25,7 +25,7 @@ export const companyFormSchema = (t: Translations['companyForm']) =>
       .or(z.literal(''))
       .optional()
       .nullable(),
-    socialProfiles: z.record(z.string()).optional().nullable(),
+    socialProfiles: z.record(z.string(), z.string()).optional().nullable(),
     addressLine1: z.string().optional().nullable(),
     addressLine2: z.string().optional().nullable(),
     postalCode: z.string().optional().nullable(),

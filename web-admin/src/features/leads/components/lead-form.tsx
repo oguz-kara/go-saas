@@ -113,18 +113,30 @@ export const LeadForm = ({
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="contact" className="gap-2">
                   <User className="size-4" />
-                  <span className="hidden sm:inline">{t?.contactInfoTitle || 'Contact'}</span>
-                  <span className="sm:hidden">{t?.mobileTabContact || 'Contact'}</span>
+                  <span className="hidden sm:inline">
+                    {t?.contactInfoTitle || 'Contact'}
+                  </span>
+                  <span className="sm:hidden">
+                    {t?.mobileTabContact || 'Contact'}
+                  </span>
                 </TabsTrigger>
                 <TabsTrigger value="details" className="gap-2">
                   <Target className="size-4" />
-                  <span className="hidden sm:inline">{t?.leadDetailsTitle || 'Details'}</span>
-                  <span className="sm:hidden">{t?.mobileTabDetails || 'Details'}</span>
+                  <span className="hidden sm:inline">
+                    {t?.leadDetailsTitle || 'Details'}
+                  </span>
+                  <span className="sm:hidden">
+                    {t?.mobileTabDetails || 'Details'}
+                  </span>
                 </TabsTrigger>
                 <TabsTrigger value="qualification" className="gap-2">
                   <ClipboardCheck className="size-4" />
-                  <span className="hidden sm:inline">{t?.qualificationTitle || 'Qualification'}</span>
-                  <span className="sm:hidden">{t?.mobileTabQualification || 'Qual.'}</span>
+                  <span className="hidden sm:inline">
+                    {t?.qualificationTitle || 'Qualification'}
+                  </span>
+                  <span className="sm:hidden">
+                    {t?.mobileTabQualification || 'Qual.'}
+                  </span>
                 </TabsTrigger>
               </TabsList>
 
@@ -159,9 +171,7 @@ export const LeadForm = ({
                             </FormLabel>
                             <FormControl>
                               <Input
-                                placeholder={
-                                  t?.firstNamePlaceholder || 'John'
-                                }
+                                placeholder={t?.firstNamePlaceholder || 'John'}
                                 {...field}
                               />
                             </FormControl>
@@ -343,9 +353,7 @@ export const LeadForm = ({
                         name="status"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>
-                              {t?.statusLabel || 'Status'}
-                            </FormLabel>
+                            <FormLabel>{t?.statusLabel || 'Status'}</FormLabel>
                             <FormControl>
                               <Select
                                 value={field.value}
@@ -381,9 +389,7 @@ export const LeadForm = ({
                         name="source"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>
-                              {t?.sourceLabel || 'Source'}
-                            </FormLabel>
+                            <FormLabel>{t?.sourceLabel || 'Source'}</FormLabel>
                             <FormControl>
                               <Select
                                 value={field.value}
@@ -438,7 +444,7 @@ export const LeadForm = ({
                                       <SelectItem key={s} value={s}>
                                         {tPriority?.[s] || s}
                                       </SelectItem>
-                                    )
+                                    ),
                                   )}
                                 </SelectContent>
                               </Select>
@@ -511,9 +517,7 @@ export const LeadForm = ({
                             </FormLabel>
                             <FormControl>
                               <Input
-                                placeholder={
-                                  t?.budgetPlaceholder || '50000'
-                                }
+                                placeholder={t?.budgetPlaceholder || '50000'}
                                 {...field}
                                 value={field.value ?? ''}
                               />
@@ -562,18 +566,17 @@ export const LeadForm = ({
                             <FormControl>
                               <Input
                                 type="number"
-                                placeholder={
-                                  t?.companySizePlaceholder || '50'
-                                }
-                                {...field}
-                                value={field.value ?? ''}
+                                placeholder={t?.companySizePlaceholder || '50'}
+                                value={field.value ? String(field.value) : ''}
                                 onChange={(e) =>
                                   field.onChange(
                                     e.target.value
                                       ? Number(e.target.value)
-                                      : null
+                                      : null,
                                   )
                                 }
+                                onBlur={field.onBlur}
+                                name={field.name}
                               />
                             </FormControl>
                             <FormMessage />
@@ -595,7 +598,9 @@ export const LeadForm = ({
                               <Select
                                 value={field.value?.join(',') ?? ''}
                                 onValueChange={(value) => {
-                                  field.onChange(value ? value.split(',') : null)
+                                  field.onChange(
+                                    value ? value.split(',') : null,
+                                  )
                                 }}
                               >
                                 <SelectTrigger>
@@ -642,11 +647,13 @@ export const LeadForm = ({
                             <FormControl>
                               <Select
                                 value={
-                                  field.value === null ? '' : String(field.value)
+                                  field.value === null
+                                    ? ''
+                                    : String(field.value)
                                 }
                                 onValueChange={(value) => {
                                   field.onChange(
-                                    value === '' ? null : value === 'true'
+                                    value === '' ? null : value === 'true',
                                   )
                                 }}
                               >
@@ -752,7 +759,13 @@ export const LeadForm = ({
           <div className="hidden lg:block lg:w-96">
             <LeadFormPreview
               values={watchedValues}
-              users={users as Array<{ id: string; name?: string | null; email: string }>}
+              users={
+                users as Array<{
+                  id: string
+                  name?: string | null
+                  email: string
+                }>
+              }
             />
           </div>
         </div>

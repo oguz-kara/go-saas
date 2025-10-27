@@ -1,6 +1,11 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@gocrm/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@gocrm/components/ui/card'
 import { Progress } from '@gocrm/components/ui/progress'
 import { Badge } from '@gocrm/components/ui/badge'
 import {
@@ -32,7 +37,7 @@ export function LeadFormPreview({ values, users }: LeadFormPreviewProps) {
 
   // Calculate completion percentage
   const completionPercentage = useMemo(() => {
-    const requiredFields = ['firstName', 'lastName', 'email'] as const
+    // const requiredFields = ['firstName', 'lastName', 'email'] as const
     const allFields = [
       'firstName',
       'lastName',
@@ -212,7 +217,7 @@ export function LeadFormPreview({ values, users }: LeadFormPreviewProps) {
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Users className="size-3.5" />
                 <span>
-                  {values.companySize}{' '}
+                  {String(values.companySize ?? '')}{' '}
                   {t?.employees || 'employees'}
                 </span>
               </div>
@@ -239,4 +244,3 @@ export function LeadFormPreview({ values, users }: LeadFormPreviewProps) {
     </Card>
   )
 }
-

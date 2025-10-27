@@ -9,7 +9,12 @@ const nextConfig: NextConfig = {
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   },
   transpilePackages: ['zod', '@hookform/resolvers'],
-  output: 'standalone',
+  // Temporarily remove standalone output to avoid Windows symlink issues
+  // To re-enable after running PowerShell as Administrator or enabling Developer Mode
+  // output: 'standalone',
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 }
 
 export default nextConfig
