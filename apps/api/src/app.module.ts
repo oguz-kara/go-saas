@@ -55,6 +55,7 @@ import { HealthModule } from './modules/health/health.module'
       playground: true,
       autoSchemaFile: true,
       sortSchema: true,
+      context: ({ req, res }) => ({ req, res }),
       include: [
         AuthModule,
         CompanyModule,

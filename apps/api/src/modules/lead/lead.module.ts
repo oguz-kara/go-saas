@@ -7,13 +7,12 @@ import { LeadActivityResolver } from './api/graphql/resolvers/activity.resolver'
 import { LeadNoteResolver } from './api/graphql/resolvers/lead.note.resolver'
 import { ActivityService } from './application/services/activity.service'
 import { NoteService } from './application/services/note.service'
-import { LeadController } from './api/rest/lead.controller'
 import { ApiKeyModule } from '../api-key/api-key.module'
 import { CacheModule } from 'src/common/services/cache/cache.module'
 
 @Module({
   imports: [ApiKeyModule, CacheModule],
-  controllers: [LeadController],
+  controllers: [],
   providers: [
     LeadResolver,
     LeadRelationsResolver,

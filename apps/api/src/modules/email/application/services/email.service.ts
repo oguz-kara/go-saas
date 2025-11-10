@@ -110,6 +110,21 @@ export class EmailService implements OnModuleInit {
       const info = await this.transporter.sendMail(mailOptions)
       this.logger.log(`Email sent: ${info.messageId}`)
     } catch (error) {
+      const isDevelopment = process.env.NODE_ENV !== 'production'
+      const isConnectionError =
+        error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND'
+
+      if (isDevelopment && isConnectionError) {
+        this.logger.warn(
+          `⚠️  Email not sent (SMTP server not available): ${options.subject}`,
+        )
+        this.logger.debug(
+          `To: ${Array.isArray(options.to) ? options.to.join(', ') : options.to}`,
+        )
+        // Don't throw in development when SMTP server is unavailable
+        return
+      }
+
       this.logger.error(`Failed to send email: ${error.message}`, error.stack)
       throw error
     }

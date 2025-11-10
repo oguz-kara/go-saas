@@ -7,9 +7,7 @@ async function bootstrap() {
 
   // Enable CORS for public API endpoints
   app.enableCors({
-    origin: process.env.CORS_ORIGIN
-      ? process.env.CORS_ORIGIN.split(',')
-      : '*',
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: [
       'Content-Type',
@@ -30,6 +28,9 @@ async function bootstrap() {
     }),
   )
 
-  await app.listen(process.env.PORT ?? 5000)
+  const port = process.env.PORT ?? 5300
+  await app.listen(port)
+  console.log(`🚀 API Server is running on http://localhost:${port}`)
+  console.log(`📊 GraphQL endpoint: http://localhost:${port}/admin-api`)
 }
 bootstrap()

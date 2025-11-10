@@ -1,0 +1,24 @@
+{
+  "name": "quote-engine",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Quote Engine - AI-powered quote generation system",
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "dev": "concurrently \"pnpm --filter ./apps/api dev\" \"pnpm --filter ./apps/web-admin dev\"",
+    "dev:api": "pnpm --filter ./apps/api dev",
+    "dev:web-admin": "pnpm --filter ./apps/web-admin dev",
+    "build": "pnpm --filter ./apps/api build && pnpm --filter ./apps/web-admin build",
+    "build:api": "pnpm --filter ./apps/api build",
+    "build:web-admin": "pnpm --filter ./apps/web-admin build",
+    "start": "concurrently \"pnpm --filter ./apps/api start:prod\" \"pnpm --filter ./apps/web-admin start\"",
+    "start:api": "pnpm --filter ./apps/api start:prod",
+    "start:web-admin": "pnpm --filter ./apps/web-admin start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "workspaces": [
+    "apps/*"
+  ]
+}

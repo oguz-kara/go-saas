@@ -40,7 +40,8 @@ class SocketService {
 
     // Derive WS base URL
     const adminApi =
-      process.env.NEXT_PUBLIC_ADMIN_GRAPHQL_API_URL || 'http://localhost:5000/admin-api'
+      process.env.NEXT_PUBLIC_ADMIN_GRAPHQL_API_URL ||
+      'http://localhost:5300/admin-api'
     const baseUrl = adminApi.replace(/\/?admin-api$/, '')
     const overrideWs = process.env.NEXT_PUBLIC_WS_URL
     const wsUrl = (overrideWs || baseUrl).replace(/\/$/, '')

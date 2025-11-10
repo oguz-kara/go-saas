@@ -7,7 +7,7 @@ import { AccessDeniedException } from '../exceptions/access-denied.exception'
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
 
 @Injectable()
-export class IdentityGuard extends AuthGuard('jwt') {
+export class IdentityGuard extends AuthGuard(['jwt', 'api-key']) {
   private readonly logger = new Logger(IdentityGuard.name)
 
   constructor(private reflector: Reflector) {
@@ -33,7 +33,7 @@ export class IdentityGuard extends AuthGuard('jwt') {
     return gqlCtx.getContext().req
   }
 
-  handleRequest(err: any, user: any, info: any) {
+  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     if (err || !user) {
       this.logger.warn(
         `IdentityGuard: Authentication failed. Info: ${info?.message || info || 'No user object'}. Error: ${err?.message || err}`,

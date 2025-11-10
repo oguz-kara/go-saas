@@ -6,13 +6,16 @@ import { JwtModule, JwtModuleOptions } from '@nestjs/jwt'
 import { CacheModule } from 'src/common/services/cache/cache.module'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { JwtStrategy } from './strategies/jwt.strategy'
+import { ApiKeyStrategy } from './strategies/api-key.strategy'
 import { ChannelModule } from '../channel'
 import { UserResolver } from './api/graphql/resolvers/user.resolver'
 import { UserService } from './application/services/user.service'
+import { ApiKeyModule } from '../api-key/api-key.module'
 
 @Module({
   imports: [
     ChannelModule,
+    ApiKeyModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -32,6 +35,7 @@ import { UserService } from './application/services/user.service'
     AuthService,
     AuthResolver,
     JwtStrategy,
+    ApiKeyStrategy,
     UserResolver,
   ],
   exports: [AuthService, UserService],

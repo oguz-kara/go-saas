@@ -43,7 +43,7 @@ const requester = async <TData, TVariables extends OperationVariables>(
 
     const apiUrl =
       process.env.NEXT_PUBLIC_ADMIN_GRAPHQL_API_URL ||
-      'http://localhost:5000/admin-api'
+      'http://localhost:5300/admin-api'
 
     const response = await fetch(apiUrl, {
       method: 'POST',

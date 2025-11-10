@@ -2,7 +2,7 @@ import { CodegenConfig } from '@graphql-codegen/cli'
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: 'http://localhost:5000/admin-api',
+  schema: 'http://localhost:5300/admin-api',
   documents: [
     './features/*/gql/documents/**/*.{ts,tsx}',
     './features/*/graphql/**/*.{ts,tsx}',

@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   const coreApiUrl =
     process.env.NEXT_PUBLIC_ADMIN_GRAPHQL_API_URL ||
-    'http://localhost:5000/admin-api'
+    'http://localhost:5300/admin-api'
 
   try {
     const response = await fetch(coreApiUrl, {
