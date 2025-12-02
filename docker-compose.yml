@@ -17,7 +17,7 @@ services:
       - "3000"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dolucrm-web-admin.rule=Host(`crm.restoreplusonline.com`)"
+      - "traefik.http.routers.dolucrm-web-admin.rule=Host(`crm.dolugo.com`)"
       - "traefik.http.routers.dolucrm-web-admin.entrypoints=websecure"
       - "traefik.http.routers.dolucrm-web-admin.tls=true"
       - "traefik.http.routers.dolucrm-web-admin.tls.certresolver=letsencrypt"
@@ -41,7 +41,7 @@ services:
       - "5000"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dolucrm-api.rule=Host(`crm-api.restoreplusonline.com`)"
+      - "traefik.http.routers.dolucrm-api.rule=Host(`crm-api.dolugo.com`)"
       - "traefik.http.routers.dolucrm-api.entrypoints=websecure"
       - "traefik.http.routers.dolucrm-api.tls=true"
       - "traefik.http.routers.dolucrm-api.tls.certresolver=letsencrypt"
@@ -52,10 +52,6 @@ services:
     container_name: dolucrm-db
     env_file:
       - ./apps/api/.env
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "4784961Edc!"
-      POSTGRES_DB: "dolucrm-db"
     ports:
       - "5433:5432"
     volumes:
