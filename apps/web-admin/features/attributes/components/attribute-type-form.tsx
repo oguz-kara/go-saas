@@ -224,12 +224,12 @@ export const AttributeTypeForm = ({
                                 checked={field.value?.includes(item)}
                                 onCheckedChange={(checked) => {
                                   return checked
-                                    ? field.onChange([...field.value, item])
+                                    ? field.onChange([...(field.value || []), item])
                                     : field.onChange(
                                         field.value?.filter(
                                           (value: AttributableType) =>
                                             value !== item,
-                                        ),
+                                        ) || [],
                                       )
                                 }}
                               />
