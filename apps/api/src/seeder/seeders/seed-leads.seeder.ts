@@ -40,34 +40,51 @@ export class SeedLeadsSeeder {
           : null,
     }))
 
-    // Upsert by email to keep idempotency
+    // Since email is no longer unique, use a combination of fields for idempotency
     for (const lead of payload) {
-      await this.prisma.lead.upsert({
-        where: { email: lead.email },
-        update: {
+      // Check if a similar lead already exists (for idempotency)
+      const existingLead = await this.prisma.lead.findFirst({
+        where: {
+          email: lead.email,
           firstName: lead.firstName,
           lastName: lead.lastName,
-          phone: lead.phone ?? null,
-          company: lead.company ?? null,
-          jobTitle: lead.jobTitle ?? null,
-          website: lead.website ?? null,
-          status: lead.status,
           source: lead.source,
-          priority: lead.priority,
-          productInterest: lead.productInterest,
-          budget: lead.budget ?? null,
-          timeline: lead.timeline ?? null,
-          companySize: lead.companySize ?? null,
-          isDecisionMaker: lead.isDecisionMaker ?? false,
-          painPoints: lead.painPoints ?? null,
-          currentSolution: lead.currentSolution ?? null,
-          lastContactedAt: lead.lastContactedAt ?? null,
-          convertedAt: lead.convertedAt ?? null,
-          lostReason: lead.lostReason ?? null,
-          assignedToId: lead.assignedToId ?? null,
         },
-        create: lead,
       })
+
+      if (existingLead) {
+        // Update existing lead
+        await this.prisma.lead.update({
+          where: { id: existingLead.id },
+          data: {
+            firstName: lead.firstName,
+            lastName: lead.lastName,
+            phone: lead.phone ?? null,
+            company: lead.company ?? null,
+            jobTitle: lead.jobTitle ?? null,
+            website: lead.website ?? null,
+            status: lead.status,
+            source: lead.source,
+            priority: lead.priority,
+            productInterest: lead.productInterest,
+            budget: lead.budget ?? null,
+            timeline: lead.timeline ?? null,
+            companySize: lead.companySize ?? null,
+            isDecisionMaker: lead.isDecisionMaker ?? false,
+            painPoints: lead.painPoints ?? null,
+            currentSolution: lead.currentSolution ?? null,
+            lastContactedAt: lead.lastContactedAt ?? null,
+            convertedAt: lead.convertedAt ?? null,
+            lostReason: lead.lostReason ?? null,
+            assignedToId: lead.assignedToId ?? null,
+          },
+        })
+      } else {
+        // Create new lead
+        await this.prisma.lead.create({
+          data: lead,
+        })
+      }
     }
 
     this.logger.log('--- LEAD SEEDER COMPLETED ---')

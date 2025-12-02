@@ -338,7 +338,7 @@ model Lead {
   // Contact Information
   firstName String
   lastName  String
-  email     String  @unique
+  email     String
   phone     String?
   company   String?
   jobTitle  String?
@@ -477,10 +477,10 @@ model ApiKey {
   isActive Boolean @default(true)
 
   // Expiration & Usage Tracking
-  expiresAt   DateTime?
-  usageCount  Int      @default(0)
-  lastUsedAt  DateTime?
-  lastUsedIp  String?
+  expiresAt  DateTime?
+  usageCount Int       @default(0)
+  lastUsedAt DateTime?
+  lastUsedIp String?
 
   // Metadata for tracking and configuration
   metadata Json? // Can store allowed sources, rate limits, etc.

@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -71,9 +70,6 @@ export class LeadService {
 
       return lead as unknown as LeadEntity
     } catch (error) {
-      if (error?.code === 'P2002') {
-        throw new ConflictException('Lead with this email already exists')
-      }
       this.logger.error('Failed to create lead', error?.stack)
       throw new InternalServerErrorException('Could not create lead.')
     }
